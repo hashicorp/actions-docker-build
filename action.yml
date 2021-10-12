@@ -129,7 +129,7 @@ runs:
 
         # Determine tarball and auto-tag names.
         TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.tar"
-        AUTO_TAG="$REPO_NAME/$TARGET/$OS/$ARCH:$VERSION_$REVISION"
+        AUTO_TAG="${REPO_NAME}/${TARGET}/${OS}/${ARCH}:${VERSION}_${REVISION}"
 
         add_vars TARBALL_NAME AUTO_TAG
 
