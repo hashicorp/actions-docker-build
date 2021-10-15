@@ -1,0 +1,36 @@
+name: test
+on: [push]
+
+jobs:
+
+  # The action we're testing expects to download an artifact,
+  # so here we upload it in preperation.
+  test-prep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+      - name: Zip Test Bin
+        run: |
+          zip ./testdata/test_bin.zip ./testdata/test_bin
+      - name: Upload a test artifact.
+        uses: actions/upload-artifact@v2
+        with:
+          path: testdata/test_bin.zip
+
+  test-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+      - name: Build
+        uses: ./action.yml # This is the action we're testing.
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          tags: |
+            artifactory.hashicorp.engineering/actions-docker-build/test:1.0.0
+          zip_artifact_name: test_bin.zip
+          bin_name: test_bin
+          workdir: testdata
