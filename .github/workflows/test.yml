@@ -30,6 +30,7 @@ jobs:
       - name: Move Dockerfile to Repo Root
         run: |
           mv testdata/Dockerfile ./
+          ls -lah
       - name: Build
         uses: ./ # This is the action we're testing.
         with:
