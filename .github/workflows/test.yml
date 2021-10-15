@@ -36,4 +36,4 @@ jobs:
             artifactory.hashicorp.engineering/actions-docker-build/test:1.0.0
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
-          workdir: testdata
+          dockerfile: testdata/Dockerfile
