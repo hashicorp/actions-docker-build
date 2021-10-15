@@ -68,9 +68,6 @@ runs:
   #  DOCKER_BUILDKIT: 1
   #  BUILDKIT_PROGRESS: plain
   steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Digest Inputs - Calculate Variables for Later Steps
       shell: bash
       run: |
