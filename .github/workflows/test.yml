@@ -17,7 +17,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: testdata/test_bin.zip
-          name: testdata/test_bin.zip
+          name: test_bin.zip
 
   test-action:
     runs-on: ubuntu-latest
