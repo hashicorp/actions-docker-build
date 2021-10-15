@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2 
       - name: Build
-        uses: ./action.yml # This is the action we're testing.
+        uses: . # This is the action we're testing.
         with:
           version: 1.0.0
           target: default
