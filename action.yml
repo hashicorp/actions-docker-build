@@ -68,9 +68,6 @@ runs:
   #  DOCKER_BUILDKIT: 1
   #  BUILDKIT_PROGRESS: plain
   steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
     - name: Digest Inputs - Calculate Variables for Later Steps
       shell: bash
       run: |
@@ -116,8 +113,11 @@ runs:
 
         add_vars PKG_NAME PKG_NAME_GUESSED
 
-        # Determine zip file name.
-        ZIP_LOCATION="dist/$OS/$ARCH"
+        # Determine zip file name. Note that the location must
+        # always be within the filesystem tree rooted at workdir
+        # because we can't access files outside of this tree.
+        # Hence this is prefixed with the workdir supplied.
+        ZIP_LOCATION="${{inputs.workdir}}/dist/$OS/$ARCH"
         ZIP_NAME="${{inputs.zip_artifact_name}}"
         ZIP_NAME_GUESSED=false
         [ -n "$ZIP_NAME" ] || {

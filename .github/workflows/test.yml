@@ -1,0 +1,84 @@
+name: test
+on: [push]
+
+jobs:
+
+  # The action we're testing expects to download an artifact,
+  # so here we upload it in preperation.
+  test-prep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+      - name: Zip Test Bin
+        run: |
+          zip ./testdata/test_bin.zip ./testdata/test_bin
+      - name: Upload a test artifact.
+        uses: actions/upload-artifact@v2
+        with:
+          path: testdata/test_bin.zip
+          name: test_bin.zip
+
+  test-dockerfile-in-root:
+    runs-on: ubuntu-latest
+    needs:
+      - test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+      # Test setup.
+      - name: Move Dockerfile to Repo Root
+        run: |
+          mv testdata/Dockerfile ./
+          ls -lah
+      - name: Build
+        uses: ./ # This is the action we're testing.
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          tags: |
+            artifactory.hashicorp.engineering/actions-docker-build/test:1.0.0
+          zip_artifact_name: test_bin.zip
+          bin_name: test_bin
+          # No overrides to Dockerfile path.
+
+  test-setting-dockerfile:
+    runs-on: ubuntu-latest
+    needs:
+      - test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+      - name: Build
+        uses: ./ # This is the action we're testing.
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          tags: |
+            artifactory.hashicorp.engineering/actions-docker-build/test:1.0.0
+          zip_artifact_name: test_bin.zip
+          bin_name: test_bin
+          # Test setting just dockerfile.
+          dockerfile: testdata/Dockerfile
+
+  test-setting-workdir:
+    runs-on: ubuntu-latest
+    needs:
+      - test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+      - name: Build
+        uses: ./ # This is the action we're testing.
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          tags: |
+            artifactory.hashicorp.engineering/actions-docker-build/test:1.0.0
+          zip_artifact_name: test_bin.zip
+          bin_name: test_bin
+          # Test setting just workdir.
+          workdir: testdata
