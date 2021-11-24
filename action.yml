@@ -70,88 +70,26 @@ runs:
   steps:
     - name: Digest Inputs - Calculate Variables for Later Steps
       shell: bash
-      run: |
-        # Funcs to add variables to GITHUB_ENV.
-        add_var() {
-          echo "$1=${!1}" >> $GITHUB_ENV
-          echo "--> Set $1 to '${!1}'"
-        }
-        add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
+      env:
 
-        # Determine repo name values.
-        REPO_NAME="${{github.event.repository.name}}"
-        REPO_NAME_MINUS_ENTERPRISE="${REPO_NAME%%-enterprise}"
-        # Assume this is not enterprise.
-        ENTERPRISE_DETECTED=false
-        ENT_META=""
-        # This checks if removing '-enterprise' suffix actually did anything.
-        # If it did, then we've detected a likely enterprise repo.
-        [ "$REPO_NAME" != "$REPO_NAME_MINUS_ENTERPRISE" ] && {
-          ENTERPRISE_DETECTED=true
-          ENT_META="+ent"
-        }
+        # Required.
+        REPO_NAME: "${{github.event.repository.name}}"
+        REVISION: "${{github.sha}}"
+        VERSION: "${{inputs.version}}"
+        ARCH: "${{inputs.arch}}"
+        TARGET: "${{inputs.target}}"
 
-        add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
+        # Optional.
+        ARM_VERSION: "${{inputs.arm_version}}"
+        PKG_NAME: "${{inputs.pkg_name}}"
+        WORKDIR: "${{inputs.workdir}}"
+        ZIP_NAME: "${{inputs.zip_artifact_name}}"
+        BIN_NAME: "${{inputs.bin_name}}"
 
-        # Get some basic info needed to building and tagging the docker image.
-        TARGET="${{inputs.target}}"
-        # OS is hard-coded here only, so if we later want to support other OSs,
-        # we'll be able to easily parameterize it.
-        OS="linux"
-        ARCH="${{inputs.arch}}"
-        VERSION="${{inputs.version}}"
-        REVISION="${{github.sha}}"
+        DOCKERFILE: "${{inputs.dockerfile}}"
 
-        add_vars TARGET OS ARCH VERSION REVISION
+      run: ${{ github.action_path }}/scripts/digest_inputs 
 
-        # Determine package name used for default zip file name.
-        PKG_NAME="${{inputs.pkg_name}}"
-        PKG_NAME_GUESSED=false
-        [ -n "$PKG_NAME" ] || {
-          PKG_NAME="${REPO_NAME_MINUS_ENTERPRISE}_${VERSION}${ENT_META}"
-        }
-
-        add_vars PKG_NAME PKG_NAME_GUESSED
-
-        # Determine zip file name. Note that the location must
-        # always be within the filesystem tree rooted at workdir
-        # because we can't access files outside of this tree.
-        # Hence this is prefixed with the workdir supplied.
-        ZIP_LOCATION="${{inputs.workdir}}/dist/$OS/$ARCH"
-        ZIP_NAME="${{inputs.zip_artifact_name}}"
-        ZIP_NAME_GUESSED=false
-        [ -n "$ZIP_NAME" ] || {
-          ZIP_NAME_GUESSED=true
-          ZIP_NAME="${PKG_NAME}_${OS}_${ARCH}.zip"
-        }
-
-        add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
-
-        # Determine tarball and auto-tag names.
-        TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.tar"
-        AUTO_TAG="${REPO_NAME}/${TARGET}/${OS}/${ARCH}:${VERSION}_${REVISION}"
-
-        add_vars TARBALL_NAME AUTO_TAG
-
-        # Determine product bin name.
-        BIN_NAME="${{inputs.bin_name}}"
-        BIN_NAME_GUESSED=false
-        # Guess bin name if none provided.
-        if [ -z "$BIN_NAME" ]; then
-          BIN_NAME="$REPO_NAME_MINUS_ENTERPRISE"
-          BIN_NAME_GUESSED=true
-        fi
-
-        add_vars BIN_NAME BIN_NAME_GUESSED
-
-        # Docker Platform
-        PLATFORM="$OS/$ARCH"
-        if [ "$ARCH" = "arm" ]; then
-          PLATFORM="$PLATFORM/v${{inputs.arm_version}}"
-        fi
-
-        add_var PLATFORM
-        
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@v2
       with:
@@ -160,79 +98,11 @@ runs:
 
     - name: Extract Product Zip Artifact
       shell: bash
-      run: |
-        cd "$ZIP_LOCATION"
-        unzip -j "$ZIP_NAME"
-
-        # If no executable files extracted, it's an error.
-        EXECUTABLES="$(find . -type f -executable -print)" || {
-          echo "==> ERROR: No executable files extracted from zip; got files:"
-          ls -lah
-          exit 1
-        }
-
-        # This check guides the user to explicitly specify BIN_NAME if the guessed
-        # one is wrong, or to update their bin_name input if it's already set.
-        [ -f "$BIN_NAME" ] || {
-          echo "==> ERROR: File $BIN_NAME not found after extracting zip; got files:"
-          ls -lah
-          if $BIN_NAME_GUESSED; then 
-            echo "--> TIP: The name $BIN_NAME was inferred from your repo name."
-            echo "         You can set the bin_name input for this Action explicitly."
-          else
-            echo "--> TIP: You may need to change the 'bin_name' input for this Action."
-          fi
-          exit 1
-        }
-
-        [ -x "$BIN_NAME" ] || {
-          echo "==> ERORR: $BIN_NAME is not executable."
-          exit 1
-        }
-
-        echo "==> Success! Extracted needed binary $BIN_NAME"
+      run: ${{ github.action_path }}/scripts/extract_product_zip
 
     - name: Docker Build
       shell: bash
-      run: |
-        TAGS=($AUTO_TAG ${{inputs.tags}})
-
-        for T in ${TAGS[@]}; do
-          TAG_FLAGS+=" --tag=$T"
-        done
-
-        BUILD_ARGS=(BIN_NAME=$BIN_NAME)
-        BUILD_ARGS+=(PRODUCT_VERSION=$VERSION)
-        BUILD_ARGS+=(PRODUCT_REVISION=$REVISION)
-
-        for B in ${BUILD_ARGS[@]}; do
-          BA_FLAGS+=" --build-arg=$B"
-        done
-
-        cd "${{inputs.workdir}}"
-        DIR=.
-
-        docker buildx create --use
-
-        echo "==> Building image with tags:"
-        for T in "${TAGS[@]}"; do
-          echo "      - $T"
-        done
-
-        docker buildx build --load \
-          --target "$TARGET" \
-          --platform "$PLATFORM" \
-          $TAG_FLAGS \
-          $BA_FLAGS \
-          -f "${{inputs.dockerfile}}" \
-          $DIR
-
-        echo "==> Saving image as '$TARBALL_NAME'"
-
-        docker save --output "$TARBALL_NAME" "${TAGS[@]}"
-
-        echo "==> Tarball created."
-        ls -lah "$TARBALL_NAME"
+      run: ${{ github.action_path}}/scripts/docker_build
 
     - name: Upload Tarball
       uses: actions/upload-artifact@v2
