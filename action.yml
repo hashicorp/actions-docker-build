@@ -19,6 +19,13 @@ inputs:
       Each tag must be in the format: <registry>/[<namespace>/]<repository>:<tag>
     required: true
 
+  dev-tags:
+    description: >
+      Additional tags
+      As a result a new additional archive file ending with .docker.dev.tar will be created
+    required: false
+
+
   # General purpose inputs.
   target:
     description: >

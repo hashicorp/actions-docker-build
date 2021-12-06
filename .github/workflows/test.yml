@@ -58,6 +58,8 @@ jobs:
           arch: amd64
           tags: |
             artifactory.hashicorp.engineering/actions-docker-build/test:1.0.0
+          dev-tags: |
+            test
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
           # Test setting just dockerfile.
