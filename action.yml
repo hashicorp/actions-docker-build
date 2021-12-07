@@ -137,7 +137,7 @@ runs:
         # Determine tarball and auto-tag names.
         TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.tar"
 
-        if [ -z "${{inputs.dev-tags}}" ]; then
+        if [ ! "${{inputs.dev-tags}}" ]; then
         DEV_TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.dev.tar"
         fi
 
