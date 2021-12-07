@@ -26,7 +26,7 @@ BUILD_ARGS+=("PRODUCT_VERSION=$VERSION")
 BUILD_ARGS+=("PRODUCT_REVISION=$REVISION")
 
 for B in "${BUILD_ARGS[@]}"; do
-	BA_FLAGS+=(" --build-arg=$B")
+	BA_FLAGS+=(" --build-arg" "$B")
 done
 
 cd "$WORKDIR"
@@ -38,6 +38,7 @@ for T in "${TAGS[@]}"; do
   echo "      - $T"
 done
 
+set -x
 docker buildx build --load \
   --target "$TARGET" \
   --platform "$PLATFORM" \
@@ -45,6 +46,7 @@ docker buildx build --load \
   "${BA_FLAGS[@]}" \
   -f "$DOCKERFILE" \
   .
+set +x
 
 echo "==> Saving image as '$TARBALL_NAME'"
 
