@@ -22,7 +22,7 @@ inputs:
   dev-tags:
     description: >
       Additional tags
-      As a result a new additional archive file ending with .docker.dev.tar will be created
+      As a result a new additional file ending with .docker.dev.tar will be created
     required: false
 
 
@@ -136,9 +136,14 @@ runs:
 
         # Determine tarball and auto-tag names.
         TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.tar"
+
+        if [ -z "${{inputs.dev-tags}}" ]; then
+        DEV_TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.dev.tar"
+        fi
+
         AUTO_TAG="${REPO_NAME}/${TARGET}/${OS}/${ARCH}:${VERSION}_${REVISION}"
 
-        add_vars TARBALL_NAME AUTO_TAG
+        add_vars TARBALL_NAME AUTO_TAG DEV_TARBALL_NAME
 
         # Determine product bin name.
         BIN_NAME="${{inputs.bin_name}}"
@@ -240,6 +245,50 @@ runs:
 
         echo "==> Tarball created."
         ls -lah "$TARBALL_NAME"
+
+    - name: Dev Docker DBuild
+      shell: bash
+      if: ${{inputs.dev-tags}}
+      run: |
+        TAGS=($AUTO_TAG ${{inputs.tags}} ${{inputs.dev-tags}})
+
+        for T in ${TAGS[@]}; do
+          TAG_FLAGS+=" --tag=$T"
+        done
+
+        BUILD_ARGS=(BIN_NAME=$BIN_NAME)
+        BUILD_ARGS+=(PRODUCT_VERSION=$VERSION)
+        BUILD_ARGS+=(PRODUCT_REVISION=$REVISION)
+
+        for B in ${BUILD_ARGS[@]}; do
+          BA_FLAGS+=" --build-arg=$B"
+        done
+
+        cd "${{inputs.workdir}}"
+        DIR=.
+
+        docker buildx create --use
+
+        echo "==> Building image with tags:"
+        for T in "${TAGS[@]}"; do
+          echo "      - $T"
+        done
+
+        docker buildx build --load \
+          --target "$TARGET" \
+          --platform "$PLATFORM" \
+          $TAG_FLAGS \
+          $BA_FLAGS \
+          -f "${{inputs.dockerfile}}" \
+          $DIR
+
+        echo "==> Saving image as '$DEV_TARBALL_NAME'"
+
+        docker save --output "$DEV_TARBALL_NAME" "${TAGS[@]}"
+
+        echo "==> DEV Tarball created."
+        ls -lah "$DEV_TARBALL_NAME"
+
 
     - name: Upload Tarball
       uses: actions/upload-artifact@v2
