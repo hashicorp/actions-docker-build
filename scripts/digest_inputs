@@ -9,11 +9,12 @@ set -Eeuo pipefail
 die() { echo "$1" 1>&1; exit 1; }
 
 # Required env vars.
-[ -n "$REPO_NAME" ] || die "Must set REPO_NAME"
-[ -n "$REVISION"  ] || dir "Must set REVISION"
-[ -n "$VERSION"   ] || die "Must set VERSION"
-[ -n "$ARCH"      ] || die "Must set ARCH"
-[ -n "$TARGET"    ] || die "Must set TARGET"
+[ -n "$GITHUB_ENV" ] || die "Must set GITHUB_ENV"
+[ -n "$REPO_NAME"  ] || die "Must set REPO_NAME"
+[ -n "$REVISION"   ] || die "Must set REVISION"
+[ -n "$VERSION"    ] || die "Must set VERSION"
+[ -n "$ARCH"       ] || die "Must set ARCH"
+[ -n "$TARGET"     ] || die "Must set TARGET"
 
 # Optional env vars.
 ARM_VERSION="${ARM_VERSION:-}"
@@ -21,15 +22,17 @@ PKG_NAME="${PKG_NAME:-}"
 WORKDIR="${WORKDIR:-}"
 ZIP_NAME="${ZIP_NAME:-}"
 BIN_NAME="${BIN_NAME:-}"
-
-DOCKERFILE="${DOCKERFILE:-}"
+DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 
 # Funcs to add variables to GITHUB_ENV.
 add_var() {
   echo "$1=${!1}" >> "$GITHUB_ENV"
   echo "--> Set $1 to '${!1}'"
 }
+
 add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
+
+add_vars DOCKERFILE
 
 # Determine repo name values.
 REPO_NAME_MINUS_ENTERPRISE="${REPO_NAME%%-enterprise}"
