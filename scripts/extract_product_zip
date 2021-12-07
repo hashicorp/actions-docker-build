@@ -20,7 +20,7 @@ unzip -j "$ZIP_NAME"
 }
 
 [ -x "$BIN_NAME" ] || {
-  echo "==> ERORR: $BIN_NAME is not executable."
+  echo "==> ERROR: $BIN_NAME is not executable."
   exit 1
 }
 
