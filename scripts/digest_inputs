@@ -32,7 +32,7 @@ add_var() {
 
 add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
 
-add_vars DOCKERFILE
+add_vars WORKDIR DOCKERFILE
 
 # Determine repo name values.
 REPO_NAME_MINUS_ENTERPRISE="${REPO_NAME%%-enterprise}"
