@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+cd "$ZIP_LOCATION"
+unzip -j "$ZIP_NAME"
+
+# This check guides the user to explicitly specify BIN_NAME if the guessed
+# one is wrong, or to update their bin_name input if it's already set.
+[ -f "$BIN_NAME" ] || {
+  echo "==> ERROR: File $BIN_NAME not found after extracting zip; got files:"
+  ls -lah
+  if $BIN_NAME_GUESSED; then 
+    echo "--> TIP: The name $BIN_NAME was inferred from your repo name."
+    echo "         You can set the bin_name input for this Action explicitly."
+  else
+    echo "--> TIP: You may need to change the 'bin_name' input for this Action."
+  fi
+  exit 1
+}
+
+[ -x "$BIN_NAME" ] || {
+  echo "==> ERROR: $BIN_NAME is not executable."
+  exit 1
+}
+
+echo "==> Success! Extracted needed binary $BIN_NAME"

@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+
+# disable unused variable checking, as this script's purpose
+# is just to populate env vars for later scripts.
+# shellcheck disable=SC2034
+
+set -Eeuo pipefail
+
+die() { echo "$1" 1>&1; exit 1; }
+
+# Required env vars.
+[ -n "$GITHUB_ENV" ] || die "Must set GITHUB_ENV"
+[ -n "$REPO_NAME"  ] || die "Must set REPO_NAME"
+[ -n "$REVISION"   ] || die "Must set REVISION"
+[ -n "$VERSION"    ] || die "Must set VERSION"
+[ -n "$ARCH"       ] || die "Must set ARCH"
+[ -n "$TARGET"     ] || die "Must set TARGET"
+
+# Optional env vars.
+ARM_VERSION="${ARM_VERSION:-}"
+PKG_NAME="${PKG_NAME:-}"
+WORKDIR="${WORKDIR:-}"
+ZIP_NAME="${ZIP_NAME:-}"
+BIN_NAME="${BIN_NAME:-}"
+DOCKERFILE="${DOCKERFILE:-Dockerfile}"
+
+# Funcs to add variables to GITHUB_ENV.
+add_var() {
+  echo "$1=${!1}" >> "$GITHUB_ENV"
+  echo "--> Set $1 to '${!1}'"
+}
+
+add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
+
+add_vars WORKDIR DOCKERFILE
+
+# Determine repo name values.
+REPO_NAME_MINUS_ENTERPRISE="${REPO_NAME%%-enterprise}"
+# Assume this is not enterprise.
+ENTERPRISE_DETECTED=false
+ENT_META=""
+# This checks if removing '-enterprise' suffix actually did anything.
+# If it did, then we've detected a likely enterprise repo.
+[ "$REPO_NAME" != "$REPO_NAME_MINUS_ENTERPRISE" ] && {
+  ENTERPRISE_DETECTED=true
+  ENT_META="+ent"
+}
+
+add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
+
+# Get some basic info needed to building and tagging the docker image.
+
+# OS is hard-coded here only, so if we later want to support other OSs,
+# we'll be able to easily parameterize it.
+OS="linux"
+
+add_vars TARGET OS ARCH VERSION REVISION
+
+# Determine package name used for default zip file name.
+PKG_NAME_GUESSED=false
+[ -n "$PKG_NAME" ] || {
+  PKG_NAME="${REPO_NAME_MINUS_ENTERPRISE}_${VERSION}${ENT_META}"
+}
+
+add_vars PKG_NAME PKG_NAME_GUESSED
+
+# Determine zip file name. Note that the location must
+# always be within the filesystem tree rooted at workdir
+# because we can't access files outside of this tree.
+# Hence this is prefixed with the workdir supplied.
+ZIP_LOCATION="$WORKDIR/dist/$OS/$ARCH"
+ZIP_NAME_GUESSED=false
+[ -n "$ZIP_NAME" ] || {
+  ZIP_NAME_GUESSED=true
+  ZIP_NAME="${PKG_NAME}_${OS}_${ARCH}.zip"
+}
+
+add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
+
+# Determine tarball and auto-tag names.
+TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.tar"
+AUTO_TAG="${REPO_NAME}/${TARGET}/${OS}/${ARCH}:${VERSION}_${REVISION}"
+
+add_vars TARBALL_NAME AUTO_TAG
+
+# Determine product bin name.
+BIN_NAME_GUESSED=false
+# Guess bin name if none provided.
+if [ -z "$BIN_NAME" ]; then
+  BIN_NAME="$REPO_NAME_MINUS_ENTERPRISE"
+  BIN_NAME_GUESSED=true
+fi
+
+add_vars BIN_NAME BIN_NAME_GUESSED
+
+# Docker Platform
+PLATFORM="$OS/$ARCH"
+if [ "$ARCH" = "arm" ]; then
+  PLATFORM="$PLATFORM/v$ARM_VERSION"
+fi
+
+add_var PLATFORM

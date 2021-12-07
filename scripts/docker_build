@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+die() { echo "$1" 1>&2; exit 1; }
+
+# Required env vars.
+[ -n "$BIN_NAME" ] || die "Must set BIN_NAME"
+[ -n "$VERSION"  ] || die "Must set VERSION"
+[ -n "$REVISION"  ] || die "Must set REVISION"
+[ -n "$DOCKERFILE"  ] || die "Must set DOCKERFILE"
+
+WORKDIR="${WORKDIR:-.}"
+TAGS="${TAGS:-}"
+
+read -ra TAGS <<< "$TAGS"
+
+TAGS+=("$AUTO_TAG")
+
+for T in "${TAGS[@]}"; do
+	TAG_FLAGS+=("--tag=$T")
+done
+
+BUILD_ARGS=("BIN_NAME=$BIN_NAME")
+BUILD_ARGS+=("PRODUCT_VERSION=$VERSION")
+BUILD_ARGS+=("PRODUCT_REVISION=$REVISION")
+
+for B in "${BUILD_ARGS[@]}"; do
+	BA_FLAGS+=("--build-arg=$B")
+done
+
+cd "$WORKDIR"
+
+docker buildx create --use
+
+echo "==> Building image with tags:"
+for T in "${TAGS[@]}"; do
+  echo "      - $T"
+done
+
+docker buildx build --load \
+  --target "$TARGET" \
+  --platform "$PLATFORM" \
+  "${TAG_FLAGS[@]}" \
+  "${BA_FLAGS[@]}" \
+  -f "$DOCKERFILE" \
+  .
+
+echo "==> Saving image as '$TARBALL_NAME'"
+
+docker save --output "$TARBALL_NAME" "${TAGS[@]}"
+
+echo "==> Tarball created."
+ls -lah "$TARBALL_NAME"
