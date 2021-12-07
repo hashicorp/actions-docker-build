@@ -248,7 +248,7 @@ runs:
 
     - name: Dev Docker Build
       shell: bash
-      if: ${{inputs.dev-tags}}
+      #if: ${{inputs.dev-tags}}
       run: |
         TAGS=($AUTO_TAG ${{inputs.tags}} ${{inputs.dev-tags}})
 
