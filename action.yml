@@ -135,15 +135,15 @@ runs:
         add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
 
         # Determine tarball and auto-tag names.
-        TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.tar"
+        #TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.tar"
 
-#        if [ ! "${{inputs.dev-tags}}" ]; then
+        #if [ ! "${{inputs.dev-tags}}" ]; then
         DEV_TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.dev.tar"
-#        fi
+        #fi
 
         AUTO_TAG="${REPO_NAME}/${TARGET}/${OS}/${ARCH}:${VERSION}_${REVISION}"
 
-        add_vars TARBALL_NAME AUTO_TAG DEV_TARBALL_NAME
+        add_vars AUTO_TAG DEV_TARBALL_NAME
 
         # Determine product bin name.
         BIN_NAME="${{inputs.bin_name}}"
@@ -293,5 +293,5 @@ runs:
     - name: Upload Tarball
       uses: actions/upload-artifact@v2
       with:
-        name: ${{env.TARBALL_NAME}}
-        path: ${{env.TARBALL_NAME}}
+        name: ${{env.DEV_TARBALL_NAME}}
+        path: ${{env.DEV_TARBALL_NAME}}
