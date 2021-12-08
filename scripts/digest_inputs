@@ -15,6 +15,7 @@ die() { echo "$1" 1>&1; exit 1; }
 [ -n "$VERSION"    ] || die "Must set VERSION"
 [ -n "$ARCH"       ] || die "Must set ARCH"
 [ -n "$TARGET"     ] || die "Must set TARGET"
+[ -n "$TAGS"       ] || die "Must set TAGS"
 
 # Optional env vars.
 ARM_VERSION="${ARM_VERSION:-}"
@@ -32,7 +33,7 @@ add_var() {
 
 add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
 
-add_vars WORKDIR DOCKERFILE
+add_vars TAGS WORKDIR DOCKERFILE
 
 # Determine repo name values.
 REPO_NAME_MINUS_ENTERPRISE="${REPO_NAME%%-enterprise}"
