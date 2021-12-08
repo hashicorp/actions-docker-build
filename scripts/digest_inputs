@@ -23,6 +23,7 @@ PKG_NAME="${PKG_NAME:-}"
 WORKDIR="${WORKDIR:-}"
 ZIP_NAME="${ZIP_NAME:-}"
 BIN_NAME="${BIN_NAME:-}"
+DEV_TAGS="${DEV_TAGS:-}"
 DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 
 # Funcs to add variables to GITHUB_ENV.
@@ -33,7 +34,7 @@ add_var() {
 
 add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
 
-add_vars TAGS WORKDIR DOCKERFILE
+add_vars TAGS DEV_TAGS WORKDIR DOCKERFILE
 
 # Determine repo name values.
 REPO_NAME_MINUS_ENTERPRISE="${REPO_NAME%%-enterprise}"
