@@ -13,7 +13,7 @@ jobs:
           echo "Z<<EOF" >> "$GITHUB_ENV
           echo "11.22.33" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-          echo "A<<EOF" >> "$GITHUB_ENV
+          echo "A<<EOF" >> $GITHUB_ENV
           echo "11.22.33" >> $GITHUB_ENV
           echo "11.22.33" >> $GITHUB_ENV
           echo "11.22.33" >> $GITHUB_ENV
