@@ -3,29 +3,6 @@ on: [push]
 
 jobs:
 
-  debug-env:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set env
-        run: |
-          echo "X=1.2.3" >> $GITHUB_ENV
-          echo "Y='1.2.3'" >> $GITHUB_ENV
-          echo "Z<<EOF" >> $GITHUB_ENV
-          echo "11.22.33" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "A<<EOF" >> $GITHUB_ENV
-          echo "11.22.33" >> $GITHUB_ENV
-          echo "11.22.33" >> $GITHUB_ENV
-          echo "11.22.33" >> $GITHUB_ENV
-          echo "11.22.33" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-      - name: Read env
-        run: |
-          echo "X='$X'"
-          echo "Y='$Y'"
-          echo "Z='$Z'"
-          echo "A='$A'"
-
   # The action we're testing expects to download an artifact,
   # so here we upload it in preperation.
   test-prep:
