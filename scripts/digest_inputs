@@ -28,7 +28,12 @@ DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 
 # Funcs to add variables to GITHUB_ENV.
 add_var() {
-  echo "$1=${!1}" >> "$GITHUB_ENV"
+  {
+    echo "$1<<EOF"
+    echo "${!1}"
+    echo "EOF"
+  } >> "$GITHUB_ENV"
+  echo "export $1='${!1}'" >> "$GITHUB_ENV.export"
   echo "--> Set $1 to '${!1}'"
 }
 
