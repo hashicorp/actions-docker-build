@@ -3,9 +3,23 @@ on: [push]
 
 jobs:
 
+  bats-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install BATS
+        env:
+          BATS_VERSION: 1.5.0
+          BATS_REPO: https://github.com/bats-core/bats-core
+          BATS_PATH: /usr/local/bats
+        run: |
+          git clone --depth 1 --branch $BATS_VERSION $BATS_REPO $BATS_PATH
+          echo $BATS_PATH/bin >> $GITHUB_PATH
+      - name: Run BATS tests
+        run: make test
+
   # The action we're testing expects to download an artifact,
   # so here we upload it in preperation.
-  test-prep:
+  action-test-prep:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,10 +33,10 @@ jobs:
           path: testdata/test_bin.zip
           name: test_bin.zip
 
-  test-dockerfile-in-root:
+  action-test-dockerfile-in-root:
     runs-on: ubuntu-latest
     needs:
-      - test-prep
+      - action-test-prep
     steps:
       - name: Checkout
         uses: actions/checkout@v2 
@@ -43,10 +57,10 @@ jobs:
           bin_name: test_bin
           # No overrides to Dockerfile path.
 
-  test-setting-dockerfile:
+  action-test-setting-dockerfile:
     runs-on: ubuntu-latest
     needs:
-      - test-prep
+      - action-test-prep
     steps:
       - name: Checkout
         uses: actions/checkout@v2 
@@ -63,10 +77,10 @@ jobs:
           # Test setting just dockerfile.
           dockerfile: testdata/Dockerfile
 
-  test-setting-workdir:
+  action-test-setting-workdir:
     runs-on: ubuntu-latest
     needs:
-      - test-prep
+      - action-test-prep
     steps:
       - name: Checkout
         uses: actions/checkout@v2 

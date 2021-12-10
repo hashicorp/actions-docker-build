@@ -1,10 +1,11 @@
 
+# setup ensures that there's a fresh .tmp directory, gitignored,
+# and sets the GITHUB_ENV variable to a file path inside that directory.
 setup() {
 	rm -rf ./.tmp
 	export GITHUB_ENV=./.tmp/github.env
 	mkdir -p ./.tmp
 	echo "*" > ./.tmp/.gitignore
-	set_all_required_env_vars	
 }
 
 set_all_required_env_vars() {
