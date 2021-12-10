@@ -12,7 +12,7 @@ jobs:
           BATS_REPO: https://github.com/bats-core/bats-core
           BATS_PATH: /usr/local/bats
         run: |
-          sudo git clone --depth 1 --branch $BATS_VERSION $BATS_REPO $BATS_PATH
+          sudo git clone --depth 1 --branch v$BATS_VERSION $BATS_REPO $BATS_PATH
           echo $BATS_PATH/bin >> $GITHUB_PATH
       - name: Run BATS tests
         run: make test
