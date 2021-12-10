@@ -14,6 +14,7 @@ jobs:
         run: |
           sudo git clone --depth 1 --branch v$BATS_VERSION $BATS_REPO $BATS_PATH
           echo $BATS_PATH/bin >> $GITHUB_PATH
+      - uses: actions/checkout@v2
       - name: Run BATS tests
         run: make test
 
