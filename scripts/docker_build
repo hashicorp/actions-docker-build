@@ -9,6 +9,10 @@ die() { echo "$1" 1>&2; exit 1; }
 [ -n "$VERSION"  ] || die "Must set VERSION"
 [ -n "$REVISION"  ] || die "Must set REVISION"
 [ -n "$DOCKERFILE"  ] || die "Must set DOCKERFILE"
+[ -n "$TARGET"  ] || die "Must set TARGET"
+[ -n "$TARBALL_NAME"  ] || die "Must set TARBALL_NAME"
+[ -n "$PLATFORM"  ] || die "Must set PLATFORM"
+[ -n "$AUTO_TAG"  ] || die "Must set AUTO_TAG"
 [ -n "$TAGS"  ] || die "Must set TAGS"
 
 WORKDIR="${WORKDIR:-.}"
