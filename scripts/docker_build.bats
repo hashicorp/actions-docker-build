@@ -12,6 +12,7 @@ set_all_required_env_vars() {
 	export BIN_NAME=repo1
 	export VERSION=1.2.3
 	export REVISION=cabba9e
+	export DOCKERFILE=Dockerfile
 	export TARGET=default
 	export TARBALL_NAME=abc.tar
 	export PLATFORM="linux/amd64"
