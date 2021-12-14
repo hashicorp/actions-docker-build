@@ -35,28 +35,36 @@ each_expected_tag() {
 	for TAG in "${EXPECTED_TAGS[@]}"; do $@ "$TAG"; done
 }
 
-_tag_exists() { docker inspect "$1" 2>&1 > /dev/null; }
+tag_exists() { docker inspect "$1" 2>&1 > /dev/null; }
 
 assert_tag_exists_locally() {
 	tag_exists "$1" && return
 	echo "Assertion failed: tag $1 missing."
 	return 1
 }
+
 assert_tag_does_not_exist_locally() {
 	tag_exists || return
 	echo "Assertion failed: tag $1 exists, but it should not."
 	return 1
 }
+
 assert_expected_tags_do_not_exist() { each_expected_tag assert_tag_does_not_exist_locally; }
 assert_expected_tags_exist() { each_expected_tag assert_tag_exists_locally; }
 
 remove_expected_tags() {
-	each_expected_tag docker rmi
+	each_expected_tag remove_tag
 	assert_expected_tags_do_not_exist
 }
 
+remove_tag() { docker rmi "$1" 2>&1 > /dev/null; }
+
 assert_tags_exist() {
 	for TAG in "$@"; do assert_tag_exists_locally "$TAG"; done
+}
+
+assert_tarball_contains_tags() { TARBALL="$1"; TAGS="$2"
+	remove_local_tags "$2"
 }
 
 @test "only required env vars set - all prod and staging tags built" {
@@ -105,12 +113,14 @@ assert_tags_exist() {
 		return 1
 	}
 
+	assert_tags_exist "$DEVTAG1" "$DEVTAG2"
+
 	# The docker build will have left behind all the tags in the local
 	# daemon. We want to assert that they are contained inside the tarbal
 	# though, so first remove them from the daemon so we can see if they
 	# load back in from the tarball.
-	docker rmi "$DEVTAG1"
-	docker rmi "$DEVTAG2"
+	remove_tag "$DEVTAG1"
+	remove_tag "$DEVTAG2"
 
 	# Run docker load to load the tarball.
 	docker load -i "$DEV_TARBALL_PATH"
