@@ -35,29 +35,33 @@ each_expected_tag() {
 	for TAG in "${EXPECTED_TAGS[@]}"; do $@ "$TAG"; done
 }
 
-tag_exists() { docker inspect "$1" 2>&1 > /dev/null; }
+tag_exists() {
+	docker inspect "$1" > /dev/null 2>&1  && return 0
+	return 1
+}
 
 assert_tag_exists_locally() {
-	tag_exists "$1" && return
+	tag_exists "$1" && return 0
 	echo "Assertion failed: tag $1 missing."
 	return 1
 }
 
 assert_tag_does_not_exist_locally() {
-	tag_exists || return
+	tag_exists "$1" || return 0
 	echo "Assertion failed: tag $1 exists, but it should not."
 	return 1
 }
 
 assert_expected_tags_do_not_exist() { each_expected_tag assert_tag_does_not_exist_locally; }
+
 assert_expected_tags_exist() { each_expected_tag assert_tag_exists_locally; }
 
 remove_expected_tags() {
 	each_expected_tag remove_tag
-	assert_expected_tags_do_not_exist
+	each_expected_tag assert_tag_does_not_exist_locally
 }
 
-remove_tag() { docker rmi "$1" 2>&1 > /dev/null; }
+remove_tag() { docker rmi "$1" > /dev/null 2>&1 || true; }
 
 assert_tags_exist() {
 	for TAG in "$@"; do assert_tag_exists_locally "$TAG"; done
