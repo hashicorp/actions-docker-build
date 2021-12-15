@@ -85,10 +85,12 @@ ZIP_NAME_GUESSED=false
 add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
 
 # Determine tarball and auto-tag names.
-TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.tar"
+TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}"
+TARBALL_NAME="${TARBALL_ROOT}.docker.tar"
+DEV_TARBALL_NAME="${TARBALL_ROOT}.docker.dev.tar"
 AUTO_TAG="${REPO_NAME}/${TARGET}/${OS}/${ARCH}:${VERSION}_${REVISION}"
 
-add_vars TARBALL_NAME AUTO_TAG
+add_vars TARBALL_NAME DEV_TARBALL_NAME AUTO_TAG
 
 # Determine product bin name.
 BIN_NAME_GUESSED=false

@@ -90,6 +90,7 @@ assert_exported_in_github_env() {
 	assert_exported_in_github_env PLATFORM                   "linux/amd64"
 	assert_exported_in_github_env REPO_NAME_MINUS_ENTERPRISE "repo1"
 	assert_exported_in_github_env TARBALL_NAME               "repo1_default_linux_amd64_1.2.3_cabba9e.docker.tar"
+	assert_exported_in_github_env DEV_TARBALL_NAME           "repo1_default_linux_amd64_1.2.3_cabba9e.docker.dev.tar"
 	assert_exported_in_github_env ZIP_LOCATION               "/dist/linux/amd64"
 	assert_exported_in_github_env ZIP_NAME_GUESSED           "true"
 }
@@ -106,6 +107,13 @@ assert_exported_in_github_env() {
 	./digest_inputs
 
 	WANT_GITHUB_ENV="testdata/want/github.env"
+
+	if "${UPDATE_TESTDATA:-false}"; then
+		mkdir -p "$(dirname "$WANT_GITHUB_ENV")"
+		cp "$GITHUB_ENV" "$WANT_GITHUB_ENV"
+		echo "Test data updated."
+	fi
+
 	if ! diff "$GITHUB_ENV" "$WANT_GITHUB_ENV"; then
 		echo "Unexpected GITHUB_ENV file, see above diff."
 		return 1
