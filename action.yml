@@ -110,8 +110,17 @@ runs:
       shell: bash
       run: ${{ github.action_path}}/scripts/docker_build
 
-    - name: Upload Tarball
+    - name: Upload Prod Tarball
       uses: actions/upload-artifact@v2
       with:
         name: ${{env.TARBALL_NAME}}
         path: ${{env.TARBALL_NAME}}
+        if-no-files-found: error
+
+    - name: Upload Dev Tarball
+      uses: actions/upload-artifact@v2
+      if: ${{env.DEV_TAGS != ""}}
+      with:
+        name: ${{env.DEV_TARBALL_NAME}}
+        path: ${{env.DEV_TARBALL_NAME}}
+        if-no-files-found: error
