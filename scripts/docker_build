@@ -62,14 +62,17 @@ docker buildx build --load \
   -f "$DOCKERFILE" \
   .
 
-echo "==> Saving image as '$TARBALL_NAME'"
+echo "==> Saving prod tags in '$TARBALL_NAME'"
 
 docker save --output "$TARBALL_NAME" "${PROD_TAGS_A[@]}" "$AUTO_TAG"
 echo "==> Tarball created."
 ls -lah "$TARBALL_NAME"
 
 if [ -n "$DEV_TAGS" ]; then
+	echo "==> Saving dev tags in '$TARBALL_NAME'"
 	docker save --output "$DEV_TARBALL_NAME" "${DEV_TAGS_A[@]}" "$AUTO_TAG"
 	echo "==> Dev Tarball created."
 	ls -lah "$DEV_TARBALL_NAME"
+else
+	echo "==> No dev tags specified, skipping export."
 fi
