@@ -89,7 +89,7 @@ assert_tags_exist() {
 	for TAG in "$@"; do assert_tag_exists_locally "$TAG"; done
 }
 
-assert_tarball_contains_tags() { TARBALL="$1"; shift
+tarball_tag_check_prep() { TARBAL="$1"; shift
 	[ -f "$TARBALL" ] || {
 		echo "Tarball not found: $TARBALL"
 		return 1
@@ -97,7 +97,17 @@ assert_tarball_contains_tags() { TARBALL="$1"; shift
 	remove_tags "$@"
 	assert_tags_do_not_exist_locally "$@"
 	docker load -i "$TARBALL"
+}
+	
+
+assert_tarball_contains_tags() { TARBALL="$1"; shift
+	tarball_tag_check_prep "$TARBALL" "$@"
 	assert_tags_exist_locally "$@"
+}
+
+assert_tarball_not_contains_tags() { TARBALL="$1"; shift
+	tarball_tag_check_prep "$TARBALL" "$@"
+	assert_tags_do_not_exist_locally "$@"
 }
 
 set_test_prod_tags() {
@@ -147,4 +157,10 @@ set_test_dev_tags() {
 	# Both tarballs contain the auto_tag and the prod or dev tags.
 	assert_tarball_contains_tags "$TARBALL_PATH" "$PROD_TAG1" "$PROD_TAG2" "$AUTO_TAG"
 	assert_tarball_contains_tags "$DEV_TARBALL_PATH" "$DEV_TAG1" "$DEV_TAG2" "$AUTO_TAG"	
+
+	# Dev tarball should not contain prod tags.
+	assert_tarball_not_contains_tags "$DEV_TARBALL_PATH" "$PROD_TAG1" "$PROD_TAG2" "$AUTO_TAG"
+
+	# Prod tarball should not contain dev tags.
+	assert_tarball_not_contains_tags "$TARBALL_PATH" "$DEV_TAG1" "$DEV_TAG2" "$AUTO_TAG"	
 }
