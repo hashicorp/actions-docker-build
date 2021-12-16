@@ -45,6 +45,9 @@ for B in "${BUILD_ARGS[@]}"; do
 	BA_FLAGS+=("--build-arg=$B")
 done
 
+TARBALL_PATH="$PWD/$TARBALL_NAME"
+DEV_TARBALL_PATH="$PWD/$DEV_TARBALL_NAME"
+
 cd "$WORKDIR"
 
 docker buildx create --use
@@ -62,17 +65,17 @@ docker buildx build --load \
   -f "$DOCKERFILE" \
   .
 
-echo "==> Saving prod tags in '$TARBALL_NAME'"
+echo "==> Saving prod tags in '$TARBALL_PATH'"
 
-docker save --output "$TARBALL_NAME" "${PROD_TAGS_A[@]}" "$AUTO_TAG"
+docker save --output "$TARBALL_PATH" "${PROD_TAGS_A[@]}" "$AUTO_TAG"
 echo "==> Tarball created."
-ls -lah "$TARBALL_NAME"
+ls -lah "$TARBALL_PATH"
 
 if [ -n "$DEV_TAGS" ]; then
-	echo "==> Saving dev tags in '$TARBALL_NAME'"
-	docker save --output "$DEV_TARBALL_NAME" "${DEV_TAGS_A[@]}" "$AUTO_TAG"
+	echo "==> Saving dev tags in '$DEV_TARBALL_PATH'"
+	docker save --output "$DEV_TARBALL_PATH" "${DEV_TAGS_A[@]}" "$AUTO_TAG"
 	echo "==> Dev Tarball created."
-	ls -lah "$DEV_TARBALL_NAME"
+	ls -lah "$DEV_TARBALL_PATH"
 else
 	echo "==> No dev tags specified, skipping export."
 fi
