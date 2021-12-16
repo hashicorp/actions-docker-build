@@ -39,6 +39,8 @@ jobs:
 
   action-test-dockerfile-in-root:
     runs-on: ubuntu-latest
+    env:
+      OVERRIDE_TARBALL_NAME: action-test-dockerfile-in-root.docker.tar
     needs:
       - action-test-prep
     steps:
@@ -50,8 +52,6 @@ jobs:
           mv testdata/Dockerfile ./
           ls -lah
       - name: Build
-        env:
-          OVERRIDE_TARBALL_NAME: action-test-dockerfile-in-root.docker.tar
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
@@ -66,14 +66,14 @@ jobs:
 
   action-test-setting-dockerfile:
     runs-on: ubuntu-latest
+    env:
+      OVERRIDE_TARBALL_NAME: action-test-setting-dockerfile.docker.tar
     needs:
       - action-test-prep
     steps:
       - name: Checkout
         uses: actions/checkout@v2 
       - name: Build
-        env:
-          OVERRIDE_TARBALL_NAME: action-test-setting-dockerfile.docker.tar
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
@@ -89,14 +89,14 @@ jobs:
 
   action-test-setting-workdir:
     runs-on: ubuntu-latest
+    env:
+      OVERRIDE_TARBALL_NAME: action-test-setting-workdir.docker.tar
     needs:
       - action-test-prep
     steps:
       - name: Checkout
         uses: actions/checkout@v2 
       - name: Build
-        env:
-          OVERRIDE_TARBALL_NAME: action-test-setting-workdir.docker.tar
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
