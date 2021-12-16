@@ -110,6 +110,10 @@ runs:
       shell: bash
       run: ${{ github.action_path}}/scripts/docker_build
 
+    - name: Wait for tarball to be fully written?
+      shell: bash
+      run: sleep 1; ls -lah
+
     - name: Upload Prod Tarball
       uses: actions/upload-artifact@v2
       with:
