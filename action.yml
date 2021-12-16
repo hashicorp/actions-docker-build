@@ -119,7 +119,7 @@ runs:
 
     - name: Upload Dev Tarball
       uses: actions/upload-artifact@v2
-      if: ${{env.DEV_TAGS != ""}}
+      if: ${{env.DEV_TAGS != ''}}
       with:
         name: ${{env.DEV_TARBALL_NAME}}
         path: ${{env.DEV_TARBALL_NAME}}
