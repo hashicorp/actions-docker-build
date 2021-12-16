@@ -2,7 +2,7 @@ name: test
 on: [push]
 
 env:
-  TAG_PREFIX: artifactory.hashicorp.engineering/actions-docker-build/test
+  GLOBAL_TAG_PREFIX: artifactory.hashicorp.engineering/actions-docker-build/test
 
 jobs:
 
@@ -40,7 +40,7 @@ jobs:
   action-test-dockerfile-in-root:
     runs-on: ubuntu-latest
     env:
-      TAG_PREFIX: ${{env.TAG_PREFIX}}/${{github.job.name}}
+      TAG_PREFIX: ${{env.GLOBAL_TAG_PREFIX}}/${{github.job.name}}
       OVERRIDE_TARBALL_NAME: ${{github.job.name}}.docker.tar
     needs:
       - action-test-prep
@@ -68,7 +68,7 @@ jobs:
   action-test-setting-dockerfile:
     runs-on: ubuntu-latest
     env:
-      TAG_PREFIX: ${{env.TAG_PREFIX}}/${{github.job.name}}
+      TAG_PREFIX: ${{env.GLOBAL_TAG_PREFIX}}/${{github.job.name}}
       OVERRIDE_TARBALL_NAME: ${{github.job.name}}.docker.tar
     needs:
       - action-test-prep
@@ -92,7 +92,7 @@ jobs:
   action-test-setting-workdir:
     runs-on: ubuntu-latest
     env:
-      TAG_PREFIX: ${{env.TAG_PREFIX}}/${{github.job.name}}
+      TAG_PREFIX: ${{env.GLOBAL_TAG_PREFIX}}/${{github.job.name}}
       OVERRIDE_TARBALL_NAME: ${{github.job.name}}.docker.tar
     needs:
       - action-test-prep
