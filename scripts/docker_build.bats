@@ -21,10 +21,7 @@ set_all_required_env_vars() {
 	export TARBALL_NAME=blahblah.docker.tar
 	export PLATFORM="linux/amd64"
 	export AUTO_TAG="some/auto/tag:1.2.3-deadbeef"
-	export TAGS="
-		dadgarcorp/repo1:1.2.3
-		public.ecr.aws/dadgarcorp/repo1:1.2.3
-	"
+	export TAGS=""
 }
 
 set_all_optional_env_vars() {
@@ -59,10 +56,22 @@ assert_tag_exists_locally() {
 	return 1
 }
 
+assert_tags_exist_locally() {
+	for T in "$@"; do
+		assert_tag_exists_locally "$T"
+	done
+}
+
 assert_tag_does_not_exist_locally() {
 	tag_exists "$1" || return 0
 	echo "Assertion failed: tag $1 exists, but it should not."
 	return 1
+}
+
+assert_tags_do_not_exist_locally() {
+	for T in "$@"; do
+		assert_tag_does_not_exist_locally "$T"
+	done
 }
 
 assert_expected_tags_do_not_exist() { each_expected_tag assert_tag_does_not_exist_locally; }
@@ -70,55 +79,50 @@ assert_expected_tags_do_not_exist() { each_expected_tag assert_tag_does_not_exis
 assert_expected_tags_exist() { each_expected_tag assert_tag_exists_locally; }
 
 remove_expected_tags() {
-	each_expected_tag remove_tag
+	each_expected_tag remove_tags
 	each_expected_tag assert_tag_does_not_exist_locally
 }
 
-remove_tag() { docker rmi "$1" > /dev/null 2>&1 || true; }
+remove_tags() { docker rmi "$@" > /dev/null 2>&1 || true; }
 
 assert_tags_exist() {
 	for TAG in "$@"; do assert_tag_exists_locally "$TAG"; done
 }
 
-assert_tarball_contains_tags() { TARBALL="$1"; TAGS="$2"
-	remove_local_tags "$2"
-}
-
-@test "only required env vars set - all prod and staging tags built" {
-	
-
-	# Execute the script under test: docker_build
-	(
-		cd "$TEST_ROOT"
-		"$SCRIPT_ROOT/docker_build"
-	)
-
-	[ -f "$TARBALL_PATH" ] || {
-		echo "Tarball not created: $TARBALL_PATH"
+assert_tarball_contains_tags() { TARBALL="$1"; shift
+	[ -f "$TARBALL" ] || {
+		echo "Tarball not found: $TARBALL"
 		return 1
 	}
-
-	# The docker build will have left behind all the tags in the local
-	# daemon. We want to assert that they are contained inside the tarbal
-	# though, so first remove them from the daemon so we can see if they
-	# load back in from the tarball.
-	remove_expected_tags
-
-	# Run docker load to load the tarball.
-	docker load -i "$TARBALL_PATH"	
-
-	assert_expected_tags_exist
+	remove_tags "$@"
+	assert_tags_do_not_exist_locally "$@"
+	docker load -i "$TARBALL"
+	assert_tags_exist_locally "$@"
 }
 
-@test "dev tags provided - dev tags built" {
+set_test_prod_tags() {
+	PROD_TAG1=dadgarcorp/repo1:1.2.3
+	PROD_TAG2=public.ecr.aws/dadgarcorp/repo1:1.2.3
 
-	DEVTAG1=dadgarcorp/repo1:1.2.3-dev
-	DEVTAG2=dadgarcorp/repo1/dev:1
+	export TAGS="
+		$PROD_TAG1
+		$PROD_TAG2
+	"
+}
+
+set_test_dev_tags() {
+	DEV_TAG1=dadgarcorp/repo1:1.2.3-dev
+	DEV_TAG2=dadgarcorp/repo1/dev:1
 
 	export DEV_TAGS="
-		$DEVTAG1
-		$DEVTAG2
+		$DEV_TAG1
+		$DEV_TAG2
 	"
+}
+
+@test "only prod tags set - all prod and staging tags built" {
+
+	set_test_prod_tags
 	
 	# Execute the script under test: docker_build
 	(
@@ -126,21 +130,21 @@ assert_tarball_contains_tags() { TARBALL="$1"; TAGS="$2"
 		"$SCRIPT_ROOT/docker_build"
 	)
 
+	assert_tarball_contains_tags "$TARBALL_PATH" "$PROD_TAG1" "$PROD_TAG2" "$AUTO_TAG"
+}
 
-	[ -f "$DEV_TARBALL_PATH" ] || {
-		echo "Tarball not created: $DEV_TARBALL_PATH"
-		return 1
-	}
+@test "prod and dev tags provided - prod and dev tags built" {
 
-	# The docker build will have left behind all the tags in the local
-	# daemon. We want to assert that they are contained inside the tarbal
-	# though, so first remove them from the daemon so we can see if they
-	# load back in from the tarball.
-	remove_tag "$DEVTAG1"
-	remove_tag "$DEVTAG2"
+	set_test_prod_tags
+	set_test_dev_tags
+	
+	# Execute the script under test: docker_build
+	(
+		cd "$TEST_ROOT"
+		"$SCRIPT_ROOT/docker_build"
+	)
 
-	# Run docker load to load the tarball.
-	docker load -i "$DEV_TARBALL_PATH"
-
-	assert_tags_exist "$DEVTAG1" "$DEVTAG2"
+	# Both tarballs contain the auto_tag and the prod or dev tags.
+	assert_tarball_contains_tags "$TARBALL_PATH" "$PROD_TAG1" "$PROD_TAG2" "$AUTO_TAG"
+	assert_tarball_contains_tags "$DEV_TARBALL_PATH" "$DEV_TAG1" "$DEV_TAG2" "$AUTO_TAG"	
 }
