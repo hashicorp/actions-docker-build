@@ -1,10 +1,12 @@
 setup() {
 	set_all_env_vars
 
+	TEST_ROOT="testdata/input"
+
 	# Get test relative paths to tarballs, needed for assertions,
 	# and remove them now so tests don't read stale tarballs.
-	export TARBALL_PATH="$WORKDIR/$TARBALL_NAME"
-	export DEV_TARBALL_PATH="$WORKDIR/$DEV_TARBALL_NAME"
+	export TARBALL_PATH="$TEST_ROOT/$TARBALL_NAME"
+	export DEV_TARBALL_PATH="$TEST_ROOT/$DEV_TARBALL_NAME"
 	rm -rf "$DEV_TARBALL_PATH"
 	rm -rf "$TARBALL_PATH"
 }
@@ -25,7 +27,7 @@ set_all_required_env_vars() {
 }
 
 set_all_optional_env_vars() {
-	export WORKDIR="testdata/input"
+	export WORKDIR=""
 	export DEV_TARBALL_NAME=blahblah.docker.dev.tar
 	export DEV_TAGS=""
 }
@@ -85,7 +87,10 @@ assert_tarball_contains_tags() { TARBALL="$1"; TAGS="$2"
 	
 
 	# Execute the script under test: docker_build
-	./docker_build
+	(
+		cd "$TEST_ROOT"
+		./docker_build
+	)
 
 	[ -f "$TARBALL_PATH" ] || {
 		echo "Tarball not created: $TARBALL_PATH"
@@ -115,7 +120,10 @@ assert_tarball_contains_tags() { TARBALL="$1"; TAGS="$2"
 	"
 	
 	# Execute the script under test: docker_build
-	./docker_build
+	(
+		cd "$TEST_ROOT"
+		./docker_build
+	)
 
 
 	[ -f "$DEV_TARBALL_PATH" ] || {
