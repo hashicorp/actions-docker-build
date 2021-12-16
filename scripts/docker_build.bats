@@ -1,6 +1,7 @@
 setup() {
 	set_all_env_vars
 
+	SCRIPT_ROOT="$PWD"
 	TEST_ROOT="testdata/input"
 
 	# Get test relative paths to tarballs, needed for assertions,
@@ -89,7 +90,7 @@ assert_tarball_contains_tags() { TARBALL="$1"; TAGS="$2"
 	# Execute the script under test: docker_build
 	(
 		cd "$TEST_ROOT"
-		./docker_build
+		"$SCRIPT_ROOT/docker_build"
 	)
 
 	[ -f "$TARBALL_PATH" ] || {
@@ -122,7 +123,7 @@ assert_tarball_contains_tags() { TARBALL="$1"; TAGS="$2"
 	# Execute the script under test: docker_build
 	(
 		cd "$TEST_ROOT"
-		./docker_build
+		"$SCRIPT_ROOT/docker_build"
 	)
 
 
