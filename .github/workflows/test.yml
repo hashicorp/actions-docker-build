@@ -51,8 +51,7 @@ jobs:
           ls -lah
       - name: Build
         env:
-          OVERRIDE_TARBALL_NAME: ${{github.jobs[github.job].name}}.docker.tar
-          JOB_NAME: ${{github.jobs[github.job].name}}
+          OVERRIDE_TARBALL_NAME: action-test-dockerfile-in-root.docker.tar
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
@@ -74,7 +73,7 @@ jobs:
         uses: actions/checkout@v2 
       - name: Build
         env:
-          OVERRIDE_TARBALL_NAME: ${{github.jobs[github.job].name}}.docker.tar
+          OVERRIDE_TARBALL_NAME: action-test-setting-dockerfile.docker.tar
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
@@ -97,7 +96,7 @@ jobs:
         uses: actions/checkout@v2 
       - name: Build
         env:
-          OVERRIDE_TARBALL_NAME: ${{github.jobs[github.job].name}}.docker.tar
+          OVERRIDE_TARBALL_NAME: action-test-setting-workdir.docker.tar
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
