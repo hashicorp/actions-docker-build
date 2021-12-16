@@ -143,7 +143,7 @@ set_test_dev_tags() {
 	assert_tarball_contains_tags "$TARBALL_PATH" "$PROD_TAG1" "$PROD_TAG2" "$AUTO_TAG"
 }
 
-@test "prod and dev tags provided - prod and dev tags built" {
+@test "prod and dev tags provided - prod, dev, and staging tags built" {
 
 	set_test_prod_tags
 	set_test_dev_tags
@@ -154,13 +154,15 @@ set_test_dev_tags() {
 		"$SCRIPT_ROOT/docker_build"
 	)
 
-	# Both tarballs contain the auto_tag and the prod or dev tags.
+	echo "Prod tarball contains prod tags and the auto tag."
 	assert_tarball_contains_tags "$TARBALL_PATH" "$PROD_TAG1" "$PROD_TAG2" "$AUTO_TAG"
+
+	echo "Dev tarball contains dev tags and the auto tag."
 	assert_tarball_contains_tags "$DEV_TARBALL_PATH" "$DEV_TAG1" "$DEV_TAG2" "$AUTO_TAG"	
 
-	# Dev tarball should not contain prod tags.
-	assert_tarball_not_contains_tags "$DEV_TARBALL_PATH" "$PROD_TAG1" "$PROD_TAG2" "$AUTO_TAG"
+	echo "Dev tarball should not contain prod tags."
+	assert_tarball_not_contains_tags "$DEV_TARBALL_PATH" "$PROD_TAG1" "$PROD_TAG2"
 
-	# Prod tarball should not contain dev tags.
-	assert_tarball_not_contains_tags "$TARBALL_PATH" "$DEV_TAG1" "$DEV_TAG2" "$AUTO_TAG"	
+	echo "Prod tarball should not contain dev tags."
+	assert_tarball_not_contains_tags "$TARBALL_PATH" "$DEV_TAG1" "$DEV_TAG2"
 }
