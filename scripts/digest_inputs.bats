@@ -42,7 +42,8 @@ assert_exported_in_github_env() {
 	fi
 }
 
-@test "only required env vars set - requires vars passed through unchanged" {
+@test "only required env vars set - required vars passed through unchanged" {
+
 	set_all_required_env_vars
 
 	# Execute the script under test: digest_inputs
