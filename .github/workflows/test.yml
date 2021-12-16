@@ -40,7 +40,7 @@ jobs:
   action-test-dockerfile-in-root:
     runs-on: ubuntu-latest
     env:
-      OVERRIDE_TARBALL_NAME: ${{github.job.name}}.docker.tar
+      OVERRIDE_TARBALL_NAME: ${{job.name}}.docker.tar
     needs:
       - action-test-prep
     steps:
@@ -58,8 +58,8 @@ jobs:
           target: default
           arch: amd64
           tags: |
-            ${{env.TAG_PREFIX}}/${{github.job.name}}:tag1
-            ${{env.TAG_PREFIX}}/${{github.job.name}}:tag2
+            ${{env.TAG_PREFIX}}/${{job.name}}:tag1
+            ${{env.TAG_PREFIX}}/${{job.name}}:tag2
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
           # No overrides to Dockerfile path.
@@ -67,7 +67,7 @@ jobs:
   action-test-setting-dockerfile:
     runs-on: ubuntu-latest
     env:
-      OVERRIDE_TARBALL_NAME: ${{github.job.name}}.docker.tar
+      OVERRIDE_TARBALL_NAME: ${{job.name}}.docker.tar
     needs:
       - action-test-prep
     steps:
@@ -80,8 +80,8 @@ jobs:
           target: default
           arch: amd64
           tags: |
-            ${{env.TAG_PREFIX}}/${{github.job.name}}:tag1
-            ${{env.TAG_PREFIX}}/${{github.job.name}}:tag2
+            ${{env.TAG_PREFIX}}/${{job.name}}:tag1
+            ${{env.TAG_PREFIX}}/${{job.name}}:tag2
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
           # Test setting just dockerfile.
@@ -90,7 +90,7 @@ jobs:
   action-test-setting-workdir:
     runs-on: ubuntu-latest
     env:
-      OVERRIDE_TARBALL_NAME: ${{github.job.name}}.docker.tar
+      OVERRIDE_TARBALL_NAME: ${{job.name}}.docker.tar
     needs:
       - action-test-prep
     steps:
@@ -103,8 +103,8 @@ jobs:
           target: default
           arch: amd64
           tags: |
-            ${{env.TAG_PREFIX}}/${{github.job.name}}:tag1
-            ${{env.TAG_PREFIX}}/${{github.job.name}}:tag2
+            ${{env.TAG_PREFIX}}/${{job.name}}:tag1
+            ${{env.TAG_PREFIX}}/${{job.name}}:tag2
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
           # Test setting just workdir.
