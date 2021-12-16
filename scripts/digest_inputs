@@ -86,8 +86,17 @@ add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
 
 # Determine tarball and auto-tag names.
 TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}"
-TARBALL_NAME="${TARBALL_ROOT}.docker.tar"
-DEV_TARBALL_NAME="${TARBALL_ROOT}.docker.dev.tar"
+DEFAULT_TARBALL_NAME="${TARBALL_ROOT}.docker.tar"
+DEFAULT_DEV_TARBALL_NAME="${TARBALL_ROOT}.docker.dev.tar"
+
+# TARBALL_NAME and DEV_TARBALL_NAME may be set explicitly by tests, by
+# setting OVERRIDE_TARBALL_NAME and OVERRIDE_DEV_TARBALL_NAME.
+# This should never be done outside of tests of this action itself,
+# because only the default tarball names are recognised by downstream
+# processes.
+TARBALL_NAME="${OVERRIDE_TARBALL_NAME:-$DEFAULT_TARBALL_NAME}"
+DEV_TARBALL_NAME="${OVERRIDE_DEV_TARBALL_NAME:-$DEFAULT_DEV_TARBALL_NAME}"
+
 AUTO_TAG="${REPO_NAME}/${TARGET}/${OS}/${ARCH}:${VERSION}_${REVISION}"
 
 add_vars TARBALL_NAME DEV_TARBALL_NAME AUTO_TAG
