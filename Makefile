@@ -11,5 +11,5 @@ testdata: export UPDATE_TESTDATA=true
 testdata: test
 
 .PHONY: bats-tests
-bats-tests: $(BATS_FILES)
-	for T in $^; do ( cd scripts && bats $$(basename $$T); ); done
+bats-tests:
+	cd scripts && bats .
