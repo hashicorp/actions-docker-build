@@ -1,3 +1,13 @@
+setup() {
+	set_all_env_vars
+
+	# Get test relative paths to tarballs, needed for assertions,
+	# and remove them now so tests don't read stale tarballs.
+	export TARBALL_PATH="$WORKDIR/$TARBALL_NAME"
+	export DEV_TARBALL_PATH="$WORKDIR/$DEV_TARBALL_NAME"
+	rm -rf "$DEV_TARBALL_PATH"
+	rm -rf "$TARBALL_PATH"
+}
 
 set_all_required_env_vars() {
 	export BIN_NAME=test_bin
@@ -6,7 +16,6 @@ set_all_required_env_vars() {
 	export DOCKERFILE=Dockerfile
 	export TARGET=default
 	export TARBALL_NAME=blahblah.docker.tar
-	export DEV_TARBALL_NAME=blahblah.docker.dev.tar
 	export PLATFORM="linux/amd64"
 	export AUTO_TAG="some/auto/tag:1.2.3-deadbeef"
 	export TAGS="
@@ -17,6 +26,7 @@ set_all_required_env_vars() {
 
 set_all_optional_env_vars() {
 	export WORKDIR="testdata/input"
+	export DEV_TARBALL_NAME=blahblah.docker.dev.tar
 	export DEV_TAGS=""
 }
 
@@ -72,12 +82,10 @@ assert_tarball_contains_tags() { TARBALL="$1"; TAGS="$2"
 }
 
 @test "only required env vars set - all prod and staging tags built" {
-	set_all_env_vars
 	
+
 	# Execute the script under test: docker_build
 	./docker_build
-
-	TARBALL_PATH="$WORKDIR/$TARBALL_NAME"
 
 	[ -f "$TARBALL_PATH" ] || {
 		echo "Tarball not created: $TARBALL_PATH"
@@ -97,7 +105,6 @@ assert_tarball_contains_tags() { TARBALL="$1"; TAGS="$2"
 }
 
 @test "dev tags provided - dev tags built" {
-	set_all_env_vars
 
 	DEVTAG1=dadgarcorp/repo1:1.2.3-dev
 	DEVTAG2=dadgarcorp/repo1/dev:1
@@ -110,14 +117,11 @@ assert_tarball_contains_tags() { TARBALL="$1"; TAGS="$2"
 	# Execute the script under test: docker_build
 	./docker_build
 
-	DEV_TARBALL_PATH="$WORKDIR/$DEV_TARBALL_NAME"
 
 	[ -f "$DEV_TARBALL_PATH" ] || {
 		echo "Tarball not created: $DEV_TARBALL_PATH"
 		return 1
 	}
-
-	assert_tags_exist "$DEVTAG1" "$DEVTAG2"
 
 	# The docker build will have left behind all the tags in the local
 	# daemon. We want to assert that they are contained inside the tarbal
