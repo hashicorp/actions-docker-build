@@ -9,15 +9,31 @@ die() { echo "$1" 1>&2; exit 1; }
 [ -n "$VERSION"  ] || die "Must set VERSION"
 [ -n "$REVISION"  ] || die "Must set REVISION"
 [ -n "$DOCKERFILE"  ] || die "Must set DOCKERFILE"
+[ -n "$TARGET"  ] || die "Must set TARGET"
+[ -n "$TARBALL_NAME"  ] || die "Must set TARBALL_NAME"
+[ -n "$DEV_TARBALL_NAME"  ] || die "Must set TARBALL_NAME"
+[ -n "$PLATFORM"  ] || die "Must set PLATFORM"
+[ -n "$AUTO_TAG"  ] || die "Must set AUTO_TAG"
+[ -n "$TAGS"  ] || die "Must set TAGS"
 
 WORKDIR="${WORKDIR:-.}"
-TAGS="${TAGS:-}"
 
-read -ra TAGS <<< "$TAGS"
+export DEV_TAGS="${DEV_TAGS:-}"
 
-TAGS+=("$AUTO_TAG")
+# Convert all contiguous blocks of whitespace to single spaces using xargs.
+# This is needed to get all tags on one line for the read -ra below.
+PROD_TAGS="$(xargs <<< "$TAGS")"
+DEV_TAGS="$(xargs <<< "$DEV_TAGS")"
 
-for T in "${TAGS[@]}"; do
+read -ra DEV_TAGS_A <<< "$DEV_TAGS"
+read -ra PROD_TAGS_A <<< "$PROD_TAGS"
+
+ALL_TAGS=("${DEV_TAGS_A[@]}")
+ALL_TAGS+=("$AUTO_TAG")
+ALL_TAGS+=("${PROD_TAGS_A[@]}")
+echo "ALL_TAGS:" "${ALL_TAGS[@]}"
+
+for T in "${ALL_TAGS[@]}"; do
 	TAG_FLAGS+=("--tag=$T")
 done
 
@@ -29,13 +45,16 @@ for B in "${BUILD_ARGS[@]}"; do
 	BA_FLAGS+=("--build-arg=$B")
 done
 
+TARBALL_PATH="$PWD/$TARBALL_NAME"
+DEV_TARBALL_PATH="$PWD/$DEV_TARBALL_NAME"
+
 cd "$WORKDIR"
 
 docker buildx create --use
 
 echo "==> Building image with tags:"
-for T in "${TAGS[@]}"; do
-  echo "      - $T"
+for T in "${ALL_TAGS[@]}"; do
+  echo "    - $T"
 done
 
 docker buildx build --load \
@@ -46,9 +65,17 @@ docker buildx build --load \
   -f "$DOCKERFILE" \
   .
 
-echo "==> Saving image as '$TARBALL_NAME'"
+echo "==> Saving prod tags in '$TARBALL_PATH'"
 
-docker save --output "$TARBALL_NAME" "${TAGS[@]}"
-
+docker save --output "$TARBALL_PATH" "${PROD_TAGS_A[@]}" "$AUTO_TAG"
 echo "==> Tarball created."
-ls -lah "$TARBALL_NAME"
+ls -lah "$TARBALL_PATH"
+
+if [ -n "$DEV_TAGS" ]; then
+	echo "==> Saving dev tags in '$DEV_TARBALL_PATH'"
+	docker save --output "$DEV_TARBALL_PATH" "${DEV_TAGS_A[@]}" "$AUTO_TAG"
+	echo "==> Dev Tarball created."
+	ls -lah "$DEV_TARBALL_PATH"
+else
+	echo "==> No dev tags specified, skipping export."
+fi

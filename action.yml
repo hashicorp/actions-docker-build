@@ -32,6 +32,10 @@ inputs:
     description: Version of arm architecture to use (ignored unless arch == arm).
     default: 6
 
+  dev_tags:
+    description: Tags to use for publishing development images (optional).
+    default: ""
+
   # Optional inputs whose values are guessed if left blank.
   zip_artifact_name:
     description: >
@@ -77,9 +81,11 @@ runs:
         REVISION: "${{github.sha}}"
         VERSION: "${{inputs.version}}"
         ARCH: "${{inputs.arch}}"
+        TAGS: "${{inputs.tags}}"
         TARGET: "${{inputs.target}}"
 
         # Optional.
+        DEV_TAGS: "${{inputs.dev_tags}}"
         ARM_VERSION: "${{inputs.arm_version}}"
         PKG_NAME: "${{inputs.pkg_name}}"
         WORKDIR: "${{inputs.workdir}}"
@@ -104,8 +110,17 @@ runs:
       shell: bash
       run: ${{ github.action_path}}/scripts/docker_build
 
-    - name: Upload Tarball
+    - name: Upload Prod Tarball
       uses: actions/upload-artifact@v2
       with:
         name: ${{env.TARBALL_NAME}}
         path: ${{env.TARBALL_NAME}}
+        if-no-files-found: error
+
+    - name: Upload Dev Tarball
+      uses: actions/upload-artifact@v2
+      if: ${{env.DEV_TAGS != ''}}
+      with:
+        name: ${{env.DEV_TARBALL_NAME}}
+        path: ${{env.DEV_TARBALL_NAME}}
+        if-no-files-found: error

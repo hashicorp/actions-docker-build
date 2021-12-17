@@ -15,6 +15,7 @@ die() { echo "$1" 1>&1; exit 1; }
 [ -n "$VERSION"    ] || die "Must set VERSION"
 [ -n "$ARCH"       ] || die "Must set ARCH"
 [ -n "$TARGET"     ] || die "Must set TARGET"
+[ -n "$TAGS"       ] || die "Must set TAGS"
 
 # Optional env vars.
 ARM_VERSION="${ARM_VERSION:-}"
@@ -22,17 +23,23 @@ PKG_NAME="${PKG_NAME:-}"
 WORKDIR="${WORKDIR:-}"
 ZIP_NAME="${ZIP_NAME:-}"
 BIN_NAME="${BIN_NAME:-}"
+DEV_TAGS="${DEV_TAGS:-}"
 DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 
 # Funcs to add variables to GITHUB_ENV.
 add_var() {
-  echo "$1=${!1}" >> "$GITHUB_ENV"
+  {
+    echo "$1<<EOF"
+    echo "${!1}"
+    echo "EOF"
+  } >> "$GITHUB_ENV"
+  echo "export $1='${!1}'" >> "$GITHUB_ENV.export"
   echo "--> Set $1 to '${!1}'"
 }
 
 add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
 
-add_vars WORKDIR DOCKERFILE
+add_vars TAGS DEV_TAGS WORKDIR DOCKERFILE
 
 # Determine repo name values.
 REPO_NAME_MINUS_ENTERPRISE="${REPO_NAME%%-enterprise}"
@@ -78,10 +85,21 @@ ZIP_NAME_GUESSED=false
 add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
 
 # Determine tarball and auto-tag names.
-TARBALL_NAME="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}.docker.tar"
+TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}"
+DEFAULT_TARBALL_NAME="${TARBALL_ROOT}.docker.tar"
+DEFAULT_DEV_TARBALL_NAME="${TARBALL_ROOT}.docker.dev.tar"
+
+# TARBALL_NAME and DEV_TARBALL_NAME may be set explicitly by tests, by
+# setting OVERRIDE_TARBALL_NAME and OVERRIDE_DEV_TARBALL_NAME.
+# This should never be done outside of tests of this action itself,
+# because only the default tarball names are recognised by downstream
+# processes.
+TARBALL_NAME="${OVERRIDE_TARBALL_NAME:-$DEFAULT_TARBALL_NAME}"
+DEV_TARBALL_NAME="${OVERRIDE_DEV_TARBALL_NAME:-$DEFAULT_DEV_TARBALL_NAME}"
+
 AUTO_TAG="${REPO_NAME}/${TARGET}/${OS}/${ARCH}:${VERSION}_${REVISION}"
 
-add_vars TARBALL_NAME AUTO_TAG
+add_vars TARBALL_NAME DEV_TARBALL_NAME AUTO_TAG
 
 # Determine product bin name.
 BIN_NAME_GUESSED=false
