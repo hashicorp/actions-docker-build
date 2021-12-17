@@ -70,7 +70,7 @@ jobs:
           save_tags_to_docker_env() { varname="$1"; numtags="$2";
             ONELINE=""
             echo "${varname}<<EOF" >> "$GITHUB_ENV"
-            for i=0; ((i<${{matrix.num_prod_tags}}); ((i++)); do
+            for i=0; ((i<${{matrix.num_prod_tags}})); ((i++)); do
                 T="${{env.TAG_PREFIX}}/${{matrix.name}}:tag$i"
                 echo "$T" >> "$GITHUB_ENV"
                 ONELINE+="$T "
