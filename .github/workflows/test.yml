@@ -104,7 +104,7 @@ jobs:
             ${{env.TAGS_ONELINE}}
 
       - name: Assert dev tarball contains dev tags
-        if: {{env.num_dev_tags != 0}}
+        if: ${{env.num_dev_tags != 0}}
         run: |
           source ./scripts/assertions.bash 
           assert_tarball_contains_tags \
