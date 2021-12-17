@@ -61,9 +61,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2 
       - name: Test Setup
+        shell: bash
         run: |
           ${{matrix.setup}}
       - name: Set TAGS, DEV_TAGS, TAGS_ONELINE and DEV_TAGS_ONELINE.
+        shell: bash
         run: | 
           save_tags_to_docker_env() { varname="$1"; numtags="$2";
             ONELINE=""
