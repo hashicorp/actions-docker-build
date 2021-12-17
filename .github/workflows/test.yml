@@ -42,6 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # Each include is a test case.
         include:
           - name: dockerfile-in-root
             setup: |
@@ -51,6 +52,18 @@ jobs:
             num_dev_tags: 0
             dockerfile:
             workdir:
+          - name: setting-dockerfile
+            setup:
+            num_prod_tags: 2
+            num_dev_tags: 0
+            dockerfile: testdata/Dockerfile
+            workdir:
+          - name: setting-workdir
+            setup:
+            num_prod_tags: 2
+            num_dev_tags: 0
+            dockerfile:
+            workdir: testdata
     env:
       OVERRIDE_TARBALL_NAME: ${{matrix.name}}.docker.tar
       OVERRIDE_DEV_TARBALL_NAME: ${{matrix.name}}.docker.dev.tar
@@ -110,97 +123,3 @@ jobs:
           assert_tarball_contains_tags \
             "${{env.OVERRIDE_DEV_TARBALL_NAME}}" \
             ${{env.DEV_TAGS_ONELINE}}
-          
-  action-test-dockerfile-in-root:
-    runs-on: ubuntu-latest
-    env:
-      OVERRIDE_TARBALL_NAME: action-test-dockerfile-in-root.docker.tar
-    needs:
-      - action-test-prep
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2 
-      # Test setup.
-      - name: Move Dockerfile to Repo Root
-        run: |
-          mv testdata/Dockerfile ./
-          ls -lah
-      - name: Build
-        uses: ./ # This is the action we're testing.
-        with:
-          version: 1.0.0
-          target: default
-          arch: amd64
-          tags: |
-            ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag1
-            ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag2
-          zip_artifact_name: test_bin.zip
-          bin_name: test_bin
-          # No overrides to Dockerfile path.
-      - name: Assert prod tarball contains correct images
-        run: |
-          source ./scripts/assertions.bash 
-          assert_tarball_contains_tags \
-            "${{env.OVERRIDE_TARBALL_NAME}}" \
-            "${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag1" \
-            "${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag2"
-
-  action-test-setting-dockerfile:
-    runs-on: ubuntu-latest
-    env:
-      OVERRIDE_TARBALL_NAME: action-test-setting-dockerfile.docker.tar
-    needs:
-      - action-test-prep
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2 
-      - name: Build
-        uses: ./ # This is the action we're testing.
-        with:
-          version: 1.0.0
-          target: default
-          arch: amd64
-          tags: |
-            ${{env.TAG_PREFIX}}/action-test-setting-dockerfile:tag1
-            ${{env.TAG_PREFIX}}/action-test-setting-dockerfile:tag2
-          zip_artifact_name: test_bin.zip
-          bin_name: test_bin
-          # Test setting just dockerfile.
-          dockerfile: testdata/Dockerfile
-      - name: Assert prod tarball contains correct images
-        run: |
-          source ./scripts/assertions.bash 
-          assert_tarball_contains_tags \
-            "${{env.OVERRIDE_TARBALL_NAME}}" \
-            "${{env.TAG_PREFIX}}/action-test-setting-dockerfile:tag1" \
-            "${{env.TAG_PREFIX}}/action-test-setting-dockerfile:tag2"
-
-  action-test-setting-workdir:
-    runs-on: ubuntu-latest
-    env:
-      OVERRIDE_TARBALL_NAME: action-test-setting-workdir.docker.tar
-    needs:
-      - action-test-prep
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2 
-      - name: Build
-        uses: ./ # This is the action we're testing.
-        with:
-          version: 1.0.0
-          target: default
-          arch: amd64
-          tags: |
-            ${{env.TAG_PREFIX}}/action-test-setting-workdir:tag1
-            ${{env.TAG_PREFIX}}/action-test-setting-workdir:tag2
-          zip_artifact_name: test_bin.zip
-          bin_name: test_bin
-          # Test setting just workdir.
-          workdir: testdata
-      - name: Assert prod tarball contains correct images
-        run: |
-          source ./scripts/assertions.bash 
-          assert_tarball_contains_tags \
-            "${{env.OVERRIDE_TARBALL_NAME}}" \
-            "${{env.TAG_PREFIX}}/action-test-setting-workdir:tag1" \
-            "${{env.TAG_PREFIX}}/action-test-setting-workdir:tag2"
