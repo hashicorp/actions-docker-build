@@ -1,3 +1,7 @@
+#!/usr/bin/env bats
+
+load assertions
+
 setup() {
 	set_all_env_vars
 
@@ -35,60 +39,6 @@ set_all_env_vars() {
 	set_all_optional_env_vars
 }
 
-tag_exists() {
-	docker inspect "$1" > /dev/null 2>&1  && return 0
-	return 1
-}
-
-assert_tag_exists_locally() {
-	tag_exists "$1" && return 0
-	echo "Assertion failed: tag $1 missing."
-	return 1
-}
-
-assert_tags_exist_locally() {
-	for T in "$@"; do
-		assert_tag_exists_locally "$T"
-	done
-}
-
-assert_tag_does_not_exist_locally() {
-	tag_exists "$1" || return 0
-	echo "Assertion failed: tag $1 exists, but it should not."
-	return 1
-}
-
-assert_tags_do_not_exist_locally() {
-	for T in "$@"; do
-		assert_tag_does_not_exist_locally "$T"
-	done
-}
-
-remove_tags() { docker rmi "$@" > /dev/null 2>&1 || true; }
-
-assert_tags_exist() {
-	for TAG in "$@"; do assert_tag_exists_locally "$TAG"; done
-}
-
-tarball_tag_check_prep() { TARBAL="$1"; shift
-	[ -f "$TARBALL" ] || {
-		echo "Tarball not found: $TARBALL"
-		return 1
-	}
-	remove_tags "$@"
-	assert_tags_do_not_exist_locally "$@"
-	docker load -i "$TARBALL"
-}
-
-assert_tarball_contains_tags() { TARBALL="$1"; shift
-	tarball_tag_check_prep "$TARBALL" "$@"
-	assert_tags_exist_locally "$@"
-}
-
-assert_tarball_not_contains_tags() { TARBALL="$1"; shift
-	tarball_tag_check_prep "$TARBALL" "$@"
-	assert_tags_do_not_exist_locally "$@"
-}
 
 set_test_prod_tags() {
 	PROD_TAG1=dadgarcorp/repo1:1.2.3
