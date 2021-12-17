@@ -37,6 +37,77 @@ jobs:
           path: testdata/test_bin.zip
           name: test_bin.zip
 
+
+  action-test-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: dockerfile-in-root
+            setup: |
+              mv testdata/Dockerfile ./
+              ls -lah
+            num_prod_tags: 2
+            num_dev_tags: 0
+            dockerfile:
+            workdir:
+    env:
+      OVERRIDE_TARBALL_NAME: ${{matrix.name}}.docker.tar
+      OVERRIDE_DEV_TARBALL_NAME: ${{matrix.name}}.docker.dev.tar
+      TAG_PREFIX: artifactory.hashicorp.engineering/actions-docker-build/test
+    needs:
+      - action-test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+      - name: Test Setup
+        run: |
+          ${{matrix.setup}}
+      - name: Set TAGS, DEV_TAGS, TAGS_ONELINE and DEV_TAGS_ONELINE.
+        run: | 
+          save_tags_to_docker_env() { varname="$1"; numtags="$2";
+            ONELINE=""
+            echo "${varname}<<EOF" >> "$GITHUB_ENV"
+            for i=0; ((i<${{matrix.num_prod_tags}}); ((i++)); do
+                T="${{env.TAG_PREFIX}}/${{matrix.name}}:tag$i"
+                echo "$T" >> "$GITHUB_ENV"
+                ONELINE+="$T "
+            done
+            echo "EOF" >> "$GITHUB_ENV"
+            echo "${varname}_ONELINE=$ONELINE" >> "$GITHUB_ENV"
+          }
+
+          save_tags_to_docker_env TAGS     ${{matrix.num_prod_tags}}
+          save_tags_to_docker_env DEV_TAGS ${{matrix.num_dev_tags}}
+          
+      - name: Invoke the Action under test
+        uses: ./
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          tags: |
+            ${{env.TAGS}}
+          dev-tags: |
+            ${{env.DEV_TAGS}}
+          zip_artifact_name: test_bin.zip
+          bin_name: test_bin
+          dockerfile: ${{matrix.dockerfile}}
+
+      - name: Assert prod tarball contains prod tags
+        run: |
+          source ./scripts/assertions.bash 
+          assert_tarball_contains_tags \
+            "${{env.OVERRIDE_TARBALL_NAME}}" \
+            ${{env.TAGS_ONELINE}}
+
+      - name: Assert dev tarball contains dev tags
+        run: |
+          source ./scripts/assertions.bash 
+          assert_tarball_contains_tags \
+            "${{env.OVERRIDE_DEV_TARBALL_NAME}}" \
+            ${{env.DEV_TAGS_ONELINE}}
+          
   action-test-dockerfile-in-root:
     runs-on: ubuntu-latest
     env:
@@ -63,6 +134,13 @@ jobs:
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
           # No overrides to Dockerfile path.
+      - name: Assert prod tarball contains correct images
+        run: |
+          source ./scripts/assertions.bash 
+          assert_tarball_contains_tags \
+            "${{env.OVERRIDE_TARBALL_NAME}}" \
+            "${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag1" \
+            "${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag2"
 
   action-test-setting-dockerfile:
     runs-on: ubuntu-latest
@@ -86,6 +164,13 @@ jobs:
           bin_name: test_bin
           # Test setting just dockerfile.
           dockerfile: testdata/Dockerfile
+      - name: Assert prod tarball contains correct images
+        run: |
+          source ./scripts/assertions.bash 
+          assert_tarball_contains_tags \
+            "${{env.OVERRIDE_TARBALL_NAME}}" \
+            "${{env.TAG_PREFIX}}/action-test-setting-dockerfile:tag1" \
+            "${{env.TAG_PREFIX}}/action-test-setting-dockerfile:tag2"
 
   action-test-setting-workdir:
     runs-on: ubuntu-latest
@@ -109,3 +194,10 @@ jobs:
           bin_name: test_bin
           # Test setting just workdir.
           workdir: testdata
+      - name: Assert prod tarball contains correct images
+        run: |
+          source ./scripts/assertions.bash 
+          assert_tarball_contains_tags \
+            "${{env.OVERRIDE_TARBALL_NAME}}" \
+            "${{env.TAG_PREFIX}}/action-test-setting-workdir:tag1" \
+            "${{env.TAG_PREFIX}}/action-test-setting-workdir:tag2"
