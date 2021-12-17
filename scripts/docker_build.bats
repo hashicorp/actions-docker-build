@@ -35,16 +35,6 @@ set_all_env_vars() {
 	set_all_optional_env_vars
 }
 
-set_expected_tags() {
-	read -ra EXPECTED_TAGS <<< "$TAGS"
-	EXPECTED_TAGS+=("$AUTO_TAG")	
-}
-
-each_expected_tag() {
-	set_expected_tags
-	for TAG in "${EXPECTED_TAGS[@]}"; do $@ "$TAG"; done
-}
-
 tag_exists() {
 	docker inspect "$1" > /dev/null 2>&1  && return 0
 	return 1
@@ -74,15 +64,6 @@ assert_tags_do_not_exist_locally() {
 	done
 }
 
-assert_expected_tags_do_not_exist() { each_expected_tag assert_tag_does_not_exist_locally; }
-
-assert_expected_tags_exist() { each_expected_tag assert_tag_exists_locally; }
-
-remove_expected_tags() {
-	each_expected_tag remove_tags
-	each_expected_tag assert_tag_does_not_exist_locally
-}
-
 remove_tags() { docker rmi "$@" > /dev/null 2>&1 || true; }
 
 assert_tags_exist() {
@@ -98,7 +79,6 @@ tarball_tag_check_prep() { TARBAL="$1"; shift
 	assert_tags_do_not_exist_locally "$@"
 	docker load -i "$TARBALL"
 }
-	
 
 assert_tarball_contains_tags() { TARBALL="$1"; shift
 	tarball_tag_check_prep "$TARBALL" "$@"
