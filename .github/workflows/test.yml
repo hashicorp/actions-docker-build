@@ -108,6 +108,7 @@ jobs:
             ${{env.DEV_TAGS}}
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
+          workdir: ${{matrix.workdir}}
           dockerfile: ${{matrix.dockerfile}}
 
       - name: Assert prod tarball contains prod tags
