@@ -51,3 +51,15 @@ assert_tarball_not_contains_tags() { TARBALL="$1"; shift
 	tarball_tag_check_prep "$TARBALL" "$@"
 	assert_tags_do_not_exist_locally "$@"
 }
+
+assert_is_binfmt_registered() { 
+  [ -f "/proc/sys/fs/binfmt_misc/$1" ] && return 0
+  return 1
+}
+
+assert_binfmt_fix_binary_flag_is_set() {
+  local flags
+  IFS=":" read _ flags <<< $(grep "flags" /proc/sys/fs/binfmt_misc/$1)
+  grep --quiet "F" <<< "$flags" && return 0
+  return 1
+}
