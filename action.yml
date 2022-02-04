@@ -96,6 +96,13 @@ runs:
 
       run: ${{ github.action_path }}/scripts/digest_inputs 
 
+    - name: Docker Login - docker.artifactory.hashicorp.engineering(RO)
+      uses: docker/login-action@v1
+      with:
+        registry: docker.artifactory.hashicorp.engineering
+        username: hc-releng-crt-ro
+        password: ${{ secrets.HASHI_CRT_RO_DOCKER_ARTIFACTORY_TOKEN }}
+
     - name: Setup QEMU in binfmt_misc filesystem
       shell: bash
       run: ${{ github.action_path }}/scripts/register_qemu_binfmt
