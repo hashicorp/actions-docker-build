@@ -2,8 +2,8 @@
 
 set -Eeuo pipefail
 
-echo "==> Pulling prodsec-binfmt image"
-docker pull docker.artifactory.hashicorp.engineering/prodsec-binfmt:latest
-
 echo "==> Registering qemu into /proc/sys/fs/binfmt_misc"
-docker run --privileged --rm prodsec-binfmt:latest --install all
+docker run --pull always \
+           --privileged \
+           --rm \
+           docker.artifactory.hashicorp.engineering/prodsec-binfmt:latest --install all
