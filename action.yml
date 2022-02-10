@@ -105,9 +105,16 @@ runs:
     - name: Extract Product Zip Artifact
       shell: bash
       run: |
-        # Sleep for a second, because sometimes this step starts before the
-        # downloaded artifact from the previous step is actually on the disk.
-        sleep 1 # barf
+        # Wait for artifact from previous step to arrive on the disk.
+        ZIP_PATH="$ZIP_LOCATION/$ZIP_NAME"
+        for (( i=0; i<10; i++ )); do
+          [ -f "$ZIP_PATH" ] && break
+          sleep 1 # barf
+        done
+        [ -f "$ZIP_PATH" ] || {
+          echo "==> No sign of a file at '$ZIP_PATH'"
+          exit 1
+        }
         ${{ github.action_path }}/scripts/extract_product_zip
 
     - name: Docker Build
