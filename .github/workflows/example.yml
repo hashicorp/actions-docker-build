@@ -39,7 +39,7 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           go build -o "$product_name" .
-          zip "$product_name" "$product_name.zip"
+          zip "$product_name.zip" "$product_name"
       - name: Upload product artifact.
         uses: actions/upload-artifact@v2
         with:
