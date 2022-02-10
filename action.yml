@@ -104,7 +104,11 @@ runs:
 
     - name: Extract Product Zip Artifact
       shell: bash
-      run: ${{ github.action_path }}/scripts/extract_product_zip
+      run: |
+        # Sleep for a second, because sometimes this step starts before the
+        # downloaded artifact from the previous step is actually on the disk.
+        sleep 1 # barf
+        ${{ github.action_path }}/scripts/extract_product_zip
 
     - name: Docker Build
       shell: bash
