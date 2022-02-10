@@ -1,0 +1,81 @@
+name: test
+on: [push]
+
+env:
+  product_name: actions-docker-build
+
+defaults:
+  run:
+    shell: bash
+    # Usually we would be in root, but this is just an example.
+    working-directory: example/
+
+jobs:
+
+  build-product-binary:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - {go: "1.16", goos: "linux", goarch: "386"}
+          - {go: "1.16", goos: "linux", goarch: "amd64"}
+          - {go: "1.16", goos: "linux", goarch: "arm"}
+          - {go: "1.16", goos: "linux", goarch: "arm64"}
+          - {go: "1.16", goos: "freebsd", goarch: "386"}
+          - {go: "1.16", goos: "freebsd", goarch: "amd64"}
+          - {go: "1.16", goos: "windows", goarch: "386"}
+          - {go: "1.16", goos: "windows", goarch: "amd64"}
+          - {go: "1.16", goos: "solaris", goarch: "amd64"}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+      - name: Setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Compile Binary
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          go build -o "$product_name" ./example
+          zip "$product_name" "$product_name.zip"
+      - name: Upload product artifact.
+        uses: actions/upload-artifact@v2
+        with:
+          path: ${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          name: ${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+
+  build-product-docker-image:
+    needs:
+      - build-product-binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # We only support building images for linux platforms,
+          # so we only specify arch here.
+          - {arch: "386"}
+          - {arch: "amd64"}
+          - {arch: "arm"}
+          - {arch: "arm64"}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+      - name: Build
+        uses: hashicorp/actions-docker-build@v1
+        with:
+          version: 1.0.0
+          target: default
+          arch: ${{ matrix.arch }}
+          # Production tags. (These are the tags used for the multi-arch images
+          # we eventually push, they must never be architecture/platform-specific.)
+          tags: |
+            docker.io/hashicorp/${{env.product_name}}:${{env.version}}
+            public.ecr.aws/hashicorp/${{env.product_name}}:${{env.version}}
+          # Dev tags are pushed more frequently by downstream processes. They also
+          # must not reference the architecture.
+          dev_tags: |
+            ${{env.TAG_PREFIX}}/action-test-setting-dockerfile:${{env.version}}-dev
+          # Usually you wouldn't need to set workdir, but this is just an example.
+          workdir: example/
