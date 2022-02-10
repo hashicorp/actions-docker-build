@@ -19,11 +19,6 @@ inputs:
       Each tag must be in the format: <registry>/[<namespace>/]<repository>:<tag>
     required: true
 
-  artifactory_token:
-    description:
-      Token used to pull Docker images from the artifactory mirror
-    required: true
-
   # General purpose inputs.
   target:
     description: >
@@ -70,7 +65,6 @@ inputs:
     description: Dockerfile path relative to workdir.
     default: Dockerfile
 
-
 # action runner (golang:latest image)
 runs:
   using: composite
@@ -107,7 +101,7 @@ runs:
       with:
         registry: docker.artifactory.hashicorp.engineering
         username: hc-releng-crt-ro
-        password: ${{ inputs.artifactory_token }}
+        password: ${{ secrets.HASHI_CRT_RO_DOCKER_ARTIFACTORY_TOKEN }}
 
     - name: Setup QEMU in binfmt_misc filesystem
       shell: bash

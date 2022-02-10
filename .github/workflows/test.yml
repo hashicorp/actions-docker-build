@@ -62,7 +62,6 @@ jobs:
             ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag2
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
-          artifactory_token: ${{ secrets.HASHI_CRT_RO_DOCKER_ARTIFACTORY_TOKEN }}
           # No overrides to Dockerfile path.
 
   action-test-setting-dockerfile:
@@ -87,7 +86,6 @@ jobs:
           bin_name: test_bin
           # Test setting just dockerfile.
           dockerfile: testdata/Dockerfile
-          artifactory_token: ${{ secrets.HASHI_CRT_RO_DOCKER_ARTIFACTORY_TOKEN }}
 
   action-test-setting-workdir:
     runs-on: ubuntu-latest
@@ -111,4 +109,3 @@ jobs:
           bin_name: test_bin
           # Test setting just workdir.
           workdir: testdata
-          artifactory_token: ${{ secrets.HASHI_CRT_RO_DOCKER_ARTIFACTORY_TOKEN }}
