@@ -57,6 +57,7 @@ on: [push]
 
 env:
   product_name: actions-docker-build
+  version: 1.0.0
 
 defaults:
   run:
@@ -93,12 +94,13 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           go build -o "$product_name" .
-          zip "$product_name.zip" "$product_name"
+          zip "${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip" "$product_name"
       - name: Upload product artifact.
         uses: actions/upload-artifact@v2
         with:
-          path: ${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          path: example/${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           name: ${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          if-no-files-found: error
 
   build-product-docker-image:
     needs:
@@ -130,8 +132,7 @@ jobs:
           # Dev tags are pushed more frequently by downstream processes. They also
           # must not reference the architecture.
           dev_tags: |
-            ${{env.TAG_PREFIX}}/action-test-setting-dockerfile:${{env.version}}-dev
+            docker.io/hashicorp/${{env.product_name}}:${{env.version}}-dev
           # Usually you wouldn't need to set workdir, but this is just an example.
           workdir: example/
-
 ```
