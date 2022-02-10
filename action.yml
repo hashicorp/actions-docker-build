@@ -106,13 +106,13 @@ runs:
       shell: bash
       run: |
         # Wait for artifact from previous step to arrive on the disk.
-        ZIP_PATH="$ZIP_LOCATION/$ZIP_NAME"
+        ZIP_PATH="$WORKDIR/$ZIP_LOCATION/$ZIP_NAME"
         for (( i=0; i<10; i++ )); do
           [ -f "$ZIP_PATH" ] && break
           sleep 1 # barf
         done
         [ -f "$ZIP_PATH" ] || {
-          echo "==> No sign of a file at '$ZIP_PATH'"
+          echo "==> No sign of a file at '$ZIP_PATH' (from $PWD)"
           exit 1
         }
         ${{ github.action_path }}/scripts/extract_product_zip
