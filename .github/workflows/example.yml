@@ -43,8 +43,9 @@ jobs:
       - name: Upload product artifact.
         uses: actions/upload-artifact@v2
         with:
-          path: ${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          path: example/${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           name: ${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          if-no-files-found: error
 
   build-product-docker-image:
     needs:
