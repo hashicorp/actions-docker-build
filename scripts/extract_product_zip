@@ -4,9 +4,6 @@ set -Eeuo pipefail
 
 cd "$ZIP_LOCATION"
 
-echo "==> Contents of $PWD:"
-ls -lah
-
 [ -f "$ZIP_NAME" ] || {
 	echo "==> File '$ZIP_NAME' not found in $PWD:"
 	ls -lah
