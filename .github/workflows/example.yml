@@ -40,11 +40,11 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           go build -o "$product_name" .
-          zip "$product_name.zip" "$product_name"
+          zip "${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip" "$product_name"
       - name: Upload product artifact.
         uses: actions/upload-artifact@v2
         with:
-          path: example/${{ env.product_name }}.zip
+          path: example/${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           name: ${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           if-no-files-found: error
 
