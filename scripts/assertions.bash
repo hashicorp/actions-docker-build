@@ -58,6 +58,6 @@ assert_is_binfmt_registered() {
 
 assert_binfmt_fix_binary_flag_is_set() {
   local flags
-  IFS=":" read _ flags <<< $(grep "flags" /proc/sys/fs/binfmt_misc/$1)
+  flags="$(cut -d: -f2 <<< $(grep "flags" /proc/sys/fs/binfmt_misc/$1))"
   grep --quiet "F" <<< "$flags"
 }
