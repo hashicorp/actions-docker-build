@@ -65,8 +65,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2 
       - name: Build
+        # To run the example with the current commit use 'uses: ./'
         uses: ./
-        uses: hashicorp/actions-docker-build@v1
+        # For real usages, you will reference the action like this:
+        # 'uses: hashicorp/actions-docker-build@v1'
         with:
           version: 1.0.0
           target: default
