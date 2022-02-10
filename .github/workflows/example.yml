@@ -3,6 +3,7 @@ on: [push]
 
 env:
   product_name: actions-docker-build
+  version: 1.0.0
 
 defaults:
   run:
@@ -43,7 +44,7 @@ jobs:
       - name: Upload product artifact.
         uses: actions/upload-artifact@v2
         with:
-          path: example/${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          path: example/${{ env.product_name }}.zip
           name: ${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           if-no-files-found: error
 
