@@ -65,6 +65,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2 
       - name: Build
+        uses: ./
         uses: hashicorp/actions-docker-build@v1
         with:
           version: 1.0.0
