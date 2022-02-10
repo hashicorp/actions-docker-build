@@ -38,7 +38,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -o "$product_name"
+          go build -o "$product_name" .
           zip "$product_name" "$product_name.zip"
       - name: Upload product artifact.
         uses: actions/upload-artifact@v2
