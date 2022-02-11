@@ -118,7 +118,7 @@ runs:
       run: ${{ github.action_path}}/scripts/docker_build
     
     - name: Run Test
-      if: (${{env.SMOKE_TEST != ''}} && ${{env.PLATFORM == 'linux/amd64'}})
+      if: ${{env.PLATFORM == 'linux/amd64'}}
       shell: bash
       run: ${{ env.SMOKE_TEST }}
       env:
