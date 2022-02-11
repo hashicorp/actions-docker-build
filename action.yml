@@ -118,12 +118,12 @@ runs:
       run: ${{ github.action_path}}/scripts/docker_build
     
     - name: Run Test
-      if: | 
-        ${{ inputs.smoke_test != '' }} && ${{env.PLATFORM == 'linux/amd64'}}
+      if: ${{ env.SMOKE_TEST != '' }} && ${{env.PLATFORM == 'linux/amd64'}}
       shell: bash
-      run: ${{ inputs.smoke_test }}
+      run: ${{ env.SMOKE_TEST }}
       env:
         IMAGE_NAME: ${{env.AUTO_TAG}}
+        SMOKE_TEST: ${{inputs.smoke_test}}
 
     - name: Upload Prod Tarball
       uses: actions/upload-artifact@v2
