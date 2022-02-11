@@ -2,7 +2,7 @@
 
 For internal HashiCorp use only.
 
-This action is used to build and tag a single-architecture linux Docker image,
+This action is used to build and tag a single-architecture Linux Docker image,
 and save it as a tarball artifact. Typically the action is called multiple
 times in a workflow, once for each target architecture, and thus multiple
 such tarball artifacts are produced in typical usage.
