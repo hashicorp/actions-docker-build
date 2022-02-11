@@ -42,6 +42,7 @@ inputs:
       Inside the script, you will have access to a variable called 'IMAGE_NAME' 
       which you can use in your test to run the image.
     required: false
+    default: ""
 
   # Optional inputs whose values are guessed if left blank.
   zip_artifact_name:
