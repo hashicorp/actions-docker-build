@@ -27,7 +27,7 @@ setup() {
 	build_blank_image
 }
 
-@test assert_tag_exists_locally() {
+@test "validate assert_tag_exists_locally" {
 	assert_tag_exists_locally "$BLANK_TAG"
 	docker rmi "$BLANK_TAG"
 	if assert_tag_exists_locally "$BLANK_TAG"; then
@@ -35,7 +35,7 @@ setup() {
 	fi
 }
 
-@test assert_tags_exist_locally() {
+@test "validate assert_tags_exist_locally" {
 	assert_tags_exist_locally "$BLANK_TAG"
 	docker rmi "$BLANK_TAG"
 	if assert_tags_exist_locally "$BLANK_TAG"; then
@@ -43,7 +43,7 @@ setup() {
 	fi
 }
 
-@test assert_tag_does_not_exist_locally() {
+@test "validate assert_tag_does_not_exist_locally" {
 	if assert_tag_does_not_exist_locally "$BLANK_TAG"; then
 		echo "Failed: existing tag detected as not existing."
 	fi	
@@ -51,7 +51,7 @@ setup() {
 	assert_tag_does_not_exist_locally "$BLANK_TAG"
 }
 
-@test assert_tags_do_not_exist_locally() {
+@test "validate assert_tags_do_not_exist_locally" {
 	if assert_tags_do_not_exist_locally "$BLANK_TAG"; then
 		echo "Failed: existing tag detected as not existing."
 	fi	
@@ -59,7 +59,7 @@ setup() {
 	assert_tag_does_not_exist_locally "$BLANK_TAG"
 }
 
-@test assert_tarball_contains_tags() {
+@test "validate assert_tarball_contains_tags" {
 	local TAGS=("${BLANK_TAG}_1" "${BLANK_TAG}_2" "${BLANK_TAG}_3")
 	for T in "${TAGS[@]}"; do
 		docker tag "$BLANK_TAG" "$T"
