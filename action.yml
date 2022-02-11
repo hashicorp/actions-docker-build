@@ -18,13 +18,6 @@ inputs:
       Whitespace-separated fully-qualified image names.
       Each tag must be in the format: <registry>/[<namespace>/]<repository>:<tag>
     required: true
-  
-  smoke_test:
-    description: > 
-      Bash shell script to run as a smoke test against the built image.
-      Inside the script, you will have access to a variable called 'IMAGE_NAME' 
-      which you can use in your test to run the image.
-    required: true
 
   # General purpose inputs.
   target:
@@ -42,6 +35,13 @@ inputs:
   dev_tags:
     description: Tags to use for publishing development images (optional).
     default: ""
+  
+  smoke_test:
+    description: > 
+      Bash shell script to run as a smoke test against the built image.
+      Inside the script, you will have access to a variable called 'IMAGE_NAME' 
+      which you can use in your test to run the image.
+    required: false
 
   # Optional inputs whose values are guessed if left blank.
   zip_artifact_name:
@@ -118,7 +118,8 @@ runs:
       run: ${{ github.action_path}}/scripts/docker_build
     
     - name: Run Test
-      if: ${{env.PLATFORM == 'linux/amd64'}}
+      if: | 
+        ${{ inputs.smoke_test != '' }} && ${{env.PLATFORM == 'linux/amd64'}}
       shell: bash
       run: ${{ inputs.smoke_test }}
       env:
