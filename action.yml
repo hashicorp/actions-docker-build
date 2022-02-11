@@ -40,7 +40,11 @@ inputs:
     description: > 
       Bash shell script to run as a smoke test against the built image.
       Inside the script, you will have access to a variable called 'IMAGE_NAME' 
-      which you can use in your test to run the image.
+      which you can use in your test to run the image. The script currently only
+      run against the `linux/amd64` build and will have access to a local docker
+      daemon. Tests should not be specific to `amd64` arch nor rely on the daemon
+      being local as these may change later to enable testing to all other images.
+      The script must exit non-zero in order to mark the test as failed.
     required: false
     default: ""
 
