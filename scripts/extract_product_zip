@@ -6,7 +6,7 @@ cd "$ZIP_LOCATION"
 
 [ -f "$ZIP_NAME" ] || {
 	echo "==> File '$ZIP_NAME' not found in $PWD:"
-	ls -lah
+	ls -lAh
 	exit 1
 }
 
