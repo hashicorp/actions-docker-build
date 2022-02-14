@@ -8,13 +8,13 @@ times in a workflow, once for each target architecture, and thus multiple
 such tarball artifacts are produced in typical usage.
 
 The resultant artifacts are pulled by private downstream processes which
-group them together as multi-arch maniefsts before publishing them.
+group them together as multi-arch manifests before publishing them.
 
 ## Usage
 
 ### First Build Product Binaries
 
-For our purposes as HashiCorp, the product images we build must always COPY
+For our purposes at HashiCorp, the product images we build must always COPY
 a local product binary, rather than pulling a binary from elsewhere.
 Therefore, prior to calling this action, you should have already built a 
 product binary matching the target platform of the docker image, zipped it
@@ -23,7 +23,7 @@ and stored it as an artifact using the [actions/upload-artifact@v2] action.
 The name of the zip file artifact and the binary inside it are significant.
 
 The zip file artifact must be saved as `<product_name>_<version>_<os>_<arch>.zip`
-If not using this format, you can set the `zip_name` parameter to use a different one.
+If not using this format, you can set the `zip_name` input to use a different one.
 
 The product binary inside the zip file should match the name of the repository
 containing it, minus any `-enterprise` suffix. If wanting to use another name,
@@ -36,15 +36,48 @@ you must call it multiple times in order to build multiple architectures.
 
 ### Action Inputs Explained
 
-- **version** is the product version we are building a docker image for.
-- **target** is the name of the "stage" or "target" in the Dockerfile to build.
-- **arch** is the architecture we're building for.
-- **tags** is a newline-separated list of the "production tags" for this image.
+- **`version`** is the product version we are building a docker image for.
+- **`target`** is the name of the "stage" or "target" in the Dockerfile to build.
+- **`arch`** is the architecture we're building for.
+- **`tags`** is a newline-separated list of the "production tags" for this image.
   **Note that you must define the same tags for each architecture you're building,
   so the tag should never reference the architecture. See note below.**
-- **dev_tags** is similar to **tags** except these tags are not intended for
+- **`dev_tags`** is similar to **tags** except these tags are not intended for
   production/final releases; **dev_tags** are typically published much more
   frequently than production tags, and are used for early access to the latest code.
+
+#### Note on `target`
+
+The `target` input is provided so that you can define multiple images inside the
+same `Dockerfile`. Here is an example Dockerfile that defines two independent targets,
+`target1` and `target2`:
+
+```Dockerfile
+FROM alpine:latest AS target1
+# Lines omitted.
+
+FROM ubuntu:latest AS target2
+# Lines omitted.
+```
+
+Sometimes you'll only want one release target (which must `COPY` a local product
+binary inside it), and one "local dev" target which actually performs the build from
+source for local development purposes. In this case you would only reference the
+release target in the action configuration.
+
+Some products need to produce multiple release Docker images. In this case, you
+can reference each different image by its target name, in a separate call to this
+action. You must be careful to ensure that the tags are different for images built
+from different targets.
+
+#### Note on `tags`
+
+The `tags` and `dev_tags` you define are really the tags which are used for the
+multi-arch manifest we construct later (not in this action). Therefore the `tags`
+and `dev_tags` for a single image target must all be exactly the same, for
+each single-arch image.
+
+In other words, never reference the `arch` inside the `tags` or `dev_tags` inputs.
 
 ### Example Configuration
 
