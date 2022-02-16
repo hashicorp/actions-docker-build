@@ -113,7 +113,7 @@ jobs:
   action-test-smoke-test-pass:
     runs-on: ubuntu-latest
     env:
-      OVERRIDE_TARBALL_NAME: action-test-smoke-test-passß.docker.tar
+      OVERRIDE_TARBALL_NAME: action-test-smoke-test-pass.docker.tar
     needs:
       - action-test-prep
     steps:
@@ -157,9 +157,9 @@ jobs:
           bin_name: test_bin
           dockerfile: testdata/Dockerfile
           smoke_test: |
-            docker run "${IMAGE_NAME}"
+            docker run "${IMAGE_NAME}" /bin/"${BIN_NAME}"
         continue-on-error: true
       - name: Check smoke test fail
         if: steps.docker-build.outcome != 'success'
         run: | 
-          echo "Smoke test failed"
+          echo "The Test - Smoke test failed is successful"
