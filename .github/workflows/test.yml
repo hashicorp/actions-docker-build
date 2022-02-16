@@ -129,6 +129,7 @@ jobs:
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
           dockerfile: testdata/Dockerfile
+          workdir: testdata
           smoke_test: |
             TEST_VERSION="$(docker run "${IMAGE_NAME}" | awk '/CLI version/{print $3}')"
             if [ "${TEST_VERSION}" != "${version}" ]; then
