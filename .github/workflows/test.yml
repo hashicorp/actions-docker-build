@@ -109,3 +109,25 @@ jobs:
           bin_name: test_bin
           # Test setting just workdir.
           workdir: testdata
+  
+  action-test-smoke-test-pass:
+    runs-on: ubuntu-latest
+    needs:
+      - actions-test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        uses: ./
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          IMAGE_NAME: ${{env.AUTO_TAG}}
+          smoke_test: |
+            TEST_VERSION="$(docker run "${IMAGE_NAME}" | awk '/CLI version/{print $3}')"
+            if [ "${TEST_VERSION}" != "${version}" ]; then
+              echo "Test FAILED"
+              exit 1
+            fi
+            echo "Test PASSED"
