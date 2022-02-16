@@ -165,3 +165,4 @@ jobs:
         run: | 
           if [ "${TEST_RESULT}" == 'success' ]; then
             exit 1
+          fi
