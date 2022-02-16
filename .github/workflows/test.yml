@@ -130,9 +130,4 @@ jobs:
           bin_name: test_bin
           dockerfile: testdata/Dockerfile
           smoke_test: |
-            TEST_VERSION="$(docker run "${IMAGE_NAME}" | awk '/CLI version/{print $3}')"
-            if [ "${TEST_VERSION}" != "${version}" ]; then
-              echo "Test FAILED"
-              exit 1
-            fi
-            echo "Test PASSED"
+            docker run "${IMAGE_NAME}"
