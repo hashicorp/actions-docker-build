@@ -157,7 +157,7 @@ jobs:
           bin_name: test_bin
           dockerfile: testdata/Dockerfile
           smoke_test: |
-            docker run "${IMAGE_NAME}" /bin/"${BIN_NAME}"
+            docker run "${IMAGE_NAME}"
         continue-on-error: true
       - name: Check smoke test fail
         env:
