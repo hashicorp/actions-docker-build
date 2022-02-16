@@ -124,3 +124,63 @@ jobs:
           source scripts/assertions.bash
           REPO="${{env.TAG_PREFIX}}/action-test-setting-workdir"
           assert_tarball_contains_tags "$OVERRIDE_TARBALL_NAME" "$REPO:tag1" "$REPO:tag2"
+  
+  action-test-smoke-test-pass:
+    runs-on: ubuntu-latest
+    env:
+      OVERRIDE_TARBALL_NAME: action-test-smoke-test-pass.docker.tar
+    needs:
+      - action-test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Invoke Action
+        uses: ./
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          tags: |
+            ${{env.TAG_PREFIX}}/action-test-smoke-test-pass:tag1
+            ${{env.TAG_PREFIX}}/action-test-smoke-test-pass:tag2
+          zip_artifact_name: test_bin.zip
+          bin_name: test_bin
+          dockerfile: testdata/Dockerfile
+          #test smoke test. This should pass
+          smoke_test: |
+            docker run "${IMAGE_NAME}" /bin/"${BIN_NAME}"
+
+  action-test-smoke-test-fail:
+    runs-on: ubuntu-latest
+    env:
+      OVERRIDE_TARBALL_NAME: action-test-smoke-test-fail.docker.tar
+    needs:
+      - action-test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Invoke Action
+        id: docker-build
+        uses: ./
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          tags: |
+            ${{env.TAG_PREFIX}}/action-test-smoke-test-fail:tag1
+            ${{env.TAG_PREFIX}}/action-test-smoke-test-fail:tag2
+          zip_artifact_name: test_bin.zip
+          bin_name: test_bin
+          dockerfile: testdata/Dockerfile
+          # Test smoke test failure
+          smoke_test: |
+            exit 1
+        continue-on-error: true
+      - name: Check smoke test fail
+        env:
+          TEST_RESULT: ${{ steps.docker-build.outcome }}
+        run: | 
+          if [ "${TEST_RESULT}" == 'success' ]; then
+            exit 1
+            echo "Successfully failed smoke test."
+          fi
