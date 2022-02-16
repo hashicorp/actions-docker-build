@@ -160,6 +160,9 @@ jobs:
             docker run "${IMAGE_NAME}" /bin/"${BIN_NAME}"
         continue-on-error: true
       - name: Check smoke test fail
+        env:
+          TEST_RESULT: ${{ steps.docker-build.outcome }}
         if: steps.docker-build.outcome != 'success'
         run: | 
-          echo "The Test - Smoke test failed is successful"
+          if [ "${TEST_RESULT}" == 'success' ]; then
+            exit 1
