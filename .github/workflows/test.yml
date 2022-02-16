@@ -162,7 +162,6 @@ jobs:
       - name: Check smoke test fail
         env:
           TEST_RESULT: ${{ steps.docker-build.outcome }}
-        if: steps.docker-build.outcome != 'success'
         run: | 
           if [ "${TEST_RESULT}" == 'success' ]; then
             exit 1
