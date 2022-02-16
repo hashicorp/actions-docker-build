@@ -131,6 +131,7 @@ jobs:
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
           dockerfile: testdata/Dockerfile
+          #test smoke test. This should pass
           smoke_test: |
             docker run "${IMAGE_NAME}" /bin/"${BIN_NAME}"
 
@@ -156,8 +157,9 @@ jobs:
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
           dockerfile: testdata/Dockerfile
+          # Test smoke test failure
           smoke_test: |
-            docker run "${IMAGE_NAME}"
+            exit 1
         continue-on-error: true
       - name: Check smoke test fail
         env:
@@ -165,4 +167,5 @@ jobs:
         run: | 
           if [ "${TEST_RESULT}" == 'success' ]; then
             exit 1
+            echo "Successfully failed smoke test."
           fi
