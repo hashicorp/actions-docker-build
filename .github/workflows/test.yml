@@ -68,7 +68,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OVERRIDE_TARBALL_NAME: action-test-setting-dockerfile.docker.tar
-
+    needs:
+      - action-test-prep
     steps:
       - name: Checkout
         uses: actions/checkout@v2 
@@ -127,6 +128,7 @@ jobs:
             ${{env.TAG_PREFIX}}/action-test-smoke-test-pass:tag2
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
+          dockerfile: testdata/Dockerfile
           smoke_test: |
             TEST_VERSION="$(docker run "${IMAGE_NAME}" | awk '/CLI version/{print $3}')"
             if [ "${TEST_VERSION}" != "${version}" ]; then
