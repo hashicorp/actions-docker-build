@@ -130,4 +130,4 @@ jobs:
           bin_name: test_bin
           dockerfile: testdata/Dockerfile
           smoke_test: |
-            docker run "${IMAGE_NAME}" /bin/$bin_name
+            docker run "${IMAGE_NAME}" /bin/${bin_name}
