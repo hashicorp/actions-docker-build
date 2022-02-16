@@ -112,6 +112,8 @@ jobs:
   
   action-test-smoke-test-pass:
     runs-on: ubuntu-latest
+    env:
+      OVERRIDE_TARBALL_NAME: action-test-smoke-test-passß.docker.tar
     needs:
       - action-test-prep
     steps:
@@ -130,4 +132,34 @@ jobs:
           bin_name: test_bin
           dockerfile: testdata/Dockerfile
           smoke_test: |
-            docker run "${IMAGE_NAME}" /bin/${BIN_NAME}
+            docker run "${IMAGE_NAME}" /bin/"${BIN_NAME}"
+
+  action-test-smoke-test-fail:
+    runs-on: ubuntu-latest
+    env:
+      OVERRIDE_TARBALL_NAME: action-test-smoke-test-fail.docker.tar
+    needs:
+      - action-test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        id: docker-build
+        uses: ./
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          tags: |
+            ${{env.TAG_PREFIX}}/action-test-smoke-test-fail:tag1
+            ${{env.TAG_PREFIX}}/action-test-smoke-test-fail:tag2
+          zip_artifact_name: test_bin.zip
+          bin_name: test_bin
+          dockerfile: testdata/Dockerfile
+          smoke_test: |
+            docker run "${IMAGE_NAME}"
+        continue-on-error: true
+      - name: Check smoke test fail
+        if: steps.docker-build.outcome != 'success'
+        run: | 
+          echo "Smoke test failed"
