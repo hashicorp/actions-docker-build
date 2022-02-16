@@ -121,7 +121,9 @@ jobs:
           version: 1.0.0
           target: default
           arch: amd64
-          IMAGE_NAME: ${{env.AUTO_TAG}}
+          tags: |
+            ${{env.TAG_PREFIX}}/action-test-smoke-test-pass:tag1
+            ${{env.TAG_PREFIX}}/action-test-smoke-test-pass:tag2
           smoke_test: |
             TEST_VERSION="$(docker run "${IMAGE_NAME}" | awk '/CLI version/{print $3}')"
             if [ "${TEST_VERSION}" != "${version}" ]; then
