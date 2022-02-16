@@ -3,6 +3,13 @@
 set -Eeuo pipefail
 
 cd "$ZIP_LOCATION"
+
+[ -f "$ZIP_NAME" ] || {
+	echo "==> File '$ZIP_NAME' not found in $PWD:"
+	ls -lAh
+	exit 1
+}
+
 unzip -j "$ZIP_NAME"
 
 # This check guides the user to explicitly specify BIN_NAME if the guessed

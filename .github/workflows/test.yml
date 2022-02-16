@@ -51,7 +51,7 @@ jobs:
         run: |
           mv testdata/Dockerfile ./
           ls -lah
-      - name: Build
+      - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
@@ -63,6 +63,11 @@ jobs:
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
           # No overrides to Dockerfile path.
+      - name: Assert Tarball Created And Contains Correct Tags
+        run: |
+          source scripts/assertions.bash
+          REPO="${{env.TAG_PREFIX}}/action-test-dockerfile-in-root"
+          assert_tarball_contains_tags "$OVERRIDE_TARBALL_NAME" "$REPO:tag1" "$REPO:tag2"
 
   action-test-setting-dockerfile:
     runs-on: ubuntu-latest
@@ -73,7 +78,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2 
-      - name: Build
+      - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
@@ -86,6 +91,11 @@ jobs:
           bin_name: test_bin
           # Test setting just dockerfile.
           dockerfile: testdata/Dockerfile
+      - name: Assert Tarball Created And Contains Correct Tags
+        run: |
+          source scripts/assertions.bash
+          REPO="${{env.TAG_PREFIX}}/action-test-setting-dockerfile"
+          assert_tarball_contains_tags "$OVERRIDE_TARBALL_NAME" "$REPO:tag1" "$REPO:tag2"
 
   action-test-setting-workdir:
     runs-on: ubuntu-latest
@@ -96,7 +106,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2 
-      - name: Build
+      - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
@@ -109,6 +119,11 @@ jobs:
           bin_name: test_bin
           # Test setting just workdir.
           workdir: testdata
+      - name: Assert Tarball Created And Contains Correct Tags
+        run: |
+          source scripts/assertions.bash
+          REPO="${{env.TAG_PREFIX}}/action-test-setting-workdir"
+          assert_tarball_contains_tags "$OVERRIDE_TARBALL_NAME" "$REPO:tag1" "$REPO:tag2"
   
   action-test-smoke-test-pass:
     runs-on: ubuntu-latest

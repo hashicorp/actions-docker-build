@@ -108,6 +108,10 @@ runs:
 
       run: ${{ github.action_path }}/scripts/digest_inputs 
 
+    - name: Setup QEMU in binfmt_misc filesystem
+      shell: bash
+      run: ${{ github.action_path }}/scripts/register_qemu_binfmt
+      
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@v2
       with:
