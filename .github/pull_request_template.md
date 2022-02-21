@@ -6,14 +6,13 @@ and what they need to know to perform a useful review.
 ### Justification
 
 Please provide a **link** to a JIRA ticket, Slack thread, Google Doc,
-or other relevant documentation about the aims of this PR. If they
-don't exist, please state that.
+or other relevant documentation about the aims of this PR.
+If there isn't one, please state that.
 
 ### Quality
 
-All code changes should be accompanied by relevant tests which
-both document and protect the newly defined behavior. There are
-_some_ exceptions like logging, configuration changes, and documentation updates.
+All changes to behavior should be accompanied by relevant tests which
+both document and protect it.
 
 This PR includes:
 
