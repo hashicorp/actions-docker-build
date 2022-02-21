@@ -1,18 +1,19 @@
 ### Summary
 
-Freeform text to explain the change, think about the potential reviewers
-of this code and what they might need to know to perform a useful review.
+Freeform text to explain the change. Think about the potential reviewers
+and what they need to know to perform a useful review.
 
 ### Justification
 
-Please provide a link to a JIRA ticket, Slack thread, Google Doc,
+Please provide a **link** to a JIRA ticket, Slack thread, Google Doc,
 or other relevant documentation about the aims of this PR. If they
-don't exist, then a short sentence explaining the justification is fine.
+don't exist, please state that.
 
 ### Quality
 
-All functional changes should be accompanied by relevant tests which
-both document and protect the newly defined behavior.
+All code changes should be accompanied by relevant tests which
+both document and protect the newly defined behavior. There are
+_some_ exceptions like logging, configuration changes, and documentation updates.
 
 This PR includes:
 
