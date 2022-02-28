@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+if [ ! -z "$dev_tags" ]; then
+    jq --null-input --arg tags "$tags" \
+    --arg dev_tags "$dev_tags" \
+    '{
+        tags: $tags | split("\n"),
+        dev_tags: $dev_tags | split("\n")
+    }' >> docker_tag_list_"$TARGET_NAME".json
+else
+    jq --null-input --arg tags "$tags" \
+    '{
+        tags: $tags | split("\n")
+    }' >> docker_tag_list_"$TARGET_NAME".json
+
+fi
