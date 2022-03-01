@@ -2,9 +2,11 @@
 
 set -Eeuo pipefail
 
-if [ ! -z "$dev_tags" ]; then
-    jq --null-input --arg tags "$tags" \
-    --arg dev_tags "$dev_tags" \
+echo ${dev_tags}
+
+if [ ! -z "${dev_tags}" ]; then
+    jq --null-input --arg tags "${tags}" \
+    --arg dev_tags "${dev_tags}" \
     '{
         tags: $tags | split("\n"),
         dev_tags: $dev_tags | split("\n")
