@@ -14,7 +14,7 @@ else
    jq --null-input --arg tags "${TAGS}" \
     --arg dev_tags "${DEV_TAGS}" \
     '{
-        tags: $tags | split("\n"),
+        tags: $tags | split("\n")[:-1],
         dev_tags: $dev_tags | split("\n")[:-1]
     }' >> docker_tag_list_"${TARGET}".json
 
