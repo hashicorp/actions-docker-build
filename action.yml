@@ -137,6 +137,13 @@ runs:
       shell: bash
       run: ${{ github.action_path}}/scripts/create_metadata
 
+    - name: Upload Docker metadata
+      uses: actions/upload-artifact@v2
+      with:
+        name: docker_tag_list_${{env.TARGET}}.json
+        path: docker_tag_list_${{env.TARGET}}.json
+        if-no-files-found: error
+
     - name: Upload Prod Tarball
       uses: actions/upload-artifact@v2
       with:
