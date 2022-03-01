@@ -9,10 +9,11 @@ if [ ! -z "$dev_tags" ]; then
         tags: $tags | split("\n"),
         dev_tags: $dev_tags | split("\n")
     }' >> docker_tag_list_"$TARGET_NAME".json
+    echo $PWD
 else
     jq --null-input --arg tags "$tags" \
     '{
         tags: $tags | split("\n")
     }' >> docker_tag_list_"$TARGET_NAME".json
-
+    echo $PWD
 fi
