@@ -7,7 +7,7 @@ if [ -z "${DEV_TAGS+x}" ]; then
     jq --null-input --arg tags "${TAGS}" \
     '{
         tags: $tags | split("\n")
-    }' >> docker_tag_list_"${TARGET_NAME}".json
+    }' >> docker_tag_list_"${TARGET}".json
 
     echo $PWD
 else
@@ -16,7 +16,7 @@ else
     '{
         tags: $tags | split("\n"),
         dev_tags: $dev_tags | split("\n")
-    }' >> docker_tag_list_"${TARGET_NAME}".json
+    }' >> docker_tag_list_"${TARGET}".json
 
     echo $PWD
 fi
