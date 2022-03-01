@@ -3,16 +3,16 @@
 set -Eeuo pipefail
 
 
-if [ -z "${dev_tags+x}" ]; then
-    jq --null-input --arg tags "${tags}" \
+if [ -z "${DEV_TAGS+x}" ]; then
+    jq --null-input --arg tags "${TAGS}" \
     '{
         tags: $tags | split("\n")
     }' >> docker_tag_list_"${TARGET_NAME}".json
 
     echo $PWD
 else
-   jq --null-input --arg tags "${tags}" \
-    --arg dev_tags "${dev_tags}" \
+   jq --null-input --arg tags "${TAGS}" \
+    --arg dev_tags "${DEV_TAGS}" \
     '{
         tags: $tags | split("\n"),
         dev_tags: $dev_tags | split("\n")
