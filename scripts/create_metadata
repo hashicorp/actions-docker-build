@@ -2,7 +2,6 @@
 
 set -Eeuo pipefail
 
-echo ${dev_tags}
 
 if [ -z "${dev_tags+x}" ]; then
     jq --null-input --arg tags "${tags}" \
