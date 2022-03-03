@@ -70,17 +70,18 @@ jobs:
         # For real usages, you will reference the action like this:
         # 'uses: hashicorp/actions-docker-build@v1'
         with:
+          repo: ${{ env.product_name }}
           version: 1.0.0
           target: default
           arch: ${{ matrix.arch }}
           # Production tags. (These are the tags used for the multi-arch images
           # we eventually push, they must never be architecture/platform-specific.)
           tags: |
-            docker.io/hashicorp/${{env.product_name}}:${{env.version}}
-            public.ecr.aws/hashicorp/${{env.product_name}}:${{env.version}}
+            docker.io/hashicorp/${{ env.product_name }}:${{ env.version }}
+            public.ecr.aws/hashicorp/${{ env.product_name }}:${{ env.version }}
           # Dev tags are pushed more frequently by downstream processes. They also
           # must not reference the architecture.
           dev_tags: |
-            docker.io/hashicorp/${{env.product_name}}:${{env.version}}-dev
+            docker.io/hashicorp/${{ env.product_name }}:${{ env.version }}-dev
           # Usually you wouldn't need to set workdir, but this is just an example.
           workdir: example/

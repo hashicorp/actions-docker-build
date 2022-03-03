@@ -36,6 +36,7 @@ you must call it multiple times in order to build multiple architectures.
 
 ### Action Inputs Explained
 
+- **`repo`** is the name of the repository where the Dockerfile is defined.
 - **`version`** is the product version we are building a docker image for.
 - **`target`** is the name of the "stage" or "target" in the Dockerfile to build.
 - **`arch`** is the architecture we're building for.

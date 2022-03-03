@@ -1,7 +1,8 @@
 name: test
 on: [push]
 
-env:
+env:  
+  REPO: actions-docker-build
   TAG_PREFIX: artifactory.hashicorp.engineering/actions-docker-build/test
 
 jobs:
@@ -54,6 +55,7 @@ jobs:
       - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
+          repo: ${{ env.REPO }}
           version: 1.0.0
           target: default
           arch: amd64
@@ -81,6 +83,7 @@ jobs:
       - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
+          repo: ${{ env.REPO }}
           version: 1.0.0
           target: default
           arch: amd64
@@ -109,6 +112,7 @@ jobs:
       - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
+          repo: ${{ env.REPO }}
           version: 1.0.0
           target: default
           arch: amd64
@@ -137,6 +141,7 @@ jobs:
       - name: Invoke Action
         uses: ./
         with:
+          repo: ${{ env.REPO }}
           version: 1.0.0
           target: default
           arch: amd64
@@ -163,6 +168,7 @@ jobs:
         id: docker-build
         uses: ./
         with:
+          repo: ${{ env.REPO }}
           version: 1.0.0
           target: default
           arch: amd64
