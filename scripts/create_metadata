@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 #Check if DEV_TAGS is unset, if not
-if [ -z "${DEV_TAGS-}" ]; then
+if [ -z "${DEV_TAGS:-}" ]; then
     DEV_TAGS=""
 fi
 jq --null-input --arg tags "${TAGS}" \
