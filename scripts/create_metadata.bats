@@ -55,10 +55,8 @@ assert_file_contains_json() { local FILEPATH="$1"; local JSON="$2"
 	# Run the script under test (create_metadata).
 	./create_metadata
 
-	# Assert file with expected name created.
 	assert_file_exists_in_dir "$WANT_FILENAME" "$OUT_DIR"
 
-	# Assert JSON written to file is correct.
 	assert_file_contains_json "$WANT_FILEPATH" "$WANT_JSON"
 
 }
