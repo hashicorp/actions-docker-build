@@ -10,6 +10,15 @@ setup() {
 	echo "*" > "$GOT/.gitignore"
 }
 
+assert_file_exists_in_dir() { local FILE="$1"; local DIR="$2"
+	local WANT_FILEPATH="$DIR/$FILE"
+	[ -f "$WANT_FILEPATH" ] || {
+		echo "Missing file '$WANT_FILEPATH'; contents of $DIR:"
+		ls -lah "$DIR"
+		return 1
+	}
+}
+
 @test "no dev tags" {
 	export TAGS="
 		tag1
@@ -33,11 +42,7 @@ setup() {
 	./create_metadata
 
 	# Assert file with expected name created.
-	[ -f "$WANT_FILEPATH" ] || {
-		echo "Missing file '$WANT_FILEPATH'; contents of $OUT_DIR:"
-		ls -lah "$OUT_DIR"
-		return 1
-	}
+	assert_file_exists_in_dir "$WANT_FILENAME" "$OUT_DIR"
 
 	# Assert contents of file correct, ignoring whitespace.
 	diff --ignore-all-space "$WANT_FILEPATH" - <<< "$WANT_JSON" > /dev/null 2>&1 || {
