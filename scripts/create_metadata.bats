@@ -40,6 +40,13 @@ setup() {
 	}
 
 	# Assert contents of file correct, ignoring whitespace.
-	diff --ignore-all-space "$WANT_FILEPATH" - <<< "$WANT_JSON"
+	diff --ignore-all-space "$WANT_FILEPATH" - <<< "$WANT_JSON" > /dev/null 2>&1 || {
+		echo "JSON not as expected."
+		echo "Got:"
+		cat "$WANT_FILEPATH"
+		echo "Want:"
+		echo "$WANT_JSON"
+		return 1
+	}
 
 }
