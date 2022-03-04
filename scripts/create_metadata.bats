@@ -19,6 +19,20 @@ assert_file_exists_in_dir() { local FILE="$1"; local DIR="$2"
 	}
 }
 
+# assert_file_contains_json compares the contents of a file with a
+# JSON string, ignoring whitespace. It's not a perfect test as whitespace
+# in JSON strings is significant. For these tests it seems good enough.
+assert_file_contains_json() { local FILEPATH="$1"; local JSON="$2"
+	diff --ignore-all-space "$FILEPATH" - <<< "$JSON" > /dev/null 2>&1 || {
+		echo "JSON not as expected."
+		echo "Got:"
+		cat "$FILEPATH"
+		echo "Want:"
+		echo "$JSON"
+		return 1
+	}
+}
+
 @test "no dev tags" {
 	export TAGS="
 		tag1
@@ -44,14 +58,7 @@ assert_file_exists_in_dir() { local FILE="$1"; local DIR="$2"
 	# Assert file with expected name created.
 	assert_file_exists_in_dir "$WANT_FILENAME" "$OUT_DIR"
 
-	# Assert contents of file correct, ignoring whitespace.
-	diff --ignore-all-space "$WANT_FILEPATH" - <<< "$WANT_JSON" > /dev/null 2>&1 || {
-		echo "JSON not as expected."
-		echo "Got:"
-		cat "$WANT_FILEPATH"
-		echo "Want:"
-		echo "$WANT_JSON"
-		return 1
-	}
+	# Assert JSON written to file is correct.
+	assert_file_contains_json "$WANT_FILEPATH" "$WANT_JSON"
 
 }
