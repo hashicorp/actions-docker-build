@@ -5,10 +5,6 @@ description: Builds and stores Docker images.
 inputs:
 
   # Required explicit inputs.
-  repo:
-    description: Name of the GitHub repository, e.g. "vault-enterprise" or "consul".
-    required: true
-
   version:
     description: Version of the product, e.g. "X.Y.Z[-pre][+edition]".
     required: true
@@ -24,6 +20,10 @@ inputs:
     required: true
 
   # General purpose inputs.
+  repo:
+    description: Name of the GitHub repository, e.g. "vault-enterprise" or "consul".
+    required: false
+    
   target:
     description: >
       Dockerfile target stage to build.
@@ -88,12 +88,19 @@ runs:
   #  DOCKER_BUILDKIT: 1
   #  BUILDKIT_PROGRESS: plain
   steps:
+    - name: Set repo name env var
+      shell: bash
+      run: |
+          if [[ "${{ inputs.repo }}" == "" ]]; then
+              echo "REPO_NAME=${{github.event.repository.name}}" >> "$GITHUB_ENV"
+          else
+              echo "REPO_NAME=${{ inputs.repo }}" >> "$GITHUB_ENV"
+          fi
     - name: Digest Inputs - Calculate Variables for Later Steps
       shell: bash
       env:
 
         # Required.
-        REPO_NAME: "${{ inputs.repo }}"
         REVISION: "${{ github.sha }}"
         VERSION: "${{ inputs.version }}"
         ARCH: "${{ inputs.arch }}"
