@@ -2,7 +2,11 @@
 
 set -Eeuo pipefail
 
-#Check if DEV_TAGS is unset, if not
+# OUT_DIR is where the file gets written.
+# The main purpose of this is to make testing easier.
+OUT_DIR="${OUT_DIR:-.}"
+
+# Check if DEV_TAGS is unset, if not, set it to empty.
 if [ -z "${DEV_TAGS:-}" ]; then
     DEV_TAGS=""
 fi
@@ -11,4 +15,4 @@ jq --null-input --arg tags "${TAGS}" \
     '{
         tags: $tags | split("\n")[:-1],
         dev_tags: $dev_tags | split("\n")[:-1]
-    }' >> docker_tag_list_"${TARGET}".json
+    }' >> "${OUT_DIR}/docker_tag_list_${TARGET}.json"
