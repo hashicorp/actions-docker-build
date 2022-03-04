@@ -58,5 +58,40 @@ assert_file_contains_json() { local FILEPATH="$1"; local JSON="$2"
 	assert_file_exists_in_dir "$WANT_FILENAME" "$OUT_DIR"
 
 	assert_file_contains_json "$WANT_FILEPATH" "$WANT_JSON"
+}
 
+
+@test "with dev tags" {
+	export TAGS="
+		tag1
+		tag2
+	"
+
+	export DEV_TAGS="
+		dev_tag1
+		dev_tag2
+	"
+
+	export TARGET="target1"
+
+	WANT_FILENAME="docker_tag_list_target1.json"
+	WANT_FILEPATH="$OUT_DIR/$WANT_FILENAME"
+
+	WANT_JSON='{
+		"dev_tags": [
+			"dev_tag1",
+			"dev_tag2"
+		],
+		"tags": [
+			"tag1",
+			"tag2"
+		]
+	}'
+
+	# Run the script under test (create_metadata).
+	./create_metadata
+
+	assert_file_exists_in_dir "$WANT_FILENAME" "$OUT_DIR"
+
+	assert_file_contains_json "$WANT_FILEPATH" "$WANT_JSON"
 }
