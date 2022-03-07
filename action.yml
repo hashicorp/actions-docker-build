@@ -84,12 +84,15 @@ runs:
   #  DOCKER_BUILDKIT: 1
   #  BUILDKIT_PROGRESS: plain
   steps:
+    - name: Set required repo name env var
+      shell: bash
+      run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f1 -d "/")" >> $GITHUB_ENV
+
     - name: Digest Inputs - Calculate Variables for Later Steps
       shell: bash
       env:
 
         # Required.
-        REPO_NAME: "${{github.event.repository.name}}"
         REVISION: "${{github.sha}}"
         VERSION: "${{inputs.version}}"
         ARCH: "${{inputs.arch}}"
