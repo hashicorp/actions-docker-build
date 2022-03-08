@@ -1,5 +1,5 @@
 name: docker-build
-author: Release Engineering <team-rel-eng@hashicorp.com>
+author: Release Engineering <rel-eng@hashicorp.com>
 description: Builds and stores Docker images.
 
 inputs:
@@ -84,27 +84,30 @@ runs:
   #  DOCKER_BUILDKIT: 1
   #  BUILDKIT_PROGRESS: plain
   steps:
+    - name: Set required repo name env var
+      shell: bash
+      run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
+
     - name: Digest Inputs - Calculate Variables for Later Steps
       shell: bash
       env:
 
         # Required.
-        REPO_NAME: "${{github.event.repository.name}}"
-        REVISION: "${{github.sha}}"
-        VERSION: "${{inputs.version}}"
-        ARCH: "${{inputs.arch}}"
-        TAGS: "${{inputs.tags}}"
-        TARGET: "${{inputs.target}}"
+        REVISION: "${{ github.sha }}"
+        VERSION: "${{ inputs.version }}"
+        ARCH: "${{ inputs.arch }}"
+        TAGS: "${{ inputs.tags }}"
+        TARGET: "${{ inputs.target }}"
 
         # Optional.
-        DEV_TAGS: "${{inputs.dev_tags}}"
-        ARM_VERSION: "${{inputs.arm_version}}"
-        PKG_NAME: "${{inputs.pkg_name}}"
-        WORKDIR: "${{inputs.workdir}}"
-        ZIP_NAME: "${{inputs.zip_artifact_name}}"
-        BIN_NAME: "${{inputs.bin_name}}"
+        DEV_TAGS: "${{ inputs.dev_tags }}"
+        ARM_VERSION: "${{ inputs.arm_version }}"
+        PKG_NAME: "${{ inputs.pkg_name }}"
+        WORKDIR: "${{ inputs.workdir }}"
+        ZIP_NAME: "${{ inputs.zip_artifact_name }}"
+        BIN_NAME: "${{ inputs.bin_name }}"
 
-        DOCKERFILE: "${{inputs.dockerfile}}"
+        DOCKERFILE: "${{ inputs.dockerfile }}"
 
       run: ${{ github.action_path }}/scripts/digest_inputs 
 
@@ -115,8 +118,8 @@ runs:
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@v2
       with:
-        name: ${{env.ZIP_NAME}}
-        path: ${{env.ZIP_LOCATION}}
+        name: ${{ env.ZIP_NAME }}
+        path: ${{ env.ZIP_LOCATION }}
 
     - name: Extract Product Zip Artifact
       shell: bash
@@ -127,7 +130,7 @@ runs:
       run: ${{ github.action_path}}/scripts/docker_build
     
     - name: Run Test
-      if: ${{env.PLATFORM == 'linux/amd64' && inputs.smoke_test != ''}}
+      if: ${{ env.PLATFORM == 'linux/amd64' && inputs.smoke_test != '' }}
       shell: bash
       run: ${{ inputs.smoke_test }}
       env:
@@ -136,14 +139,14 @@ runs:
     - name: Upload Prod Tarball
       uses: actions/upload-artifact@v2
       with:
-        name: ${{env.TARBALL_NAME}}
-        path: ${{env.TARBALL_NAME}}
+        name: ${{ env.TARBALL_NAME }}
+        path: ${{ env.TARBALL_NAME }}
         if-no-files-found: error
 
     - name: Upload Dev Tarball
       uses: actions/upload-artifact@v2
-      if: ${{env.DEV_TAGS != ''}}
+      if: ${{ env.DEV_TAGS != '' }}
       with:
-        name: ${{env.DEV_TARBALL_NAME}}
-        path: ${{env.DEV_TARBALL_NAME}}
+        name: ${{ env.DEV_TARBALL_NAME }}
+        path: ${{ env.DEV_TARBALL_NAME }}
         if-no-files-found: error
