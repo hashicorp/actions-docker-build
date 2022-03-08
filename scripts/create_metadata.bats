@@ -33,7 +33,7 @@ assert_file_contains_json() { local FILEPATH="$1"; local JSON="$2"
 	}
 }
 
-@test "no dev tags" {
+@test "create metadata - no dev tags" {
 	export TAGS="
 		tag1
 		tag2
@@ -61,7 +61,7 @@ assert_file_contains_json() { local FILEPATH="$1"; local JSON="$2"
 }
 
 
-@test "with dev tags" {
+@test "create metadata - with dev tags" {
 	export TAGS="
 		tag1
 		tag2
