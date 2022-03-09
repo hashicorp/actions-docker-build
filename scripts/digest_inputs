@@ -29,7 +29,7 @@ BIN_NAME="${BIN_NAME:-}"
 DEV_TAGS="${DEV_TAGS:-}"
 DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 
-dev_tags_validation
+dev_tags_validation "$DEV_TAGS"
 
 # Funcs to add variables to GITHUB_ENV.
 add_var() {
