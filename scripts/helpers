@@ -6,9 +6,12 @@ set -Eeuo pipefail
 dev_tags_validation() {
   if [ -n "${1}" ]; then
     for dt in ${1}; do
+      # strip docker.io if exists
+      dt_stripped=${dt//docker.io\//}
+
       # if there are two parts we presume it's the public docker registry, ex: hashicorppreview/consul. Anything else is a registry we don't check currently.
-      parts=$(echo "$dt" | awk -F'/' '{print NF}')
-      if [ "$parts" -eq 2 ] && [[ "$dt" != hashicorppreview/* ]]; then
+      parts=$(echo "$dt_stripped" | awk -F'/' '{print NF}')
+      if [ "$parts" -eq 2 ] && [[ "$dt_stripped" != hashicorppreview/* ]]; then
         echo "Only valid DockerHub organization is 'hashicorppreview' (Got: $dt)"
         exit 1
       fi
