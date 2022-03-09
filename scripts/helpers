@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+# Validates dev_tags for DockerHub only pushes to "hashicorppreview" org
+dev_tags_validation() {
+  if [ -n "${1}" ]; then
+    for dt in ${1}; do
+      # if there are two parts we presume it's the public docker registry, ex: hashicorppreview/consul. Anything else is a registry we don't check currently.
+      parts=$(echo "$dt" | awk -F'/' '{print NF}')
+      if [ "$parts" -eq 2 ] && [[ "$dt" != hashicorppreview/* ]]; then
+        echo "Only valid DockerHub organization is 'hashicorppreview' (Got: $dt)"
+        exit 1
+      fi
+    done
+  fi
+}
