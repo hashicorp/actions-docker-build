@@ -20,7 +20,7 @@ load helpers
 
 	run dev_tags_validation "$DEV_TAGS"
 	[ $status -eq 1 ]
-	# [ "$output" = "Only valid DockerHub organization is 'hashicorppreview' (Got: dadgarcorp/repo1:1.2.3)" ]
+	[[ "$output" = *"dev_tags must begin with 'hashicorppreview/' or 'docker.io/hashicorppreview/'"* ]]
 }
 
 @test "assert invalid dev_tags set with host docker.io" {
@@ -31,5 +31,5 @@ load helpers
 
 	run dev_tags_validation "$DEV_TAGS"
 	[ $status -eq 1 ]
-	# [ "$output" = "Only valid DockerHub organization is 'hashicorppreview' (Got: docker.io/dadgarcorp/repo1:1.2.3)" ]
+	[[ "$output" = *"dev_tags must begin with 'hashicorppreview/' or 'docker.io/hashicorppreview/'"* ]]
 }
