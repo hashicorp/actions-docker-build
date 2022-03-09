@@ -5,10 +5,10 @@ load helpers
 @test "assert valid dev_tags set" {
 	local DEV_TAGS='
 		hashicorppreview/repo1:1.2.3
-		public.ecr.aws/dadgarcorp/repo1:1.2.3
 	'
 
 	run dev_tags_validation "$DEV_TAGS"
+	echo $output
 	[ $status -eq 0 ]
 }
 
@@ -20,12 +20,24 @@ load helpers
 
 	run dev_tags_validation "$DEV_TAGS"
 	[ $status -eq 1 ]
+	echo $output
 	[[ "$output" = *"dev_tags must begin with 'hashicorppreview/' or 'docker.io/hashicorppreview/'"* ]]
 }
 
 @test "assert invalid dev_tags set with host docker.io" {
 	local DEV_TAGS='
 		docker.io/dadgarcorp/repo1:1.2.3
+		public.ecr.aws/dadgarcorp/repo1:1.2.3
+	'
+
+	run dev_tags_validation "$DEV_TAGS"
+	[ $status -eq 1 ]
+	[[ "$output" = *"dev_tags must begin with 'hashicorppreview/' or 'docker.io/hashicorppreview/'"* ]]
+}
+
+@test "assert invalid dev_tags set with non docker.io host" {
+	local DEV_TAGS='
+		docker.io/hashicorppreview/repo1:1.2.3
 		public.ecr.aws/dadgarcorp/repo1:1.2.3
 	'
 
