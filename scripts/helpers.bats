@@ -8,7 +8,6 @@ load helpers
 	'
 
 	run dev_tags_validation "$DEV_TAGS"
-	echo $output
 	[ $status -eq 0 ]
 }
 
@@ -20,7 +19,6 @@ load helpers
 
 	run dev_tags_validation "$DEV_TAGS"
 	[ $status -eq 1 ]
-	echo $output
 	[[ "$output" = *"dev_tags must begin with 'hashicorppreview/' or 'docker.io/hashicorppreview/'"* ]]
 }
 
