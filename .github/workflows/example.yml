@@ -12,24 +12,23 @@ defaults:
     working-directory: example/
 
 jobs:
-
   build-product-binary:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          - {go: "1.16", goos: "linux", goarch: "386"}
-          - {go: "1.16", goos: "linux", goarch: "amd64"}
-          - {go: "1.16", goos: "linux", goarch: "arm"}
-          - {go: "1.16", goos: "linux", goarch: "arm64"}
-          - {go: "1.16", goos: "freebsd", goarch: "386"}
-          - {go: "1.16", goos: "freebsd", goarch: "amd64"}
-          - {go: "1.16", goos: "windows", goarch: "386"}
-          - {go: "1.16", goos: "windows", goarch: "amd64"}
-          - {go: "1.16", goos: "solaris", goarch: "amd64"}
+          - { go: "1.16", goos: "linux", goarch: "386" }
+          - { go: "1.16", goos: "linux", goarch: "amd64" }
+          - { go: "1.16", goos: "linux", goarch: "arm" }
+          - { go: "1.16", goos: "linux", goarch: "arm64" }
+          - { go: "1.16", goos: "freebsd", goarch: "386" }
+          - { go: "1.16", goos: "freebsd", goarch: "amd64" }
+          - { go: "1.16", goos: "windows", goarch: "386" }
+          - { go: "1.16", goos: "windows", goarch: "amd64" }
+          - { go: "1.16", goos: "solaris", goarch: "amd64" }
     steps:
       - name: Checkout
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v2
       - name: Setup go
         uses: actions/setup-go@v2
         with:
@@ -57,13 +56,13 @@ jobs:
         include:
           # We only support building images for linux platforms,
           # so we only specify arch here.
-          - {arch: "386"}
-          - {arch: "amd64"}
-          - {arch: "arm"}
-          - {arch: "arm64"}
+          - { arch: "386" }
+          - { arch: "amd64" }
+          - { arch: "arm" }
+          - { arch: "arm64" }
     steps:
       - name: Checkout
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v2
       - name: Build
         # To run the example with the current commit use 'uses: ./'
         uses: ./
@@ -81,6 +80,6 @@ jobs:
           # Dev tags are pushed more frequently by downstream processes. They also
           # must not reference the architecture.
           dev_tags: |
-            docker.io/hashicorp/${{env.product_name}}:${{env.version}}-dev
+            docker.io/hashicorppreview/${{env.product_name}}:${{env.version}}-dev
           # Usually you wouldn't need to set workdir, but this is just an example.
           workdir: example/
