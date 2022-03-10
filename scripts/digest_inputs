@@ -6,6 +6,9 @@
 
 set -Eeuo pipefail
 
+# shellcheck disable=SC1091
+source "$(dirname "${BASH_SOURCE[0]}")"/helpers.bash
+
 die() { echo "$1" 1>&1; exit 1; }
 
 # Required env vars.
@@ -25,6 +28,8 @@ ZIP_NAME="${ZIP_NAME:-}"
 BIN_NAME="${BIN_NAME:-}"
 DEV_TAGS="${DEV_TAGS:-}"
 DOCKERFILE="${DOCKERFILE:-Dockerfile}"
+
+dev_tags_validation "$DEV_TAGS"
 
 # Funcs to add variables to GITHUB_ENV.
 add_var() {
