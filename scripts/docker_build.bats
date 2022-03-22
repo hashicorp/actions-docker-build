@@ -31,6 +31,7 @@ set_all_required_env_vars() {
 set_all_optional_env_vars() {
 	export WORKDIR=""
 	export DEV_TARBALL_NAME=blahblah.docker.dev.tar
+	export REDHAT_TARBALL_NAME=blahblah.docker.redhat.tar
 	export DEV_TAGS=""
 }
 
@@ -48,6 +49,12 @@ set_test_prod_tags() {
 		$PROD_TAG1
 		$PROD_TAG2
 	"
+}
+
+set_test_redhat_tag() {
+	REDHAT_TAG1=scan.connect.redhat.com/blahblah.productname:1.2.3-ubi
+
+	export REDHAT_TAG="$REDHAT_TAG1"
 }
 
 set_test_dev_tags() {
@@ -76,10 +83,12 @@ set_test_dev_tags() {
 PROD_DEV="prod and dev tags provided"
 
 build_prod_and_dev_tags() {
-
 	set_test_prod_tags
 	set_test_dev_tags
-	
+	exercise_docker_build_script
+}
+
+exercise_docker_build_script() {
 	# Execute the script under test: docker_build
 	(
 		cd "$TEST_ROOT"
@@ -105,4 +114,10 @@ build_prod_and_dev_tags() {
 @test "$PROD_DEV / prod tarball does not contain dev tags" {
 	build_prod_and_dev_tags
 	assert_tarball_not_contains_tags "$TARBALL_PATH" "$DEV_TAG1" "$DEV_TAG2"
+}
+
+@test "redhat_tag set / redhat tarball contains redhat tag" {
+	set_test_redhat_tag
+	exercise_docker_build_script
+	assert_tarball_contains_tags "$REDHAT_TARBALL_PATH" "$REDHAT_TAG1"
 }
