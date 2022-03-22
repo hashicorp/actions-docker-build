@@ -15,9 +15,17 @@ inputs:
 
   tags:
     description: >
-      Whitespace-separated fully-qualified image names.
+      Whitespace-separated fully-qualified image names to use for production releases.
+      If you set tags non-empty, then the redhat_tag input must be empty.
       Each tag must be in the format: <registry>/[<namespace>/]<repository>:<tag>
-    required: true
+    default: ""
+
+  redhat_tag:
+    description: >
+      Single tag to use for pushing to Red Hat Certified Container Project.
+      If you set redhat_tag non-empty, then the tags input must be empty.
+      Each tag must be in the format: <registry>/[<namespace>/]<repository>:<tag>
+    default: ""
 
   # General purpose inputs.
   target:
@@ -97,6 +105,7 @@ runs:
         VERSION: "${{ inputs.version }}"
         ARCH: "${{ inputs.arch }}"
         TAGS: "${{ inputs.tags }}"
+        REDHAT_TAG: "${{ inputs.redhat_tag }}"
         TARGET: "${{ inputs.target }}"
 
         # Optional.

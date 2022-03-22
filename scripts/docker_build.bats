@@ -121,18 +121,3 @@ exercise_docker_build_script() {
 	exercise_docker_build_script
 	assert_tarball_contains_tags "$REDHAT_TARBALL_PATH" "$REDHAT_TAG1"
 }
-
-
-@test "redhat_tag and tags set / error" {
-	set_test_redhat_tag
-	set_test_prod_tags
-	if OUTPUT="$(exercise_docker_build_script 2>&1)"; then
-		echo "Wanted faliure when both redhat_tag and tags are set; got success with output:"
-		echo "$OUTPUT"
-		return 1
-	fi
-
-	echo "Test passed! Failing it anyway to see the output..."
-	echo "$OUTPUT"
-	return 1 # TODO remove this line
-}
