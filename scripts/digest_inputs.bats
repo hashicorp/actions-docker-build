@@ -9,7 +9,7 @@ setup() {
 	echo "*" > ./.tmp/.gitignore
 }
 
-set_all_required_env_vars() {
+set_all_required_env_vars_and_tags() {
 	export REPO_NAME=repo1
 	export REVISION=cabba9e
 	export VERSION=1.2.3
@@ -29,6 +29,7 @@ set_all_optional_env_vars_empty() {
 	export BIN_NAME=
 	export DEV_TAGS=
 	export DOCKERFILE=
+	export TAGS=
 }
 
 assert_exported_in_github_env() {
@@ -43,9 +44,9 @@ assert_exported_in_github_env() {
 	fi
 }
 
-@test "only required env vars set - required vars passed through unchanged" {
+@test "only required env vars and tags set - required vars passed through unchanged" {
 
-	set_all_required_env_vars
+	set_all_required_env_vars_and_tags
 
 	# Execute the script under test: digest_inputs
 	./digest_inputs
@@ -56,14 +57,14 @@ assert_exported_in_github_env() {
 	assert_exported_in_github_env VERSION   "1.2.3"
 	assert_exported_in_github_env ARCH      "amd64"
 	assert_exported_in_github_env TARGET    "default"
-	assert_exported_in_github_env TAGS      "
+	assert_exported_in_github_env TAGS '
 		dadgarcorp/repo1:1.2.3
 		public.ecr.aws/dadgarcorp/repo1:1.2.3
-	"
+	'
 }
 
-@test "only required env vars set - optional variables set as expected" {
-	set_all_required_env_vars
+@test "only required env vars and tags set - optional variables set as expected" {
+	set_all_required_env_vars_and_tags
 
 	# Execute the script under test: digest_inputs
 	./digest_inputs
@@ -78,8 +79,8 @@ assert_exported_in_github_env() {
 	assert_exported_in_github_env DOCKERFILE  "Dockerfile"
 }
 
-@test "only required env vars set - generated variables set as expected" {
-	set_all_required_env_vars
+@test "only required env vars and tags set - generated variables set as expected" {
+	set_all_required_env_vars_and_tags
 
 	# Execute the script under test: digest_inputs
 	./digest_inputs
@@ -102,8 +103,8 @@ assert_exported_in_github_env() {
 # as we expect, byte-for-byte. (This is only verified in one test case, because
 # it's likely to be fragile, but it's important that we validate this at least
 # once becaue the format of that file is important to get right.)
-@test "only required env vars set - GITHUB_ENV file written correctly" {
-	set_all_required_env_vars
+@test "required env vars and tags set - GITHUB_ENV file written correctly" {
+	set_all_required_env_vars_and_tags
 
 	# Execute the script under test: digest_inputs
 	./digest_inputs
@@ -120,4 +121,33 @@ assert_exported_in_github_env() {
 		echo "Unexpected GITHUB_ENV file, see above diff."
 		return 1
 	fi
+}
+
+@test "redhat_tag and tags set / error" {
+	set_all_required_env_vars_and_tags
+
+	export REDHAT_TAG="blah"
+
+	if OUTPUT="$(./digest_inputs 2>&1)"; then
+		echo "Wanted faliure when both redhat_tag and tags are set; got success with output:"
+		echo "$OUTPUT"
+		return 1
+	fi
+
+	echo "Test passed! Failing it anyway to see the output..."
+	echo "$OUTPUT"
+	return 1 # TODO remove this line
+}
+
+@test "redhat_tag set but not tags / passed through correctly" {
+	set_all_required_env_vars_and_tags
+
+	TAGS=
+
+	export REDHAT_TAG="scan.connect.redhat.com/ospid-cabba9e/lockbox:1"
+
+	# Execute the script under test: digest_inputs
+	./digest_inputs
+
+	assert_exported_in_github_env REDHAT_TAG "scan.connect.redhat.com/ospid-cabba9e/lockbox:1"
 }
