@@ -11,11 +11,13 @@ die() { echo "$1" 1>&2; exit 1; }
 [ -n "$DOCKERFILE"  ] || die "Must set DOCKERFILE"
 [ -n "$TARGET"  ] || die "Must set TARGET"
 [ -n "$TARBALL_NAME"  ] || die "Must set TARBALL_NAME"
-[ -n "$DEV_TARBALL_NAME"  ] || die "Must set TARBALL_NAME"
-[ -n "$REDHAT_TARBALL_NAME" ] || die "Must set TARBALL_NAME"
+[ -n "$DEV_TARBALL_NAME"  ] || die "Must set DEV_TARBALL_NAME"
+[ -n "$REDHAT_TARBALL_NAME" ] || die "Must set REDHAT_TARBALL_NAME"
 [ -n "$PLATFORM"  ] || die "Must set PLATFORM"
 [ -n "$AUTO_TAG"  ] || die "Must set AUTO_TAG"
-[ -n "$TAGS" ] || [ -n "$REDHAT_TAG" ] || die "Must set TAGS"
+[ -n "$TAGS" ] || [ -n "$REDHAT_TAG" ] || die "Must set either TAG or REDHAT_TAG"
+[ -z "$TAGS" ] || [ -z "$REDHAT_TAG" ] || die "Must set either TAG or REDHAT_TAG (not both)"
+
 
 WORKDIR="${WORKDIR:-.}"
 
