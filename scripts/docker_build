@@ -12,26 +12,32 @@ die() { echo "$1" 1>&2; exit 1; }
 [ -n "$TARGET"  ] || die "Must set TARGET"
 [ -n "$TARBALL_NAME"  ] || die "Must set TARBALL_NAME"
 [ -n "$DEV_TARBALL_NAME"  ] || die "Must set TARBALL_NAME"
+[ -n "$REDHAT_TARBALL_NAME" ] || die "Must set TARBALL_NAME"
 [ -n "$PLATFORM"  ] || die "Must set PLATFORM"
 [ -n "$AUTO_TAG"  ] || die "Must set AUTO_TAG"
-[ -n "$TAGS"  ] || die "Must set TAGS"
+[ -n "$TAGS" ] || [ -n "$REDHAT_TAG" ] || die "Must set TAGS"
 
 WORKDIR="${WORKDIR:-.}"
 
 export DEV_TAGS="${DEV_TAGS:-}"
+export REDHAT_TAG="${REDHAT_TAG:-}"
 
 # Convert all contiguous blocks of whitespace to single spaces using xargs.
 # This is needed to get all tags on one line for the read -ra below.
 PROD_TAGS="$(xargs <<< "$TAGS")"
 DEV_TAGS="$(xargs <<< "$DEV_TAGS")"
+# REDHAT_TAG="$(xargs <<< "$REDHAT_TAG")"
 
 read -ra DEV_TAGS_A <<< "$DEV_TAGS"
 read -ra PROD_TAGS_A <<< "$PROD_TAGS"
+read -ra REDHAT_TAG_A <<< "$REDHAT_TAG"
 
 ALL_TAGS=("${DEV_TAGS_A[@]}")
+ALL_TAGS+=("${REDHAT_TAG_A[@]}")
 ALL_TAGS+=("$AUTO_TAG")
 ALL_TAGS+=("${PROD_TAGS_A[@]}")
 echo "ALL_TAGS:" "${ALL_TAGS[@]}"
+
 
 for T in "${ALL_TAGS[@]}"; do
 	TAG_FLAGS+=("--tag=$T")
@@ -47,6 +53,7 @@ done
 
 TARBALL_PATH="$PWD/$TARBALL_NAME"
 DEV_TARBALL_PATH="$PWD/$DEV_TARBALL_NAME"
+REDHAT_TARBALL_PATH="$PWD/$REDHAT_TARBALL_NAME"
 
 cd "$WORKDIR"
 
@@ -78,4 +85,13 @@ if [ -n "$DEV_TAGS" ]; then
 	ls -lah "$DEV_TARBALL_PATH"
 else
 	echo "==> No dev tags specified, skipping export."
+fi
+
+if [ -n "$REDHAT_TAG" ]; then
+	echo "==> Saving Redhat tag in '$REDHAT_TARBALL_PATH'"
+	docker save --output "$REDHAT_TARBALL_PATH" "${REDHAT_TAG_A[@]}" "$AUTO_TAG"
+	echo "==> Redhat Tarball created."
+	ls -lah "$REDHAT_TARBALL_PATH"
+else
+	echo "==> No Redhat tag specified, skipping export."
 fi

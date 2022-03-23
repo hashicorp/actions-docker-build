@@ -12,8 +12,10 @@ setup() {
 	# and remove them now so tests don't read stale tarballs.
 	export TARBALL_PATH="$TEST_ROOT/$TARBALL_NAME"
 	export DEV_TARBALL_PATH="$TEST_ROOT/$DEV_TARBALL_NAME"
+	export REDHAT_TARBALL_PATH="$TEST_ROOT/$REDHAT_TARBALL_NAME"
 	rm -rf "$DEV_TARBALL_PATH"
 	rm -rf "$TARBALL_PATH"
+	rm -rf "$REDHAT_TARBALL_PATH"
 }
 
 set_all_required_env_vars() {
@@ -70,7 +72,7 @@ set_test_dev_tags() {
 @test "only prod tags set - all prod and staging tags built" {
 
 	set_test_prod_tags
-	
+
 	# Execute the script under test: docker_build
 	(
 		cd "$TEST_ROOT"
@@ -103,7 +105,7 @@ exercise_docker_build_script() {
 
 @test "$PROD_DEV / dev tarball contains dev tags and the auto tag" {
 	build_prod_and_dev_tags
-	assert_tarball_contains_tags "$DEV_TARBALL_PATH" "$DEV_TAG1" "$DEV_TAG2" "$AUTO_TAG"	
+	assert_tarball_contains_tags "$DEV_TARBALL_PATH" "$DEV_TAG1" "$DEV_TAG2" "$AUTO_TAG"
 }
 
 @test "$PROD_DEV / dev tarball does not contain prod tags" {
