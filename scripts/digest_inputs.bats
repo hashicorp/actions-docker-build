@@ -133,10 +133,6 @@ assert_exported_in_github_env() {
 		echo "$OUTPUT"
 		return 1
 	fi
-
-	echo "Test passed! Failing it anyway to see the output..."
-	echo "$OUTPUT"
-	return 1 # TODO remove this line
 }
 
 @test "redhat_tag set but not tags / passed through correctly" {

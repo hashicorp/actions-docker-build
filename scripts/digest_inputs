@@ -12,13 +12,14 @@ source "$(dirname "${BASH_SOURCE[0]}")"/helpers.bash
 die() { echo "$1" 1>&1; exit 1; }
 
 # Required env vars.
-[ -n "$GITHUB_ENV" ] || die "Must set GITHUB_ENV"
-[ -n "$REPO_NAME"  ] || die "Must set REPO_NAME"
-[ -n "$REVISION"   ] || die "Must set REVISION"
-[ -n "$VERSION"    ] || die "Must set VERSION"
-[ -n "$ARCH"       ] || die "Must set ARCH"
-[ -n "$TARGET"     ] || die "Must set TARGET"
-[ -n "$TAGS"       ] || die "Must set TAGS"
+[ -n "${GITHUB_ENV:-}" ] || die "Must set GITHUB_ENV"
+[ -n "${REPO_NAME:-}"  ] || die "Must set REPO_NAME"
+[ -n "${REVISION:-}"   ] || die "Must set REVISION"
+[ -n "${VERSION:-}"    ] || die "Must set VERSION"
+[ -n "${ARCH:-}"       ] || die "Must set ARCH"
+[ -n "${TARGET:-}"     ] || die "Must set TARGET"
+[ -n "${TAGS:-}" ] || [ -n "${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG"
+[ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG (not both)"
 
 # Optional env vars.
 ARM_VERSION="${ARM_VERSION:-}"
