@@ -28,14 +28,13 @@ export REDHAT_TAG="${REDHAT_TAG:-}"
 # This is needed to get all tags on one line for the read -ra below.
 PROD_TAGS="$(xargs <<< "$TAGS")"
 DEV_TAGS="$(xargs <<< "$DEV_TAGS")"
-# REDHAT_TAG="$(xargs <<< "$REDHAT_TAG")"
+REDHAT_TAG="$(xargs <<< "$REDHAT_TAG")"
 
 read -ra DEV_TAGS_A <<< "$DEV_TAGS"
 read -ra PROD_TAGS_A <<< "$PROD_TAGS"
-read -ra REDHAT_TAG_A <<< "$REDHAT_TAG"
 
 ALL_TAGS=("${DEV_TAGS_A[@]}")
-ALL_TAGS+=("${REDHAT_TAG_A[@]}")
+ALL_TAGS+=("${REDHAT_TAG}")
 ALL_TAGS+=("$AUTO_TAG")
 ALL_TAGS+=("${PROD_TAGS_A[@]}")
 echo "ALL_TAGS:" "${ALL_TAGS[@]}"
@@ -90,8 +89,8 @@ else
 fi
 
 if [ -n "$REDHAT_TAG" ]; then
-	echo "==> Saving Redhat tag in '$REDHAT_TARBALL_PATH'"
-	docker save --output "$REDHAT_TARBALL_PATH" "${REDHAT_TAG_A[@]}" "$AUTO_TAG"
+	echo "==> Saving Redhat tag '$REDHAT_TAG' to '$REDHAT_TARBALL_PATH'"
+	docker save --output "$REDHAT_TARBALL_PATH" "${REDHAT_TAG}" "$AUTO_TAG"
 	echo "==> Redhat Tarball created."
 	ls -lah "$REDHAT_TARBALL_PATH"
 else

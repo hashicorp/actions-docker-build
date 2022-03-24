@@ -210,9 +210,7 @@ jobs:
           redhat_tag: ${{env.TEST_REDHAT_TAG}}
           zip_artifact_name: test_bin.zip
           bin_name: test_bin
-          # No overrides to Dockerfile path.
       - name: Assert Tarball Created And Contains Correct Tags
         run: |
           source scripts/assertions.bash
-          REPO="${{env.TAG_PREFIX}}/action-test-redhat-tag-only"
           assert_tarball_contains_tags "$OVERRIDE_TARBALL_NAME" "$TEST_REDHAT_TAG"
