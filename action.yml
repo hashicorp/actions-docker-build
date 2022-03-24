@@ -170,3 +170,11 @@ runs:
         name: ${{ env.DEV_TARBALL_NAME }}
         path: ${{ env.DEV_TARBALL_NAME }}
         if-no-files-found: error
+
+    - name: Upload Red Hat Tarball
+      uses: actions/upload-artifact@v2
+      if: ${{ env.REDHAT_TAG != '' }}
+      with:
+        name: ${{ env.REDHAT_TARBALL_NAME }}
+        path: ${{ env.REDHAT_TARBALL_NAME }}
+        if-no-files-found: error
