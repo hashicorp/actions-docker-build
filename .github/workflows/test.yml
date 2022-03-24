@@ -184,3 +184,35 @@ jobs:
             exit 1
             echo "Successfully failed smoke test."
           fi
+
+
+  action-test-redhat-tag-only:
+    runs-on: ubuntu-latest
+    env:
+      OVERRIDE_TARBALL_NAME: action-test-redhat-tag-only.docker.tar
+      TEST_REDHAT_TAG: scan.connect.redhat.com/ospid-blahblah/productname:1.2.3
+    needs:
+      - action-test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2 
+      # Test setup.
+      - name: Move Dockerfile to Repo Root
+        run: |
+          mv testdata/Dockerfile ./
+          ls -lah
+      - name: Invoke Action
+        uses: ./ # This is the action we're testing.
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          redhat_tag: ${{env.TEST_REDHAT_TAG}}
+          zip_artifact_name: test_bin.zip
+          bin_name: test_bin
+          # No overrides to Dockerfile path.
+      - name: Assert Tarball Created And Contains Correct Tags
+        run: |
+          source scripts/assertions.bash
+          REPO="${{env.TAG_PREFIX}}/action-test-redhat-tag-only"
+          assert_tarball_contains_tags "$OVERRIDE_TARBALL_NAME" "$TEST_REDHAT_TAG"
