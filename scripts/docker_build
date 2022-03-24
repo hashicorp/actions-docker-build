@@ -28,15 +28,16 @@ export REDHAT_TAG="${REDHAT_TAG:-}"
 # This is needed to get all tags on one line for the read -ra below.
 PROD_TAGS="$(xargs <<< "$TAGS")"
 DEV_TAGS="$(xargs <<< "$DEV_TAGS")"
-REDHAT_TAG="$(xargs <<< "$REDHAT_TAG")"
 
 read -ra DEV_TAGS_A <<< "$DEV_TAGS"
 read -ra PROD_TAGS_A <<< "$PROD_TAGS"
 
 ALL_TAGS=("${DEV_TAGS_A[@]}")
-ALL_TAGS+=("${REDHAT_TAG}")
 ALL_TAGS+=("$AUTO_TAG")
 ALL_TAGS+=("${PROD_TAGS_A[@]}")
+if [ -n "$REDHAT_TAG" ]; then
+	ALL_TAGS+=("${REDHAT_TAG}")
+fi
 echo "ALL_TAGS:" "${ALL_TAGS[@]}"
 
 
