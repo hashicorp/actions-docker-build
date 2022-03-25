@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load helpers
+load validators.bash
 
 @test "assert valid dev_tags set" {
 	local DEV_TAGS='
