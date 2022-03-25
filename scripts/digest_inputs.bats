@@ -136,10 +136,10 @@ assert_exported_in_github_env() {
 	assert_exported_in_github_env REDHAT_TAG "scan.connect.redhat.com/ospid-cabba9e/lockbox:1"
 }
 
-assert_failure_with_message_when() { local MESSAGE="$1"; local WHEN="$2"; shift 2
+assert_failure_with_message_when() { local MESSAGE="$1"; shift
 	local OUTPUT
 	if OUTPUT="$("$@" 2>&1)"; then
-		echo "Command '$*' succeeded but should have failed when $WHEN"
+		echo "Command '$*' succeeded but should have failed."
 		echo "Full output:"
 		echo "$OUTPUT"
 		return 1
@@ -154,16 +154,28 @@ assert_failure_with_message_when() { local MESSAGE="$1"; local WHEN="$2"; shift 
 
 @test "redhat_tag and tags set / error" {
 	set_all_required_env_vars_and_tags
-
 	export REDHAT_TAG="blah"
-
-	assert_failure_with_message_when "" "both redhat_tag and tags are set" ./digest_inputs
+	WANT_ERR=""
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
 }
 
-@test "tags contains a redhat tat / error" {
+@test "tags contains a redhat tag / error" {
 	set_all_required_env_vars_and_tags
-
 	export TAGS="scan.connect.redhat.com/some/image:1.2.3"
+	WANT_ERR=""
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
+}
 
-	assert_failure_with_message_when "" "tags contains a redhat tag" ./digest_inputs
+@test "redhat_tag contains non-redhat tag / error" {
+	set_all_required_env_vars_and_tags
+	export REDHAT_TAG="docker.io/blarblah:1.2.3"
+	WANT_ERR=""
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
+}
+
+@test "redhat_tag contains whitespace / error" {
+	set_all_required_env_vars_and_tags
+	export REDHAT_TAG="docker.io/blarblah:1.2.3 notice the spaces"
+	WANT_ERR=""
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
 }
