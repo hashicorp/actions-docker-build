@@ -37,7 +37,7 @@ assert_exported_in_github_env() {
 	WANT="$2"
 
 	GOT="$(source "$GITHUB_ENV.export" && echo "${!VAR_NAME}")"
-	
+
 	if ! [ "$GOT" = "$WANT" ]; then
 		echo "Got $VAR_NAME='$GOT'; want $VAR_NAME='$WANT'"
 		return 1
