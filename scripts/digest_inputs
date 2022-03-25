@@ -7,7 +7,8 @@
 set -Eeuo pipefail
 
 # shellcheck disable=SC1091
-source "validation.bash"
+VALIDATION_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
+source "${VALIDATION_DIR}/validation.bash"
 
 die() { echo "$1" 1>&2; exit 1; }
 
