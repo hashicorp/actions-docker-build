@@ -158,6 +158,7 @@ runs:
 
     - name: Upload Prod Tarball
       uses: actions/upload-artifact@v2
+      if: ${{ env.TAGS != '' }}
       with:
         name: ${{ env.TARBALL_NAME }}
         path: ${{ env.TARBALL_NAME }}
