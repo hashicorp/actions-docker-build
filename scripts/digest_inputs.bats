@@ -144,7 +144,12 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 		echo "$OUTPUT"
 		return 1
 	fi
-	grep -qF "$MESSAGE" <<< "$OUTPUT" && return
+	grep -qF "$MESSAGE" <<< "$OUTPUT" && {
+		if ! "${DEBUG_TESTS:-false}"; then return; fi
+		echo "DEBUG MODE; TEST PASSED! FAILING TO SEE THE OUTPUT:"
+		echo "$OUTPUT"
+		return 1
+	}
 	echo "Command '$*' failed correctly, but did not include expected error message."
 	echo "Expected to find '$MESSAGE' in output:"
 	echo "$OUTPUT"
@@ -155,27 +160,29 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 @test "redhat_tag and tags set / error" {
 	set_all_required_env_vars_and_tags
 	export REDHAT_TAG="blah"
-	WANT_ERR=""
+	WANT_ERR="Must set either TAGS or REDHAT_TAG (not both)"
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
 }
 
 @test "tags contains a redhat tag / error" {
 	set_all_required_env_vars_and_tags
 	export TAGS="scan.connect.redhat.com/some/image:1.2.3"
-	WANT_ERR=""
+	WANT_ERR="found a tag beginning 'scan.connect.redhat.com/' in the tags input"
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
 }
 
 @test "redhat_tag contains non-redhat tag / error" {
 	set_all_required_env_vars_and_tags
 	export REDHAT_TAG="docker.io/blarblah:1.2.3"
-	WANT_ERR=""
+	unset TAGS
+	WANT_ERR="redhat_tag must match the pattern"
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
 }
 
 @test "redhat_tag contains whitespace / error" {
 	set_all_required_env_vars_and_tags
-	export REDHAT_TAG="docker.io/blarblah:1.2.3 notice the spaces"
-	WANT_ERR=""
+	export REDHAT_TAG="scan.connect.redhat.com/some/image:1.2.3 scan.connect.redhat.com/blah/blah:1.2.3"
+	unset TAGS
+	WANT_ERR="redhat_tag must match the pattern"
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
 }

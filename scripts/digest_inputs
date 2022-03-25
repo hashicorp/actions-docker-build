@@ -18,8 +18,8 @@ die() { echo "$1" 1>&1; exit 1; }
 [ -n "${VERSION:-}"    ] || die "Must set VERSION"
 [ -n "${ARCH:-}"       ] || die "Must set ARCH"
 [ -n "${TARGET:-}"     ] || die "Must set TARGET"
-[ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG"
-[ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG (not both)"
+[ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAGS or REDHAT_TAG"
+[ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAGS or REDHAT_TAG (not both)"
 
 # Optional env vars.
 ARM_VERSION="${ARM_VERSION:-}"

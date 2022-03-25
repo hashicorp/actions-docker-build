@@ -8,7 +8,7 @@ REDHAT_TAG_PREFIX="scan.connect.redhat.com/"
 REDHAT_TAG_PATTERN='^scan\.connect\.redhat\.com\/ospid\-[^[:space:]]+\/[^[:space:]]+:[^[:space:]]+$'
 
 is_not_redhat_tag() {
-	grep -qP "^\Q$REDHAT_TAG_PREFIX" <<< "$1" || return
+	[[ $1 == $REDHAT_TAG_PREFIX* ]] || return
 	log "Error: found a tag beginning '$REDHAT_TAG_PREFIX' in the tags input."
 	log "A tag matching this pattern may be set in the redhat_tag input."
 	return 1
