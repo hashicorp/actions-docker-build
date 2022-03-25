@@ -11,13 +11,20 @@ if [ -z "${DEV_TAGS:-}" ]; then
     DEV_TAGS=""
 fi
 
+# Check if REDHAT_TAG is unset, if not, set it to empty.
+if [ -z "${REDHAT_TAG:-}" ]; then
+    REDHAT_TAG=""
+fi
+
 # SPLIT splits a string by whitespace and removes any empty matches.
 SPLIT='split("[[:space:]]+"; "gn") | map(select(length > 0))'
 
 jq --null-input --sort-keys \
-	--arg tags "${TAGS}" \
+	--arg tags "${TAGS:-}" \
     --arg dev_tags "${DEV_TAGS}" \
+    --arg redhat_tag "${REDHAT_TAG}" \
     '{
 	tags: $tags | '"$SPLIT"',
-        dev_tags: $dev_tags | '"$SPLIT"'
+        dev_tags: $dev_tags | '"$SPLIT"',
+            redhat_tag: $redhat_tag | '"$SPLIT"'
     }' > "${OUT_DIR}/docker_tag_list_${TARGET}.json"
