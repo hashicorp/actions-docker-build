@@ -123,18 +123,6 @@ assert_exported_in_github_env() {
 	fi
 }
 
-@test "redhat_tag and tags set / error" {
-	set_all_required_env_vars_and_tags
-
-	export REDHAT_TAG="blah"
-
-	if OUTPUT="$(./digest_inputs 2>&1)"; then
-		echo "Wanted faliure when both redhat_tag and tags are set; got success with output:"
-		echo "$OUTPUT"
-		return 1
-	fi
-}
-
 @test "redhat_tag set but not tags / passed through correctly" {
 	set_all_required_env_vars_and_tags
 
@@ -147,3 +135,16 @@ assert_exported_in_github_env() {
 
 	assert_exported_in_github_env REDHAT_TAG "scan.connect.redhat.com/ospid-cabba9e/lockbox:1"
 }
+
+@test "redhat_tag and tags set / error" {
+	set_all_required_env_vars_and_tags
+
+	export REDHAT_TAG="blah"
+
+	if OUTPUT="$(./digest_inputs 2>&1)"; then
+		echo "Wanted faliure when both redhat_tag and tags are set; got success with output:"
+		echo "$OUTPUT"
+		return 1
+	fi
+}
+
