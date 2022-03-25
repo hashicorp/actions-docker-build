@@ -136,15 +136,34 @@ assert_exported_in_github_env() {
 	assert_exported_in_github_env REDHAT_TAG "scan.connect.redhat.com/ospid-cabba9e/lockbox:1"
 }
 
+assert_failure_with_message_when() { local MESSAGE="$1"; local WHEN="$2"; shift 2
+	local OUTPUT
+	if OUTPUT="$("$@" 2>&1)"; then
+		echo "Command '$*' succeeded but should have failed when $WHEN"
+		echo "Full output:"
+		echo "$OUTPUT"
+		return 1
+	fi
+	grep -qF "$MESSAGE" <<< "$OUTPUT" && return
+	echo "Command '$*' failed correctly, but did not include expected error message."
+	echo "Expected to find '$MESSAGE' in output:"
+	echo "$OUTPUT"
+	return 1
+
+}
+
 @test "redhat_tag and tags set / error" {
 	set_all_required_env_vars_and_tags
 
 	export REDHAT_TAG="blah"
 
-	if OUTPUT="$(./digest_inputs 2>&1)"; then
-		echo "Wanted faliure when both redhat_tag and tags are set; got success with output:"
-		echo "$OUTPUT"
-		return 1
-	fi
+	assert_failure_with_message_when "" "both redhat_tag and tags are set" ./digest_inputs
 }
 
+@test "tags contains a redhat tat / error" {
+	set_all_required_env_vars_and_tags
+
+	export TAGS="scan.connect.redhat.com/some/image:1.2.3"
+
+	assert_failure_with_message_when "" "tags contains a redhat tag" ./digest_inputs
+}
