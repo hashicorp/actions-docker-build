@@ -46,6 +46,7 @@ assert_file_contains_json() { local FILEPATH="$1"; local JSON="$2"
 
 	WANT_JSON='{
 		"dev_tags": [],
+		"redhat_tag": [],
 		"tags": [
 			"tag1",
 			"tag2"
@@ -82,6 +83,7 @@ assert_file_contains_json() { local FILEPATH="$1"; local JSON="$2"
 			"dev_tag1",
 			"dev_tag2"
 		],
+		"redhat_tag": [],
 		"tags": [
 			"tag1",
 			"tag2"
