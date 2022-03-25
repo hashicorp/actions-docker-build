@@ -7,7 +7,7 @@
 set -Eeuo pipefail
 
 # shellcheck disable=SC1091
-source "$(dirname "${BASH_SOURCE[0]}")"/validators.bash
+source validators.bash
 
 die() { echo "$1" 1>&1; exit 1; }
 
