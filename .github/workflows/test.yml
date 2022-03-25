@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v2
       - name: Zip Test Bin
         run: |
           zip ./testdata/test_bin.zip ./testdata/test_bin
@@ -45,7 +45,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v2
       # Test setup.
       - name: Move Dockerfile to Repo Root
         run: |
@@ -77,7 +77,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v2
       - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
@@ -105,7 +105,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v2
       - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
@@ -124,7 +124,7 @@ jobs:
           source scripts/assertions.bash
           REPO="${{env.TAG_PREFIX}}/action-test-setting-workdir"
           assert_tarball_contains_tags "$OVERRIDE_TARBALL_NAME" "$REPO:tag1" "$REPO:tag2"
-  
+
   action-test-smoke-test-pass:
     runs-on: ubuntu-latest
     env:
@@ -179,7 +179,7 @@ jobs:
       - name: Check smoke test fail
         env:
           TEST_RESULT: ${{ steps.docker-build.outcome }}
-        run: | 
+        run: |
           if [ "${TEST_RESULT}" == 'success' ]; then
             exit 1
             echo "Successfully failed smoke test."
@@ -195,7 +195,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v2
       # Test setup.
       - name: Move Dockerfile to Repo Root
         run: |
@@ -213,4 +213,4 @@ jobs:
       - name: Assert Tarball Created And Contains Correct Tags
         run: |
           source scripts/assertions.bash
-          assert_tarball_contains_tags "$OVERRIDE_TARBALL_NAME" "$TEST_REDHAT_TAG"
+          assert_tarball_contains_tags "$OVERRIDE_REDHAT_TARBALL_NAME" "$TEST_REDHAT_TAG"

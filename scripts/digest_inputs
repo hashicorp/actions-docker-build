@@ -103,7 +103,7 @@ DEFAULT_DEV_TARBALL_NAME="${TARBALL_ROOT}.docker.dev.tar"
 DEFAULT_REDHAT_TARBALL_NAME="${TARBALL_ROOT}.docker.redhat.tar"
 
 # (DEV_|REDHAT_)?TARBALL_NAME may be set explicitly by tests, by
-# setting OVERRIDE_TARBALL_NAME and OVERRIDE_DEV_TARBALL_NAME.
+# setting OVERRIDE_REDHAT_TARBALL_NAME and OVERRIDE_DEV_TARBALL_NAME.
 # This should never be done outside of tests of this action itself,
 # because only the default tarball names are recognised by downstream
 # processes.
