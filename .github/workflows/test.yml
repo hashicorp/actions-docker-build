@@ -213,4 +213,4 @@ jobs:
       - name: Assert Tarball Created And Contains Correct Tags
         run: |
           source scripts/assertions.bash
-          assert_tarball_contains_tags "$OVERRIDE_REDHAT_TARBALL_NAME" "$TEST_REDHAT_TAG"
+          assert_tarball_contains_tags "$OVERRIDE_TARBALL_NAME" "$TEST_REDHAT_TAG"
