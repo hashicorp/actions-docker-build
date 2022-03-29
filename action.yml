@@ -149,11 +149,14 @@ runs:
       shell: bash
       run: ${{ github.action_path}}/scripts/create_metadata
 
-    - name: Upload Docker metadata
+    - name: Upload Docker Image metadata
       uses: actions/upload-artifact@v2
+      env:
+        # Add _redhat if this is a redhat call.
+        REDHAT_SUFFIX: ${{ inputs.redhat_tag && "_redhat" || "" }}
       with:
-        name: docker_tag_list_${{env.TARGET}}.json
-        path: docker_tag_list_${{env.TARGET}}.json
+        name: docker_tag_list_${{env.TARGET}}${env.REDHAT_SUFFIX}}.json
+        path: docker_tag_list_${{env.TARGET}}${env.REDHAT_SUFFIX}}.json
         if-no-files-found: error
 
     - name: Upload Prod Tarball
