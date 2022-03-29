@@ -153,7 +153,7 @@ runs:
       uses: actions/upload-artifact@v2
       env:
         # Add _redhat if this is a redhat call.
-        REDHAT_SUFFIX: ${{ inputs.redhat_tag && "_redhat" || "" }}
+        REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
       with:
         name: docker_tag_list_${{env.TARGET}}${env.REDHAT_SUFFIX}}.json
         path: docker_tag_list_${{env.TARGET}}${env.REDHAT_SUFFIX}}.json
