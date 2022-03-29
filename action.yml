@@ -155,8 +155,8 @@ runs:
         # Add _redhat if this is a redhat call.
         REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
       with:
-        name: docker_tag_list_${{env.TARGET}}${env.REDHAT_SUFFIX}}.json
-        path: docker_tag_list_${{env.TARGET}}${env.REDHAT_SUFFIX}}.json
+        name: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.json
+        path: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.json
         if-no-files-found: error
 
     - name: Upload Prod Tarball
