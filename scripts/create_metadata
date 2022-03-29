@@ -6,6 +6,15 @@ set -Eeuo pipefail
 # The main purpose of this is to make testing easier.
 OUT_DIR="${OUT_DIR:-.}"
 
+FILE_SUFFIX=""
+if [ -n "$REDHAT_TAG" ]; then 
+	FILE_SUFFIX="_redhat"
+fi
+
+OUT_FILE="docker_tag_list_${TARGET:?}${FILE_SUFFIX}.json"
+
+OUT_PATH="${OUT_DIR}/${OUT_FILE}"
+
 # SPLIT splits a string by whitespace and removes any empty matches.
 SPLIT='split("[[:space:]]+"; "gn") | map(select(length > 0))'
 
@@ -14,7 +23,7 @@ jq --null-input --sort-keys \
     --arg dev_tags "${DEV_TAGS:-}" \
     --arg redhat_tag "${REDHAT_TAG:-}" \
     '{
-	tags: $tags | '"$SPLIT"',
-        dev_tags: $dev_tags | '"$SPLIT"',
-            redhat_tag: $redhat_tag | '"$SPLIT"'
-    }' > "${OUT_DIR}/docker_tag_list_${TARGET}.json"
+		tags: $tags | '"$SPLIT"',
+    	dev_tags: $dev_tags | '"$SPLIT"',
+    	redhat_tag: $redhat_tag | '"$SPLIT"'
+	}' > "${OUT_PATH}"
