@@ -37,7 +37,7 @@ assert_exported_in_github_env() {
 	WANT="$2"
 
 	GOT="$(source "$GITHUB_ENV.export" && echo "${!VAR_NAME}")"
-	
+
 	if ! [ "$GOT" = "$WANT" ]; then
 		echo "Got $VAR_NAME='$GOT'; want $VAR_NAME='$WANT'"
 		return 1
@@ -123,22 +123,6 @@ assert_exported_in_github_env() {
 	fi
 }
 
-@test "redhat_tag and tags set / error" {
-	set_all_required_env_vars_and_tags
-
-	export REDHAT_TAG="blah"
-
-	if OUTPUT="$(./digest_inputs 2>&1)"; then
-		echo "Wanted faliure when both redhat_tag and tags are set; got success with output:"
-		echo "$OUTPUT"
-		return 1
-	fi
-
-	echo "Test passed! Failing it anyway to see the output..."
-	echo "$OUTPUT"
-	return 1 # TODO remove this line
-}
-
 @test "redhat_tag set but not tags / passed through correctly" {
 	set_all_required_env_vars_and_tags
 
@@ -150,4 +134,55 @@ assert_exported_in_github_env() {
 	./digest_inputs
 
 	assert_exported_in_github_env REDHAT_TAG "scan.connect.redhat.com/ospid-cabba9e/lockbox:1"
+}
+
+assert_failure_with_message_when() { local MESSAGE="$1"; shift
+	local OUTPUT
+	if OUTPUT="$("$@" 2>&1)"; then
+		echo "Command '$*' succeeded but should have failed."
+		echo "Full output:"
+		echo "$OUTPUT"
+		return 1
+	fi
+	grep -qF "$MESSAGE" <<< "$OUTPUT" && {
+		if ! "${DEBUG_TESTS:-false}"; then return; fi
+		echo "DEBUG MODE; TEST PASSED! FAILING TO SEE THE OUTPUT:"
+		echo "$OUTPUT"
+		return 1
+	}
+	echo "Command '$*' failed correctly, but did not include expected error message."
+	echo "Expected to find '$MESSAGE' in output:"
+	echo "$OUTPUT"
+	return 1
+
+}
+
+@test "redhat_tag and tags set / error" {
+	set_all_required_env_vars_and_tags
+	export REDHAT_TAG="blah"
+	WANT_ERR="Must set either TAGS or REDHAT_TAG (not both)"
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
+}
+
+@test "tags contains a redhat tag / error" {
+	set_all_required_env_vars_and_tags
+	export TAGS="scan.connect.redhat.com/some/image:1.2.3"
+	WANT_ERR="found a tag beginning 'scan.connect.redhat.com/' in the tags input"
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
+}
+
+@test "redhat_tag contains non-redhat tag / error" {
+	set_all_required_env_vars_and_tags
+	export REDHAT_TAG="docker.io/blarblah:1.2.3"
+	unset TAGS
+	WANT_ERR="redhat_tag must match the pattern"
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
+}
+
+@test "redhat_tag contains whitespace / error" {
+	set_all_required_env_vars_and_tags
+	export REDHAT_TAG="scan.connect.redhat.com/some/image:1.2.3 scan.connect.redhat.com/blah/blah:1.2.3"
+	unset TAGS
+	WANT_ERR="redhat_tag must match the pattern"
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
 }

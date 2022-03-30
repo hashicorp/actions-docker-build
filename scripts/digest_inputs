@@ -7,18 +7,20 @@
 set -Eeuo pipefail
 
 # shellcheck disable=SC1091
-source "$(dirname "${BASH_SOURCE[0]}")"/helpers.bash
+VALIDATION_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
+source "${VALIDATION_DIR}/validation.bash"
 
-die() { echo "$1" 1>&1; exit 1; }
+die() { echo "$1" 1>&2; exit 1; }
 
 # Required env vars.
-[ -n "$GITHUB_ENV" ] || die "Must set GITHUB_ENV"
-[ -n "$REPO_NAME"  ] || die "Must set REPO_NAME"
-[ -n "$REVISION"   ] || die "Must set REVISION"
-[ -n "$VERSION"    ] || die "Must set VERSION"
-[ -n "$ARCH"       ] || die "Must set ARCH"
-[ -n "$TARGET"     ] || die "Must set TARGET"
-[ -n "$TAGS"       ] || die "Must set TAGS"
+[ -n "${GITHUB_ENV:-}" ] || die "Must set GITHUB_ENV"
+[ -n "${REPO_NAME:-}"  ] || die "Must set REPO_NAME"
+[ -n "${REVISION:-}"   ] || die "Must set REVISION"
+[ -n "${VERSION:-}"    ] || die "Must set VERSION"
+[ -n "${ARCH:-}"       ] || die "Must set ARCH"
+[ -n "${TARGET:-}"     ] || die "Must set TARGET"
+[ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAGS or REDHAT_TAG"
+[ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAGS or REDHAT_TAG (not both)"
 
 # Optional env vars.
 ARM_VERSION="${ARM_VERSION:-}"
@@ -28,7 +30,12 @@ ZIP_NAME="${ZIP_NAME:-}"
 BIN_NAME="${BIN_NAME:-}"
 DEV_TAGS="${DEV_TAGS:-}"
 DOCKERFILE="${DOCKERFILE:-Dockerfile}"
+TAGS="${TAGS:-}"
+REDHAT_TAG="${REDHAT_TAG:-}"
 
+# Validate tags.
+tags_validation "$TAGS"
+redhat_tag_validation "$REDHAT_TAG"
 dev_tags_validation "$DEV_TAGS"
 
 # Funcs to add variables to GITHUB_ENV.
@@ -44,7 +51,7 @@ add_var() {
 
 add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
 
-add_vars TAGS DEV_TAGS WORKDIR DOCKERFILE
+add_vars TAGS REDHAT_TAG DEV_TAGS WORKDIR DOCKERFILE
 
 # Determine repo name values.
 REPO_NAME_MINUS_ENTERPRISE="${REPO_NAME%%-enterprise}"
@@ -93,18 +100,20 @@ add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
 TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}"
 DEFAULT_TARBALL_NAME="${TARBALL_ROOT}.docker.tar"
 DEFAULT_DEV_TARBALL_NAME="${TARBALL_ROOT}.docker.dev.tar"
+DEFAULT_REDHAT_TARBALL_NAME="${TARBALL_ROOT}.docker.redhat.tar"
 
-# TARBALL_NAME and DEV_TARBALL_NAME may be set explicitly by tests, by
+# (DEV_|REDHAT_)?TARBALL_NAME may be set explicitly by tests, by
 # setting OVERRIDE_TARBALL_NAME and OVERRIDE_DEV_TARBALL_NAME.
 # This should never be done outside of tests of this action itself,
 # because only the default tarball names are recognised by downstream
 # processes.
 TARBALL_NAME="${OVERRIDE_TARBALL_NAME:-$DEFAULT_TARBALL_NAME}"
 DEV_TARBALL_NAME="${OVERRIDE_DEV_TARBALL_NAME:-$DEFAULT_DEV_TARBALL_NAME}"
+REDHAT_TARBALL_NAME="${OVERRIDE_REDHAT_TARBALL_NAME:-$DEFAULT_REDHAT_TARBALL_NAME}"
 
 AUTO_TAG="${REPO_NAME}/${TARGET}/${OS}/${ARCH}:${VERSION}_${REVISION}"
 
-add_vars TARBALL_NAME DEV_TARBALL_NAME AUTO_TAG
+add_vars TARBALL_NAME DEV_TARBALL_NAME REDHAT_TARBALL_NAME  AUTO_TAG
 
 # Determine product bin name.
 BIN_NAME_GUESSED=false

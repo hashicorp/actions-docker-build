@@ -5,20 +5,24 @@ set -Eeuo pipefail
 die() { echo "$1" 1>&2; exit 1; }
 
 # Required env vars.
-[ -n "$BIN_NAME" ] || die "Must set BIN_NAME"
-[ -n "$VERSION"  ] || die "Must set VERSION"
-[ -n "$REVISION"  ] || die "Must set REVISION"
-[ -n "$DOCKERFILE"  ] || die "Must set DOCKERFILE"
-[ -n "$TARGET"  ] || die "Must set TARGET"
-[ -n "$TARBALL_NAME"  ] || die "Must set TARBALL_NAME"
-[ -n "$DEV_TARBALL_NAME"  ] || die "Must set TARBALL_NAME"
-[ -n "$PLATFORM"  ] || die "Must set PLATFORM"
-[ -n "$AUTO_TAG"  ] || die "Must set AUTO_TAG"
-[ -n "$TAGS"  ] || die "Must set TAGS"
+[ -n "${BIN_NAME:-}" ] || die "Must set BIN_NAME"
+[ -n "${VERSION:-}" ] || die "Must set VERSION"
+[ -n "${REVISION:-}" ] || die "Must set REVISION"
+[ -n "${DOCKERFILE:-}" ] || die "Must set DOCKERFILE"
+[ -n "${TARGET:-}" ] || die "Must set TARGET"
+[ -n "${TARBALL_NAME:-}" ] || die "Must set TARBALL_NAME"
+[ -n "${DEV_TARBALL_NAME:-}" ] || die "Must set DEV_TARBALL_NAME"
+[ -n "${REDHAT_TARBALL_NAME:-}" ] || die "Must set REDHAT_TARBALL_NAME"
+[ -n "${PLATFORM:-}" ] || die "Must set PLATFORM"
+[ -n "${AUTO_TAG:-}" ] || die "Must set AUTO_TAG"
+[ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG"
+[ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG (not both)"
+
 
 WORKDIR="${WORKDIR:-.}"
 
 export DEV_TAGS="${DEV_TAGS:-}"
+export REDHAT_TAG="${REDHAT_TAG:-}"
 
 # Convert all contiguous blocks of whitespace to single spaces using xargs.
 # This is needed to get all tags on one line for the read -ra below.
@@ -31,7 +35,11 @@ read -ra PROD_TAGS_A <<< "$PROD_TAGS"
 ALL_TAGS=("${DEV_TAGS_A[@]}")
 ALL_TAGS+=("$AUTO_TAG")
 ALL_TAGS+=("${PROD_TAGS_A[@]}")
+if [ -n "$REDHAT_TAG" ]; then
+	ALL_TAGS+=("${REDHAT_TAG}")
+fi
 echo "ALL_TAGS:" "${ALL_TAGS[@]}"
+
 
 for T in "${ALL_TAGS[@]}"; do
 	TAG_FLAGS+=("--tag=$T")
@@ -47,6 +55,7 @@ done
 
 TARBALL_PATH="$PWD/$TARBALL_NAME"
 DEV_TARBALL_PATH="$PWD/$DEV_TARBALL_NAME"
+REDHAT_TARBALL_PATH="$PWD/$REDHAT_TARBALL_NAME"
 
 cd "$WORKDIR"
 
@@ -78,4 +87,13 @@ if [ -n "$DEV_TAGS" ]; then
 	ls -lah "$DEV_TARBALL_PATH"
 else
 	echo "==> No dev tags specified, skipping export."
+fi
+
+if [ -n "$REDHAT_TAG" ]; then
+	echo "==> Saving Redhat tag '$REDHAT_TAG' to '$REDHAT_TARBALL_PATH'"
+	docker save --output "$REDHAT_TARBALL_PATH" "${REDHAT_TAG}" "$AUTO_TAG"
+	echo "==> Redhat Tarball created."
+	ls -lah "$REDHAT_TARBALL_PATH"
+else
+	echo "==> No Redhat tag specified, skipping export."
 fi

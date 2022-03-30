@@ -43,11 +43,11 @@ inputs:
   dev_tags:
     description: Tags to use for publishing development images (optional).
     default: ""
-  
+
   smoke_test:
-    description: > 
+    description: >
       Bash shell script to run as a smoke test against the built image.
-      Inside the script, you will have access to a variable called 'IMAGE_NAME' 
+      Inside the script, you will have access to a variable called 'IMAGE_NAME'
       which you can use in your test to run the image. The script currently only
       run against the `linux/amd64` build and will have access to a local docker
       daemon. Tests should not be specific to `amd64` arch nor rely on the daemon
@@ -118,12 +118,12 @@ runs:
 
         DOCKERFILE: "${{ inputs.dockerfile }}"
 
-      run: ${{ github.action_path }}/scripts/digest_inputs 
+      run: ${{ github.action_path }}/scripts/digest_inputs
 
     - name: Setup QEMU in binfmt_misc filesystem
       shell: bash
       run: ${{ github.action_path }}/scripts/register_qemu_binfmt
-      
+
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@v2
       with:
@@ -137,7 +137,7 @@ runs:
     - name: Docker Build
       shell: bash
       run: ${{ github.action_path}}/scripts/docker_build
-    
+
     - name: Run Test
       if: ${{ env.PLATFORM == 'linux/amd64' && inputs.smoke_test != '' }}
       shell: bash
@@ -145,8 +145,23 @@ runs:
       env:
         IMAGE_NAME: ${{env.AUTO_TAG}}
 
+    - name: Generate Docker metadata
+      shell: bash
+      run: ${{ github.action_path}}/scripts/create_metadata
+
+    - name: Upload Docker Image metadata
+      uses: actions/upload-artifact@v2
+      env:
+        # Add _redhat if this is a redhat call.
+        REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
+      with:
+        name: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.json
+        path: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.json
+        if-no-files-found: error
+
     - name: Upload Prod Tarball
       uses: actions/upload-artifact@v2
+      if: ${{ env.TAGS != '' }}
       with:
         name: ${{ env.TARBALL_NAME }}
         path: ${{ env.TARBALL_NAME }}
@@ -158,4 +173,12 @@ runs:
       with:
         name: ${{ env.DEV_TARBALL_NAME }}
         path: ${{ env.DEV_TARBALL_NAME }}
+        if-no-files-found: error
+
+    - name: Upload Red Hat Tarball
+      uses: actions/upload-artifact@v2
+      if: ${{ env.REDHAT_TAG != '' }}
+      with:
+        name: ${{ env.REDHAT_TARBALL_NAME }}
+        path: ${{ env.REDHAT_TARBALL_NAME }}
         if-no-files-found: error
