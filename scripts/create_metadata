@@ -7,7 +7,7 @@ set -Eeuo pipefail
 OUT_DIR="${OUT_DIR:-.}"
 
 FILE_SUFFIX=""
-if [ -n "$REDHAT_TAG" ]; then 
+if [ -n "${REDHAT_TAG:-}" ]; then 
 	FILE_SUFFIX="_redhat"
 fi
 
