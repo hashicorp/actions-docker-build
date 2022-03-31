@@ -58,6 +58,9 @@ you can set the `bin_name` input.
 Since the action itself only builds a single image for a single architecture,
 you must call it multiple times in order to build multiple architectures.
 
+NOTE: If using the `redhat_tag` input, you must not use an architecture matrix,
+see note on `redhat_tag` below.
+
 ### Action Inputs Explained
 
 - **`version`** is the product version we are building a docker image for.
@@ -72,6 +75,8 @@ you must call it multiple times in order to build multiple architectures.
   Currently `dev_tags` must begin with `[docker.io/]hashicorppreview`.
 - **`redhat_tag`** allows specifying a Red Hat tag to apply to the image.
   NOTE: If you specify `redhat_tag` you may not also specify `tags` or `dev_tags`.
+- **`smoke_test`** allows specifying a script to run immediately after the image
+  is built, to perform some basic checks on the image. See note on `smoke_test` below.
 
 #### Note on `target`
 
@@ -120,6 +125,16 @@ Before using `redhat_tag` you will need to set up a project and obtain the proje
 ID, as well as the project-specific login key, which needs to be made available in
 Vault under a specific path and key. There is internal-only documentation in the
 wiki detailing how to do this.
+
+#### Note on `smoke_test`
+
+The `smoke_test` input accepts a bash script which will be run ater the image is built.
+When the script is run, an environment variable called `IMAGE_NAME` is set to the name
+of the image built. Your script can use this to run the image, e.g.
+
+```
+docker run "$IMAGE_NAME"
+```
 
 ### Example Configuration
 
