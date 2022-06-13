@@ -80,6 +80,7 @@ assert_exported_in_github_env() {
 	# Set the expected exported values of the required variables.
 	assert_exported_in_github_env VERSION   "1.2.3+ent"
 	assert_exported_in_github_env PKG_NAME  "repo1_1.2.3+ent"
+	assert_exported_in_github_env AUTO_TAG  "repo1-enterprise/default/linux/amd64:1.2.3-ent_cabba9e"
 }
 
 @test "ent version not provided / handled correctly" {
@@ -93,8 +94,9 @@ assert_exported_in_github_env() {
 	./digest_inputs
 
 	# Set the expected exported values of the required variables.
-	assert_exported_in_github_env VERSION   "1.2.3"
+	assert_exported_in_github_env VERSION   "1.2.3+ent"
 	assert_exported_in_github_env PKG_NAME  "repo1_1.2.3+ent"
+	assert_exported_in_github_env AUTO_TAG  "repo1-enterprise/default/linux/amd64:1.2.3-ent_cabba9e"
 }
 
 @test "complex ent version provided / handled correctly" {
@@ -110,6 +112,7 @@ assert_exported_in_github_env() {
 	# Set the expected exported values of the required variables.
 	assert_exported_in_github_env VERSION   "1.2.3+ent-complex.version123"
 	assert_exported_in_github_env PKG_NAME  "repo1_1.2.3+ent-complex.version123"
+	assert_exported_in_github_env AUTO_TAG  "repo1-enterprise/default/linux/amd64:1.2.3-ent-complex.version123_cabba9e"
 }
 
 @test "only required env vars and tags set - optional variables set as expected" {
