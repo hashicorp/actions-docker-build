@@ -1,9 +1,13 @@
 # Changelog - Docker Build Action
 
-## v1.2.3
+## v1.3.1
 
 - Resolve issue where the internal auto tag was invalid with enterprise
   versions.
+
+## v1.3.0
+
+_No entries._
 
 ## v1.2.2
 
