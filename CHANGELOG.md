@@ -1,6 +1,25 @@
 # Changelog - Docker Build Action
 
-## v1.1.0 (not yet released)
+## v1.2.3
+
+- Resolve issue where the internal auto tag was invalid with enterprise
+  versions.
+
+## v1.2.2
+
+- Better handling of enterprise versions and complex version strings, e.g.
+  `1.2.3+ent-fips.XYZ` now interpreted correctly.
+
+## v1.2.1
+
+- Fix for `REPO_NAME` not being set when calling the workflow from a schedule.`
+
+## v1.2.0
+
+- Fixing issue with docker buildx targeting arm cpus from amd64 host
+- Add capability to run docker images smoke test in CI
+
+## v1.1.0
 
 - Fixed: When setting `workdir:` that directory is used for downloading the binary
   artifact. This fixes the issue where it was possible to download the artifact
