@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+# shellcheck disable=SC2030,SC2031 # We want to modify exported vars in subshells.
+
 # setup ensures that there's a fresh .tmp directory, gitignored,
 # and sets the GITHUB_ENV variable to a file path inside that directory.
 setup() {
@@ -36,6 +38,7 @@ assert_exported_in_github_env() {
 	VAR_NAME="$1"
 	WANT="$2"
 
+	# shellcheck disable=SC1090 # purposefully not following source
 	GOT="$(source "$GITHUB_ENV.export" && echo "${!VAR_NAME}")"
 
 	if ! [ "$GOT" = "$WANT" ]; then
@@ -55,12 +58,58 @@ assert_exported_in_github_env() {
 	assert_exported_in_github_env REPO_NAME "repo1"
 	assert_exported_in_github_env REVISION  "cabba9e"
 	assert_exported_in_github_env VERSION   "1.2.3"
+	assert_exported_in_github_env PKG_NAME  "repo1_1.2.3"
 	assert_exported_in_github_env ARCH      "amd64"
 	assert_exported_in_github_env TARGET    "default"
 	assert_exported_in_github_env TAGS '
 		dadgarcorp/repo1:1.2.3
 		public.ecr.aws/dadgarcorp/repo1:1.2.3
 	'
+}
+
+@test "ent version provided / handled correctly" {
+
+	set_all_required_env_vars_and_tags
+
+	REPO_NAME="repo1-enterprise"
+	VERSION="1.2.3+ent"
+
+	# Execute the script under test: digest_inputs
+	./digest_inputs
+
+	# Set the expected exported values of the required variables.
+	assert_exported_in_github_env VERSION   "1.2.3+ent"
+	assert_exported_in_github_env PKG_NAME  "repo1_1.2.3+ent"
+}
+
+@test "ent version not provided / handled correctly" {
+
+	set_all_required_env_vars_and_tags
+
+	REPO_NAME="repo1-enterprise"
+	VERSION="1.2.3"
+
+	# Execute the script under test: digest_inputs
+	./digest_inputs
+
+	# Set the expected exported values of the required variables.
+	assert_exported_in_github_env VERSION   "1.2.3"
+	assert_exported_in_github_env PKG_NAME  "repo1_1.2.3+ent"
+}
+
+@test "complex ent version provided / handled correctly" {
+
+	set_all_required_env_vars_and_tags
+
+	REPO_NAME="repo1-enterprise"
+	VERSION="1.2.3+ent-complex.version123"
+
+	# Execute the script under test: digest_inputs
+	./digest_inputs
+
+	# Set the expected exported values of the required variables.
+	assert_exported_in_github_env VERSION   "1.2.3+ent-complex.version123"
+	assert_exported_in_github_env PKG_NAME  "repo1_1.2.3+ent-complex.version123"
 }
 
 @test "only required env vars and tags set - optional variables set as expected" {

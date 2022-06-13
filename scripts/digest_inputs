@@ -6,9 +6,8 @@
 
 set -Eeuo pipefail
 
-# shellcheck disable=SC1091
-VALIDATION_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")"; pwd)"
-source "${VALIDATION_DIR}/validation.bash"
+# shellcheck source=scripts/validation.bash
+source "${BASH_SOURCE%/*}/validation.bash"
 
 die() { echo "$1" 1>&2; exit 1; }
 
@@ -62,7 +61,9 @@ ENT_META=""
 # If it did, then we've detected a likely enterprise repo.
 [ "$REPO_NAME" != "$REPO_NAME_MINUS_ENTERPRISE" ] && {
   ENTERPRISE_DETECTED=true
-  ENT_META="+ent"
+  if ! [[ "$VERSION" =~ .*\+.* ]]; then
+  	ENT_META="+ent"
+  fi
 }
 
 add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
