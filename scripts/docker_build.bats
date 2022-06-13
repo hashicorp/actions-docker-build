@@ -93,8 +93,7 @@ build_prod_and_dev_tags() {
 exercise_docker_build_script() {
 	# Execute the script under test: docker_build
 	(
-		cd "$TEST_ROOT"
-		"$SCRIPT_ROOT/docker_build"
+		cd "$TEST_ROOT" && "$SCRIPT_ROOT/docker_build"
 	)
 }
 
