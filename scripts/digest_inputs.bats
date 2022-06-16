@@ -67,12 +67,28 @@ assert_exported_in_github_env() {
 	'
 }
 
-@test "ent version provided / handled correctly" {
+@test "ent version +ent provided / handled correctly" {
 
 	set_all_required_env_vars_and_tags
 
 	REPO_NAME="repo1-enterprise"
 	VERSION="1.2.3+ent"
+
+	# Execute the script under test: digest_inputs
+	./digest_inputs
+
+	# Set the expected exported values of the required variables.
+	assert_exported_in_github_env VERSION   "1.2.3+ent"
+	assert_exported_in_github_env PKG_NAME  "repo1_1.2.3+ent"
+	assert_exported_in_github_env AUTO_TAG  "repo1-enterprise/default/linux/amd64:1.2.3-ent_cabba9e"
+}
+
+@test "ent version -ent provided / handled correctly" {
+
+	set_all_required_env_vars_and_tags
+
+	REPO_NAME="repo1-enterprise"
+	VERSION="1.2.3-ent"
 
 	# Execute the script under test: digest_inputs
 	./digest_inputs

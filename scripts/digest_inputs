@@ -61,10 +61,15 @@ ENT_META=""
 # If it did, then we've detected a likely enterprise repo.
 [ "$REPO_NAME" != "$REPO_NAME_MINUS_ENTERPRISE" ] && {
   ENTERPRISE_DETECTED=true
-  if ! [[ "$VERSION" =~ .*\+.* ]]; then
+  # If the version doesn't contain a '+' or '-ent' then add the '+ent' suffix.
+  if [[ ! "$VERSION" =~ .*\+.* ]] && [[ ! "$VERSION" =~ .*-ent.* ]]; then
 	VERSION="$VERSION+ent"
   fi
 }
+
+# If the version contains '-ent' then rectify this to '+ent' for the sake
+# getting the correct default zip name for the product.
+VERSION="${VERSION//-ent/+ent}"
 
 add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
 
