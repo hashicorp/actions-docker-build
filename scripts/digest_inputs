@@ -33,6 +33,18 @@ DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 TAGS="${TAGS:-}"
 REDHAT_TAG="${REDHAT_TAG:-}"
 
+autocorrect_tags() {
+	local NEW_TAGS
+	trap 'echo "$NEW_TAGS"' RETURN
+	NEW_TAGS="$(tr + - <<< "$2")"
+	[[ "$NEW_TAGS" = "$TAGS" ]] || warn "Input '$1' contains '+' character(s), replacing them with '-'."
+}
+
+# Autocorrect tags.
+TAGS="$(autocorrect_tags       tags       "$TAGS")"
+DEV_TAGS="$(autocorrect_tags   dev_tags   "$DEV_TAGS")"
+REDHAT_TAG="$(autocorrect_tags redhat_tag "$REDHAT_TAG")"
+
 # Validate tags.
 tags_validation "$TAGS"
 redhat_tag_validation "$REDHAT_TAG"

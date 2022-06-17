@@ -131,6 +131,57 @@ assert_exported_in_github_env() {
 	assert_exported_in_github_env AUTO_TAG  "repo1-enterprise/default/linux/amd64:1.2.3-ent-complex.version123_cabba9e"
 }
 
+@test "one tag contains a + character" {
+	set_all_required_env_vars_and_tags
+
+	export TAGS='
+		dadgarcorp/repo1:1.2.3+ent
+		public.ecr.aws/dadgarcorp/repo1:1.2.3-ent
+	'
+
+	# Execute the script under test: digest_inputs
+	./digest_inputs
+
+	assert_exported_in_github_env TAGS '
+		dadgarcorp/repo1:1.2.3-ent
+		public.ecr.aws/dadgarcorp/repo1:1.2.3-ent
+	'
+}
+
+@test "another tag contains a + character" {
+	set_all_required_env_vars_and_tags
+
+	export TAGS='
+		dadgarcorp/repo1:1.2.3-ent
+		public.ecr.aws/dadgarcorp/repo1:1.2.3+ent
+	'
+
+	# Execute the script under test: digest_inputs
+	./digest_inputs
+
+	assert_exported_in_github_env TAGS '
+		dadgarcorp/repo1:1.2.3-ent
+		public.ecr.aws/dadgarcorp/repo1:1.2.3-ent
+	'
+}
+
+@test "all tags contain + characters" {
+	set_all_required_env_vars_and_tags
+
+	export TAGS='
+		dadgarcorp/repo1:1.2.3+ent
+		public.ecr.aws/dadgarcorp/repo1:1.2.3+ent
+	'
+
+	# Execute the script under test: digest_inputs
+	./digest_inputs
+
+	assert_exported_in_github_env TAGS '
+		dadgarcorp/repo1:1.2.3-ent
+		public.ecr.aws/dadgarcorp/repo1:1.2.3-ent
+	'
+}
+
 @test "only required env vars and tags set - optional variables set as expected" {
 	set_all_required_env_vars_and_tags
 
