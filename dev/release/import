@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+# shellcheck source=dev/../util.bash
+source "${BASH_SOURCE%/*}/../util.bash"
+
+CL_DIR="dev/changes"
+
+[[ -e "$CL_DIR" ]] && die "Please delete $CL_DIR before running $0; it will create that directory from scratch."
+
+mkdir -p "$CL_DIR"
+
+# releases prints a one-line json object for each release.
+releases() {
+	gh release list | cut -d$'\t' -f1 | while read -r TAG; do
+		gh release view --json tagName,name,body "$TAG"
+	done | jq -c .
+}
+
+for_each_release() {
+	releases | while IFS=$'\n' read -r RELEASE; do
+		local TAG BODY
+		R_TAG="$( jq -r .tagName <<< "$RELEASE")"
+		R_BODY="$(jq -r .body    <<< "$RELEASE")"	
+		"$@" "$R_TAG" "$R_BODY"
+	done
+}
+
+write_release_file() {
+	local TAG="$1" BODY="$2" FILE="$CL_DIR/$1.md"
+	echo "$BODY" > "$FILE"
+	log "Release $TAG written to $FILE"
+}
+
+for_each_release write_release_file
+
+make changelog

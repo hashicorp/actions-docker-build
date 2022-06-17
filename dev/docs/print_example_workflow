@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# shellcheck disable=SC2016 # Backticks are purposefully not being expanded here.
+
+set -Eeuo pipefail
+
+# Emit the awk-escaped YAML inside a markdown code block.
+echo '```yaml'
+sed -E -e 's/\\/\\\\/g' -e 's/"/\\"/g' ".github/workflows/$1"
+echo '```'

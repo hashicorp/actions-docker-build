@@ -1,0 +1,102 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+
+log() { echo >&2 "$*"; }
+die() { log "$(bold_red "FATAL: ") $(bold "$*")"; exit 1; }
+err() { log "$(bold_red "ERROR: ") $*"; return 1; }
+
+ok() { log "$(bold_green "OK: $*")"; }
+
+styled_text() { ATTR="$1"; shift; echo -en '\033['"${ATTR}m$*"'\033[0m'; }
+
+bold()      { styled_text "1"    "$*"; }
+blue()      { styled_text "94"   "$*"; }
+bold_blue() { styled_text "1;94" "$*"; }
+red()       { styled_text "91"   "$*"; }
+bold_red()  { styled_text "1;91" "$*"; }
+green()     { styled_text "92"   "$*"; }
+
+DIR=".git/hook_tmp/pre-push"
+
+test_in_isolation() {
+	local REF="$1"
+	shift
+	rm -rf "$DIR"
+	mkdir -p "$DIR"
+	git clone -q . "$DIR"
+	(
+		cd "$DIR"
+		git diff --exit-code > /dev/null 2>&1 || die "Unable to check $REF - unclean clone."
+		git reset -q --hard "$REF"
+		RESULT="$("$@" 2>&1)" ||  {
+			err "Command failed ($*):"
+			echo "$RESULT" 1>&2
+			exit 1
+		}
+	) || return 1
+}
+
+assert_no_diff_caused_by() {
+	local REF="$1"
+	local NAME="$2"
+	shift 2
+	test_in_isolation "$REF" "$@"
+	(
+		cd "$DIR"
+		git diff --exit-code > /dev/null 2>&1 || exit 1
+	) || die "$NAME is out of date, please run '$*' and commit the changes."
+	log "✓ $NAME is up-to-date."
+}
+
+assert_success() {
+	local REF="$1"
+	local NAME="$2"
+	shift 2
+	test_in_isolation "$REF" "$@" || die "$NAME failed; please ensure that '$*' succeeds before pushing."
+	log "✓ $NAME passed."
+}
+
+# shellcheck disable=SC2021 # We want to replace square brackets.
+zero="$(git hash-object --stdin </dev/null | tr '[0-9a-f]' '0')"
+
+while read -r _ local_oid _ remote_oid
+do
+	if test "$local_oid" = "$zero"
+	then
+		# Handle delete
+		:
+	else
+		if test "$remote_oid" = "$zero"
+		then
+			# New branch, examine all commits
+			range="$local_oid"
+		else
+			# Update to existing branch, examine new commits
+			range="$remote_oid..$local_oid"
+		fi
+
+		# Check for version consistency.
+		assert_success "$local_oid" "Version check" make version/check
+
+		CL_FILE="dev/changes/v$(cat dev/VERSION).md"
+		# Check for changelog update.
+		git diff --name-only "$range" | grep -qE "^$CL_FILE\$" || {
+			die "No update to changelog file '$CL_FILE'; run 'make changelog/add' to update it."
+		}
+		log "✓ Changes logged in $CL_FILE"
+
+		# Check docs are up-to-date.
+		assert_no_diff_caused_by "$local_oid" "CHANGELOG.md" make changelog
+		assert_no_diff_caused_by "$local_oid" "README.md"    make readme
+
+		# Check tests pass with commited changes.
+		assert_success "$local_oid" "Tests" make test
+
+		# Check example target still works.
+		assert_success "$local_oid" "Example target" make example
+
+	fi
+done
+
+exit 0
