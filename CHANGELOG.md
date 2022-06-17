@@ -6,7 +6,8 @@ Instead, edit the files in dev/changes/, then run 'make docs' to update this fil
 
 ## Unreleased Changes (targeting v1.3.2)
 
-
+Internal:
+  - Added dev/ machinery from actions-go-build.
 
 ## [v1.3.1](https://github.com/hashicorp/actions-docker-build/releases/tag/v1.3.1) - June 13, 2022
 
