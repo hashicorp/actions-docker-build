@@ -6,10 +6,11 @@
 
 set -Eeuo pipefail
 
+# shellcheck source=scripts/logging.bash
+source "${BASH_SOURCE%/*}/logging.bash"
+
 # shellcheck source=scripts/validation.bash
 source "${BASH_SOURCE%/*}/validation.bash"
-
-die() { echo "$1" 1>&2; exit 1; }
 
 # Required env vars.
 [ -n "${GITHUB_ENV:-}" ] || die "Must set GITHUB_ENV"
@@ -54,22 +55,39 @@ add_vars TAGS REDHAT_TAG DEV_TAGS WORKDIR DOCKERFILE
 
 # Determine repo name values.
 REPO_NAME_MINUS_ENTERPRISE="${REPO_NAME%%-enterprise}"
+
 # Assume this is not enterprise.
 ENTERPRISE_DETECTED=false
-ENT_META=""
+
+#
+## Version mangling.
+#
+# Catch and auto-correct a few common mistakes with the version input.
+# Emit loud warnings when action is taken based on these rules.
+
 # This checks if removing '-enterprise' suffix actually did anything.
 # If it did, then we've detected a likely enterprise repo.
 [ "$REPO_NAME" != "$REPO_NAME_MINUS_ENTERPRISE" ] && {
   ENTERPRISE_DETECTED=true
   # If the version doesn't contain a '+' or '-ent' then add the '+ent' suffix.
   if [[ ! "$VERSION" =~ .*\+.* ]] && [[ ! "$VERSION" =~ .*-ent.* ]]; then
-	VERSION="$VERSION+ent"
+	NEW_VERSION="$VERSION+ent"
+    warn "Appending '+ent' to the version string '$VERSION' -> '$NEW_VERSION' add '+ent' to the version input to remove this warning."
+	VERSION="$NEW_VERSION"
   fi
 }
 
 # If the version contains '-ent' then rectify this to '+ent' for the sake
 # getting the correct default zip name for the product.
-VERSION="${VERSION//-ent/+ent}"
+if [[ "$VERSION" =~ .*-ent.* ]]; then
+	NEW_VERSION="${VERSION//-ent/+ent}"
+	warn "Changing '-ent' to '+ent' in version string; '$VERSION' -> '$NEW_VERSION'; change the version input to '$NEW_VERSION' to remove this warning."
+	VERSION="$NEW_VERSION"
+fi
+
+#
+## End version mangling.
+#
 
 add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
 
