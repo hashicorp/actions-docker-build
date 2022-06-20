@@ -8,7 +8,7 @@ setup() {
 
 skip_unless_run_destructive() {
   if [ "$RUN_DESTRUCTIVE_TESTS" != true ]; then
-    skip
+    skip "Not running destuctive tests; set RUN_DESTRUCTIVE_TESTS=true to run them."
   fi
 }
 

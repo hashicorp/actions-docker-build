@@ -5,10 +5,10 @@
 # setup ensures that there's a fresh .tmp directory, gitignored,
 # and sets the GITHUB_ENV variable to a file path inside that directory.
 setup() {
-	rm -rf ./.tmp
-	export GITHUB_ENV=./.tmp/github.env
-	mkdir -p ./.tmp
-	echo "*" > ./.tmp/.gitignore
+	local DIR="$BATS_TEST_TMPDIR"
+	rm -rf "$DIR"
+	mkdir -p "$DIR"
+	export GITHUB_ENV="$DIR/github.env"
 }
 
 set_all_required_env_vars_and_tags() {

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+# This script formats the inputs declaration from the action.yml
+# into a markdown table.
+
+set -Eeuo pipefail
+
+# shellcheck source=dev/docs/markdown_table.bash
+source "${BASH_SOURCE%/*}/markdown_table.bash"
+
+list_input_names() {
+	yq -r '.inputs | keys_unsorted[]' < action.yml
+}
+
+declare -a NAMES
+read_output_to_array NAMES list_input_names
+
+HEADERS=("Name" "Description")
+
+input_name_field() {
+	local NAME="$1"
+	local REQUIRED="$2"
+	if "$REQUIRED"; then
+		echo "**\`$NAME\`**&nbsp;_(required)_"
+	else
+		echo "\`$NAME\`&nbsp;_(optional)_"
+	fi
+}
+
+write_input_row() {
+	local INPUT_NAME="$1"
+	local FIELDS=()
+	local REQUIRED
+	REQUIRED="$(read_input_field "$INPUT_NAME" required)"
+	FIELDS=(
+		"$(input_name_field "$INPUT_NAME" "$REQUIRED")"
+		"$(read_input_field "$INPUT_NAME" description)"
+	)
+	write_row "${FIELDS[@]}"
+}
+
+read_input_field() {
+	local INPUT_NAME="$1"
+	local FIELD="$2"
+	yq -r ".inputs.$INPUT_NAME.$FIELD" < action.yml
+}
+
+write_input_rows() {
+	for NAME in "${NAMES[@]}"; do
+		write_input_row "$NAME"
+	done
+}
+
+markdown_table write_header write_input_rows

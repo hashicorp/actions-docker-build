@@ -3,6 +3,7 @@
 load assertions
 
 setup() {
+	[[ "$FAST" = "true" ]] && skip "Skipping slow test because FAST=true."
 	set_all_env_vars
 
 	SCRIPT_ROOT="$PWD"

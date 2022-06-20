@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+# remove_escaped_dots replaces literal '\.' with literal '.'
+# For some reason gh-md-toc thinks it has to escape dots
+# inside link text.
+remove_escaped_dots() {
+	sed -E 's/\\\./\./g'
+}
+
+gh-md-toc --start-depth 1 --depth 3 --hide-footer --hide-header README.md | remove_escaped_dots
