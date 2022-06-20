@@ -6,7 +6,41 @@ Instead, edit the files in dev/changes/, then run 'make docs' to update this fil
 
 ## Unreleased Changes (targeting v1.3.3)
 
+Internal:
 
+- Skip slow tests on pre-push hook.
+
+<!-- RECENT COMMITS TO JOG YOUR MEMORY (DELETE THIS SECTION WHEN DONE)...
+commit e821c068d91ac9ea4c6e16bdc9bec4c341d75e38
+Author: Sam Salisbury <samsalisbury@gmail.com>
+Date:   Mon Jun 20 14:40:40 2022 +0100
+
+    add message about how to run destructive tests
+
+commit 137c92fd373c0f555fa6f8dd9542e00143e02d95
+Author: Sam Salisbury <samsalisbury@gmail.com>
+Date:   Mon Jun 20 14:40:26 2022 +0100
+
+    allow digest_inputs tests to run in parallel
+
+commit 7da74984216cfeb88453714575ffc582a636602a
+Author: Sam Salisbury <samsalisbury@gmail.com>
+Date:   Mon Jun 20 14:39:58 2022 +0100
+
+    skip slow tests on pre-push hook
+
+commit 16e2edd13cd1e44ab21879d29fde19f2c2e55ffe
+Author: Sam Salisbury <samsalisbury@gmail.com>
+Date:   Mon Jun 20 14:26:52 2022 +0100
+
+    delete temporary file
+
+commit c85cadd631d86a9b15e0296697041b07c18f04eb
+Author: Sam Salisbury <samsalisbury@gmail.com>
+Date:   Mon Jun 20 14:20:00 2022 +0100
+
+    update changelog
+ END RECENT COMMITS TO JOG YOUR MEMORY (DELETE THIS SECTION WHEN DONE)... -->
 
 ## [v1.3.2](https://github.com/hashicorp/actions-docker-build/releases/tag/v1.3.2) - June 17, 2022
 
