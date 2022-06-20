@@ -91,7 +91,7 @@ do
 		assert_no_diff_caused_by "$local_oid" "README.md"    make readme
 
 		# Check tests pass with commited changes.
-		assert_success "$local_oid" "Tests" make test
+		assert_success "$local_oid" "Tests" make test/fast
 
 		# Check example target still works.
 		assert_success "$local_oid" "Example target" make example
