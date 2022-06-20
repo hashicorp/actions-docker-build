@@ -4,7 +4,11 @@ Instead, edit the files in dev/changes/, then run 'make docs' to update this fil
 -->
 # Changelog - Docker Build Action
 
-## Unreleased Changes (targeting v1.3.2)
+## Unreleased Changes (targeting v1.3.3)
+
+
+
+## [v1.3.2](https://github.com/hashicorp/actions-docker-build/releases/tag/v1.3.2) - June 17, 2022
 
 Internal:
   - Added dev/ machinery from actions-go-build.
