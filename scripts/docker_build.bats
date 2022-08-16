@@ -122,3 +122,22 @@ exercise_docker_build_script() {
 	exercise_docker_build_script
 	assert_tarball_contains_tags "$REDHAT_TARBALL_PATH" "$REDHAT_TAG1"
 }
+
+@test "version label set to correct value" {
+	set_test_prod_tags
+	exercise_docker_build_script
+}
+
+@test "build with version label set to wrong value" {
+	set_test_prod_tags
+	export DOCKERFILE=version_label_incorrect_value.Dockerfile
+	run exercise_docker_build_script
+	[ $status -eq 1 ]
+}
+
+@test "build with version label unset" {
+	set_test_prod_tags
+	export DOCKERFILE=version_label_unset.Dockerfile
+	run exercise_docker_build_script
+	[ $status -eq 1 ]
+}
