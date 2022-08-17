@@ -77,10 +77,11 @@ docker buildx build --load \
 # validate version label is set to the correct value
 version_label_validation() {
 	val=$(docker inspect --format='{{ index .Config.Labels "version" }}' "${2}")
+	error_context="actions-docker-build passes a 'PRODUCT_VERSION' build-arg to the build. Ensure it is defined in the Dockerfile and the 'version' label uses it"
 	if [ "$val" = "" ]; then
-		die "Error: 'version' label must be set to version passed in but was empty"
+		die "Error: 'version' label must be set to version passed in but was empty.\n$error_context"
 	elif [ "$val" != "${1}" ]; then
-		die "Error: 'version' label must be set to version passed in but was ($val)"
+		die "Error: 'version' label must match the version passed in but was ($val).\n$error_context"
 	fi
 }
 
