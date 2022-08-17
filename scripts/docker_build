@@ -74,6 +74,20 @@ docker buildx build --load \
   -f "$DOCKERFILE" \
   .
 
+# validate version label is set to the correct value
+version_label_validation() {
+	val=$(docker inspect --format='{{ index .Config.Labels "version" }}' "${2}")
+	if [ "$val" = "" ]; then
+		die "Error: 'version' label must be set to version passed in but was empty"
+	elif [ "$val" != "${1}" ]; then
+		die "Error: 'version' label must be set to version passed in but was ($val)"
+	fi
+}
+
+for T in "${ALL_TAGS[@]}"; do
+	version_label_validation "$VERSION" "$T"
+done
+
 echo "==> Saving prod tags in '$TARBALL_PATH'"
 
 docker save --output "$TARBALL_PATH" "${PROD_TAGS_A[@]}" "$AUTO_TAG"
