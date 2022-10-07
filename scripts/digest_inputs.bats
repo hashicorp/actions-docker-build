@@ -247,12 +247,12 @@ assert_exported_in_github_env() {
 
 	TAGS=
 
-	export REDHAT_TAG="scan.connect.redhat.com/ospid-cabba9e/lockbox:1"
+	export REDHAT_TAG="quay.io/redhat-isv-containers/cabba9e:1"
 
 	# Execute the script under test: digest_inputs
 	./digest_inputs
 
-	assert_exported_in_github_env REDHAT_TAG "scan.connect.redhat.com/ospid-cabba9e/lockbox:1"
+	assert_exported_in_github_env REDHAT_TAG "quay.io/redhat-isv-containers/cabba9e:1"
 }
 
 assert_failure_with_message_when() { local MESSAGE="$1"; shift
@@ -283,10 +283,17 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
 }
 
-@test "tags contains a redhat tag / error" {
+@test "tags contains an old redhat tag / error" {
 	set_all_required_env_vars_and_tags
-	export TAGS="scan.connect.redhat.com/some/image:1.2.3"
+	export TAGS="quay.io/image:1.2.3"
 	WANT_ERR="found a tag beginning 'scan.connect.redhat.com/' in the tags input"
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
+}
+
+@test "tags contains a new redhat tag / error" {
+	set_all_required_env_vars_and_tags
+	export TAGS="quay.io/image:1.2.3"
+	WANT_ERR="found a tag beginning 'quay.io/redhat-isv-containers/' in the tags input"
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
 }
 
