@@ -1,7 +1,16 @@
 log() { echo "$*" 1>&2; }
 
-REDHAT_TAG_PREFIX="scan.connect.redhat.com/"
-REDHAT_TAG_PATTERN='^scan\.connect\.redhat\.com\/ospid\-[^[:space:]]+\/[^[:space:]]+:[^[:space:]]+$'
+OLD_REDHAT_TAG_PREFIX="scan.connect.redhat.com/"
+
+REDHAT_TAG_PREFIX="quay.io/redhat-isv-containers/"
+REDHAT_TAG_PATTERN='^quay\.io\/redhat-isv-containers\/[0-9a-f]+:[^[:space:]]+$'
+
+is_not_old_redhat_tag() {
+	[[ $1 == $OLD_REDHAT_TAG_PREFIX* ]] || return 0
+	log "Error: found a tag beginning '$OLD_REDHAT_TAG_PREFIX'."
+	log "This tag format has been deprecated, please use a tag beginning '$REDHAT_TAG_PREFIX'."
+	return 1
+}
 
 is_not_redhat_tag() {
 	[[ $1 == $REDHAT_TAG_PREFIX* ]] || return 0
@@ -26,7 +35,7 @@ tags_validation() {
 
 redhat_tag_validation() {
 	for TAG in $1; do
-		is_valid_redhat_tag "$TAG" && continue
+		is_not_old_redhat_tag "$TAG" && is_valid_redhat_tag "$TAG" && continue
 		return 1
 	done
 }
