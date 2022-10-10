@@ -34,10 +34,7 @@ tags_validation() {
 }
 
 redhat_tag_validation() {
-	for TAG in $1; do
-		is_not_old_redhat_tag "$TAG" && is_valid_redhat_tag "$TAG" && continue
-		return 1
-	done
+	is_not_old_redhat_tag "$1" && is_valid_redhat_tag "$1"
 }
 
 DEV_TAG_PATTERN='^(docker\.io/)?hashicorppreview/.*'

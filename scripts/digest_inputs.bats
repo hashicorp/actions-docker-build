@@ -308,7 +308,7 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 
 @test "redhat_tag contains whitespace / error" {
 	set_all_required_env_vars_and_tags
-	export REDHAT_TAG="quay.io/redhat-isv-containers/blah:1.2.3"
+	export REDHAT_TAG="quay.io/redhat-isv-containers/cabba9e:1.2.3 quay.io/redhat-isv-containers/cabba9e:1.2.3"
 	unset TAGS
 	WANT_ERR="redhat_tag must match the pattern"
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
