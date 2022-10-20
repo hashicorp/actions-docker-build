@@ -34,6 +34,7 @@ tags_validation() {
 }
 
 redhat_tag_validation() {
+	[[ -z "$1" ]] && return 0
 	is_not_old_redhat_tag "$1" && is_valid_redhat_tag "$1"
 }
 
