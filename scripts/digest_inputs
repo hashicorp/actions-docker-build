@@ -34,9 +34,9 @@ TAGS="${TAGS:-}"
 REDHAT_TAG="${REDHAT_TAG:-}"
 
 autocorrect_tags() {
-	local NEW_TAGS
+	local TAGS="$2" NEW_TAGS
 	trap 'echo "$NEW_TAGS"' RETURN
-	NEW_TAGS="$(tr + - <<< "$2")"
+	NEW_TAGS="$(tr + - <<< "$TAGS")"
 	[[ "$NEW_TAGS" = "$TAGS" ]] || warn "Input '$1' contains '+' character(s), replacing them with '-'."
 }
 
