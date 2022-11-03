@@ -226,3 +226,58 @@ jobs:
           # Usually you wouldn't need to set workdir, but this is just an example.
           workdir: example/
 ```
+
+## Releasing
+
+### Determine the New Version
+
+To release a new version, first figure out what version you're releasing.
+You can see the absolute [latest release](https://github.com/hashicorp/actions-docker-build/releases/latest)
+or look at [all current releases](https://github.com/hashicorp/actions-docker-build/releases).
+
+We use semantic versioning for this action. Therefore...
+
+- If the release is expected to need additional action by users after upgrading,
+  in order to preserve existing functionality, then it's classified as a breaking
+  change, and the major version should be incremented (with the minor and patch
+  both reset to 0.
+- If the release adds additional new features that are opt-in but that can be safely
+  ignored by users then the minor version should be incremented.
+- If the release fixes a bug or alters logging or some other minor change that is very
+  unlikely to break any existing usages of the action, then increment the patch version.
+
+### Create the Release
+
+Go to [draft a new release](https://github.com/hashicorp/actions-docker-build/releases/new).
+
+- Use the version string from above, prefixed with `v` for the tag, e.g. `v1.2.3`.
+- The title should be the same as the tag.
+- Write a summary of changes to the best of your ability.
+- If this is the highest overall version number, then select "set as latest release".
+- Publish release.
+
+### Push the change to users.
+
+Currently, some users bind to `vX` and `vX.Y` tags, and expect these tags to be updated
+so that they receive upgrades automatically. In order to do this:
+
+Locally fetch the new tag created by the release:
+
+```
+git fetch vX.Y.Z
+```
+
+Add the new tags 
+
+```
+git tag -f vX.Y vX.Y.Z
+git tag -f vX vX.Y.Z
+```
+
+Push the new tags
+
+```
+git push origin vX.Y vX
+```
+
+And you're all done!
