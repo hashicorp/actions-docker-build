@@ -125,7 +125,7 @@ runs:
       run: ${{ github.action_path }}/scripts/register_qemu_binfmt
 
     - name: Download Product Zip Artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: ${{ env.ZIP_NAME }}
         path: ${{ env.ZIP_LOCATION }}
@@ -150,7 +150,7 @@ runs:
       run: ${{ github.action_path}}/scripts/create_metadata
 
     - name: Upload Docker Image metadata
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       env:
         # Add _redhat if this is a redhat call.
         REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
@@ -160,7 +160,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload Prod Tarball
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ env.TAGS != '' }}
       with:
         name: ${{ env.TARBALL_NAME }}
@@ -168,7 +168,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload Dev Tarball
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ env.DEV_TAGS != '' }}
       with:
         name: ${{ env.DEV_TARBALL_NAME }}
@@ -176,7 +176,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload Red Hat Tarball
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: ${{ env.REDHAT_TAG != '' }}
       with:
         name: ${{ env.REDHAT_TARBALL_NAME }}
