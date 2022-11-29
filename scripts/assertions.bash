@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 # This file contains functions for making assertions about docker tag existence
 # both in the local daemon and in specific tarballs.
 

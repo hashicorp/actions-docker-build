@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 log()  { echo "==> $*" 1>&2; }
 info() { log "$(bold_green "INFO: "   ) $(bold "$*")"; } 
 warn() { log "$(bold_red   "WARNING: ") $(bold "$*")"; }

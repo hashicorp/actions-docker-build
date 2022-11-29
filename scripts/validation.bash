@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 log() { echo "$*" 1>&2; }
 
 OLD_REDHAT_TAG_PREFIX="scan.connect.redhat.com/"
