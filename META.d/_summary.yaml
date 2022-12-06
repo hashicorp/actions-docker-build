@@ -1,6 +1,6 @@
 schema: 1.1
 
-partition: rel-eng
+partition: internal-platform
 category: github-action
 
 summary:
