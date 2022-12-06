@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 # FAIL: PRODUCT_VERSION is expected and is the name of the build arg, not VERSION
 # This dockerfile should not set the version label
 FROM alpine:latest AS default

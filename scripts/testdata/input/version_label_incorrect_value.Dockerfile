@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 # FAIL: PRODUCT_VERSION is expected and is the name of the build arg, not VERSION
 # This dockerfile will set the value to 8.6 which comes from the UBI container but
 # does not match the PRODUCT_VERSION we expect
