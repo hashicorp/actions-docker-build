@@ -1,0 +1,13 @@
+schema: 1.1
+
+partition: rel-eng
+category: github-action
+
+summary:
+  name: actions-docker-build
+  owner: team-rel-eng
+  pagerduty: https://hashicorp.pagerduty.com/service-directory/P37IMEL
+  description: Docker image building action. Meant for use in repos that have been onboarded to Common Release Tooling (CRT).
+  
+  visibility: external
+  auth_methods: None

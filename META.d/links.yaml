@@ -1,0 +1,7 @@
+runbooks: []
+  # - name: Runbook Name
+  #   link: Link to Runbook
+
+other_links:
+  - name: README
+    link: https://github.com/hashicorp/actions-docker-build/blob/main/README.md
