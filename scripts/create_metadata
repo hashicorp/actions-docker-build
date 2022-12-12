@@ -11,6 +11,13 @@ if [ -n "${REDHAT_TAG:-}" ]; then
 	FILE_SUFFIX="_redhat"
 fi
 
+# VERSION_SUFFIX would need to be appended in the OUT_FILE example: OUT_FILE="docker_tag_list_${TARGET:?}${FILE_SUFFIX}${VERSION_SUFFIX}.json"
+# VERSION_SUFFIX=""
+# if [ -n "${DEV_TAGS:-}" ]; then 
+# 	VERSION_SUFFIX="-dev"
+# fi
+
+
 OUT_FILE="docker_tag_list_${TARGET:?}${FILE_SUFFIX}.json"
 
 OUT_PATH="${OUT_DIR}/${OUT_FILE}"

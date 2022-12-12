@@ -97,6 +97,13 @@ if [[ "$VERSION" =~ .*-ent.* ]]; then
 	VERSION="$NEW_VERSION"
 fi
 
+# If the version contains a '-dev' appended to the base version then add the '-dev' tag.
+# if [[ ! "$VERSION" =~ .*\+.* ]] && [[ ! "$VERSION" =~ .*-dev.* ]]; then
+# 	DEV_VERSION="$VERSION-dev"
+#     warn "Appending '-dev' to the version string '$VERSION' -> '$DEV_VERSION' add '-dev' to the version input to remove this warning."
+# 	VERSION="$DEV_VERSION"
+#   fi
+
 #
 ## End version mangling.
 #
