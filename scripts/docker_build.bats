@@ -54,7 +54,7 @@ set_test_prod_tags() {
 }
 
 set_test_redhat_tag() {
-	export REDHAT_TAG1=scan.connect.redhat.com/blahblah.productname:1.2.3-ubi
+	export REDHAT_TAG1=quay.io/redhat-isv-containers/blahblah.productname:1.2.3-ubi
 
 	export REDHAT_TAG="$REDHAT_TAG1"
 }

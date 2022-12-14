@@ -18,14 +18,14 @@ jobs:
       matrix:
         include:
           - { go: "1.16", goos: "linux", goarch: "386" }
-          - { go: "1.16", goos: "linux", goarch: "amd64" }
-          - { go: "1.16", goos: "linux", goarch: "arm" }
-          - { go: "1.16", goos: "linux", goarch: "arm64" }
-          - { go: "1.16", goos: "freebsd", goarch: "386" }
-          - { go: "1.16", goos: "freebsd", goarch: "amd64" }
-          - { go: "1.16", goos: "windows", goarch: "386" }
-          - { go: "1.16", goos: "windows", goarch: "amd64" }
-          - { go: "1.16", goos: "solaris", goarch: "amd64" }
+#          - { go: "1.16", goos: "linux", goarch: "amd64" }
+#          - { go: "1.16", goos: "linux", goarch: "arm" }
+#          - { go: "1.16", goos: "linux", goarch: "arm64" }
+#          - { go: "1.16", goos: "freebsd", goarch: "386" }
+#          - { go: "1.16", goos: "freebsd", goarch: "amd64" }
+#          - { go: "1.16", goos: "windows", goarch: "386" }
+#          - { go: "1.16", goos: "windows", goarch: "amd64" }
+#          - { go: "1.16", goos: "solaris", goarch: "amd64" }
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -57,9 +57,9 @@ jobs:
           # We only support building images for linux platforms,
           # so we only specify arch here.
           - { arch: "386" }
-          - { arch: "amd64" }
-          - { arch: "arm" }
-          - { arch: "arm64" }
+#          - { arch: "amd64" }
+#          - { arch: "arm" }
+#          - { arch: "arm64" }
     steps:
       - name: Checkout
         uses: actions/checkout@v2

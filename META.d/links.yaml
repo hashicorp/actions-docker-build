@@ -1,0 +1,10 @@
+runbooks: []
+  # - name: runbook name
+  #   link: link to runbook
+
+other_links:
+  - name: readme
+    link: https://github.com/hashicorp/actions-docker-build/blob/main/README.md
+
+  - name: pagerduty
+    link: https://hashicorp.pagerduty.com/service-directory/P37IMEL
