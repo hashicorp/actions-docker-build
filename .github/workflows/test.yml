@@ -190,7 +190,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       OVERRIDE_REDHAT_TARBALL_NAME: action-test-redhat-tag-only.docker.tar
-      TEST_REDHAT_TAG: scan.connect.redhat.com/ospid-blahblah/productname:1.2.3
+      TEST_REDHAT_TAG: quay.io/redhat-isv-containers/63111fb3496edcd88344ab5b:1.2.3
     needs:
       - action-test-prep
     steps:
