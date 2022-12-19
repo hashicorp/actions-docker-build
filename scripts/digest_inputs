@@ -55,10 +55,6 @@ if [ "$PUSH_AUTO_DEV_TAGS" = true ] || ([[ ! -z "${DEV_TAGS}" ]]); then
   DEV_TAGS=${DEV_TAGS:=("hashicorppreview/${REPO_NAME}:${MINOR}-dev" "hashicorppreview/${REPO_NAME}:${MINOR}-dev-${REVISION}")}
 fi
 
-# Check that one of tags and redhags is set
-[ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAGS or REDHAT_TAG"
-[ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAGS or REDHAT_TAG (not both)"
-
 autocorrect_tags() {
 	local TAGS="$2" NEW_TAGS
 	trap 'echo "$NEW_TAGS"' RETURN
