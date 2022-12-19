@@ -43,10 +43,6 @@ inputs:
     description: Version of arm architecture to use (ignored unless arch == arm).
     default: 6
 
-  dev_tags:
-    description: Tags to use for publishing development images (optional).
-    default: ""
-
   smoke_test:
     description: >
       Bash shell script to run as a smoke test against the built image.
@@ -78,6 +74,15 @@ inputs:
       Name of the product binary inside the zip file. If empty (which is the default)
       then the name is guessed using repo name with any -enteprise suffix removed.
     default: ""
+
+  # Set defaults in scripts/digest_inputs.sh
+  dev_tags:
+    description: Tags to use for publishing development images (optional).
+    default: ""
+
+  push_auto_dev_tags:
+    description: Tag to determine whether to push default dev tags (optional).
+    default: "false"
 
   # Escape hatch inputs (use sparingly if at all).
   workdir:
@@ -113,6 +118,7 @@ runs:
 
         # Optional.
         DEV_TAGS: "${{ inputs.dev_tags }}"
+        PUSH_AUTO_DEV_TAGS: "${{ inputs.push_auto_dev_tags }}"
         ARM_VERSION: "${{ inputs.arm_version }}"
         PKG_NAME: "${{ inputs.pkg_name }}"
         WORKDIR: "${{ inputs.workdir }}"
