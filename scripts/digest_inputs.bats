@@ -47,6 +47,15 @@ assert_exported_in_github_env() {
 	fi
 }
 
+assert_exp_var() {
+  GOT="$1"
+  WANT="$2"
+  if ! [ "$GOT" = "$WANT" ]; then
+		echo "Got '$GOT'; want '$WANT'"
+		return 1
+	fi
+}
+
 @test "only required env vars and tags set - required vars passed through unchanged" {
 
 	set_all_required_env_vars_and_tags
@@ -311,5 +320,37 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 	export REDHAT_TAG="quay.io/redhat-isv-containers/cabba9e:1.2.3 quay.io/redhat-isv-containers/cabba9e:1.2.3"
 	unset TAGS
 	WANT_ERR="redhat_tag must match the pattern"
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
+}
+
+@test "get minor version / no error" {
+	set_all_required_env_vars_and_tags
+	export VERSION=1.0.0-dev+hcp.int
+  ./digest_inputs
+
+	assert_exported_in_github_env MINOR "1.0"
+}
+
+@test "get minor version / missing delimiter (.)" {
+	set_all_required_env_vars_and_tags
+	export VERSION=100-dev+hcp.int
+  WANT_ERR="Version must be of format: MAJOR.MINOR.PATCH"
+
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
+}
+
+@test "get minor version / non-valid major version" {
+	set_all_required_env_vars_and_tags
+	export VERSION=x.0.0-dev+hcp.int
+  WANT_ERR="Version must be of format: MAJOR.MINOR.PATCH"
+
+	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
+}
+
+@test "get minor version / non-valid minor version" {
+	set_all_required_env_vars_and_tags
+	export VERSION=1.x.0-dev+hcp.int
+  WANT_ERR="Version must be of format: MAJOR.MINOR.PATCH"
+
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
 }
