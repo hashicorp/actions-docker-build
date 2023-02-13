@@ -72,7 +72,14 @@ see note on `redhat_tag` below.
 - **`dev_tags`** is similar to **tags** except these tags are not intended for
   production/final releases; **dev_tags** are typically published much more
   frequently than production tags, and are used for early access to the latest code.
-  Currently `dev_tags` must begin with `[docker.io/]hashicorppreview`.
+  Currently `dev_tags` must begin with `[docker.io/]hashicorppreview`. 
+- **`push_auto_dev_tags`** is a flag that can be passed in when calling the action to 
+  define whether the dev tags are pushed. Note that the default behaviour, when dev 
+  tags are defined, is to push dev tags:
+  - PUSH_AUTO_DEV_TAGS=true & no dev-tags defined: push default dev tags
+  - PUSH_AUTO_DEV_TAGS=true & dev-tags defined: push non-default dev tags
+  - PUSH_AUTO_DEV_TAGS=false/empty & no dev-tags defined: do NOT push dev tags
+  - PUSH_AUTO_DEV_TAGS=false/empty & dev-tags defined: push non-default dev tags
 - **`redhat_tag`** allows specifying a Red Hat tag to apply to the image.
   NOTE: If you specify `redhat_tag` you may not also specify `tags` or `dev_tags`.
 - **`smoke_test`** allows specifying a script to run immediately after the image
