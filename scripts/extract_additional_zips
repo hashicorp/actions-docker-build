@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+# Prior to Bash 4.4, testing the length of an empty array or string with 
+# set -u results in an unbound variable error. This provides a backwards
+# compatible, if arcane, way to check if ADDITIONAL_ZIPS is empty.
+# shellcheck disable=SC2199
+if [[ ! ${ADDITIONAL_ZIPS[@]:-${ADDITIONAL_ZIPS[@]}} ]]; then
+  echo "==> No additional artifacts specified"
+  exit 0
+fi
+
+cd "$ZIP_LOCATION"/additional
+
+# shellcheck disable=SC2068
+for artifact in ${ADDITIONAL_ZIPS[@]}; do 
+  # actions/download-artifact, when no `name` is specified downloads each
+  # artifact to a directory named the same as the artifact. Ex: foo.zip 
+  # would be downloaded to foo.zip/foo.zip  
+  if [ ! -f "${artifact}/${artifact}" ]; then
+    echo "==> Additional file '${artifact}' not found in $PWD"
+    exit 1
+  fi
+
+  unzip -j "${artifact}/${artifact}"
+
+  echo "==> Success! Extracted zip $artifact"
+done
+
+echo "==> DEBUGS"
+pwd
+ls -la .

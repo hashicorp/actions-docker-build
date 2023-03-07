@@ -31,11 +31,23 @@ jobs:
       - name: Zip Test Bin
         run: |
           zip ./testdata/test_bin.zip ./testdata/test_bin
+          zip ./testdata/additional-zips/test_additional_one.zip ./testdata/additional-zips/test_additional_one
+          zip ./testdata/additional-zips/test_additional_two.zip ./testdata/additional-zips/test_additional_two
       - name: Upload a test artifact.
         uses: actions/upload-artifact@v2
         with:
           path: testdata/test_bin.zip
           name: test_bin.zip
+      - name: Upload additional test artifact (1).
+        uses: actions/upload-artifact@v2
+        with:
+          path: testdata/additional-zips/test_additional_one.zip
+          name: test_additional_one.zip
+      - name: Upload additional test artifact (2).
+        uses: actions/upload-artifact@v2
+        with:
+          path: testdata/additional-zips/test_additional_two.zip
+          name: test_additional_two.zip
 
   action-test-dockerfile-in-root:
     runs-on: ubuntu-latest
@@ -215,3 +227,30 @@ jobs:
         run: |
           source scripts/assertions.bash
           assert_tarball_contains_tags "$OVERRIDE_REDHAT_TARBALL_NAME" "$TEST_REDHAT_TAG"
+
+  action-test-additional-artifacts:
+    runs-on: ubuntu-latest
+    needs:
+      - action-test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Test setup
+      - name: Move Dockefile to Repo Root
+        run: |
+          mv testdata/additional-zips/Dockerfile ./
+          ls -lah
+      - name: Invoke Action
+        uses: ./
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          zip_artifact_name: test_bin.zip
+          bin_name: test_bin
+          tags: |
+            ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag1
+            ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag2
+          additional_zips: |
+            test_additional_one.zip
+            test_additional_two.zip

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo "👋 Hello from the test additional one bin. You said $1 :o"

@@ -33,6 +33,7 @@ DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 TAGS="${TAGS:-}"
 REDHAT_TAG="${REDHAT_TAG:-}"
 PUSH_AUTO_DEV_TAGS="${PUSH_AUTO_DEV_TAGS:=false}"
+ADDITIONAL_ZIPS="${ADDITIONAL_ZIPS:-}"
 
 # Strip version to MAJOR.MINOR
 get_minor_version() {
@@ -192,3 +193,5 @@ fi
 add_var PLATFORM
 
 add_var MINOR
+
+add_var ADDITIONAL_ZIPS
