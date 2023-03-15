@@ -19,8 +19,10 @@ LABEL version=$PRODUCT_VERSION
 LABEL revision=$PRODUCT_REVISION
 
 COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
-COPY dist/$TARGETOS/$TARGETARCH/additional/test_additional_one /bin/
-COPY dist/$TARGETOS/$TARGETARCH/additional/test_additional_two /bin/
+COPY dist/$TARGETOS/$TARGETARCH/test_additional_one /bin/
+COPY dist/$TARGETOS/$TARGETARCH/test_additional_two /bin/
+COPY dist/$TARGETOS/$TARGETARCH/NOT-EULA.txt /doc/
+
 
 USER 100
 CMD ["/bin/$BIN_NAME", "default"]
@@ -44,8 +46,8 @@ LABEL version=$PRODUCT_VERSION
 LABEL revision=$PRODUCT_REVISION
 
 COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
-COPY dist/$TARGETOS/$TARGETARCH/additional/test-additional-one /bin/
-COPY dist/$TARGETOS/$TARGETARCH/additional/test-additional-two /bin/
+COPY dist/$TARGETOS/$TARGETARCH/test-additional-one /bin/
+COPY dist/$TARGETOS/$TARGETARCH/test-additional-two /bin/
 
 USER 100
 CMD ["/bin/$BIN_NAME", "alternative"]

@@ -30,24 +30,37 @@ jobs:
         uses: actions/checkout@v2
       - name: Zip Test Bin
         run: |
+          set -x
           zip ./testdata/test_bin.zip ./testdata/test_bin
-          zip ./testdata/additional-zips/test_additional_one.zip ./testdata/additional-zips/test_additional_one
-          zip ./testdata/additional-zips/test_additional_two.zip ./testdata/additional-zips/test_additional_two
+          zip ./testdata/test_additional_one.zip ./testdata/additional-zips/test_additional_one
+          zip ./testdata/test_additional_two.zip ./testdata/additional-zips/test_additional_two
+          zip ./testdata/test_additional_with_eula_one.zip ./testdata/additional-zips/test_additional_one ./testdata/additional-zips/NOT-EULA.txt
+          zip ./testdata/test_additional_with_eula_two.zip ./testdata/additional-zips/test_additional_two ./testdata/additional-zips/NOT-EULA.txt
       - name: Upload a test artifact.
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          path: testdata/test_bin.zip
           name: test_bin.zip
-      - name: Upload additional test artifact (1).
-        uses: actions/upload-artifact@v2
+          path: testdata/test_bin.zip
+      - name: Upload a test artifact.
+        uses: actions/upload-artifact@v3
         with:
-          path: testdata/additional-zips/test_additional_one.zip
           name: test_additional_one.zip
-      - name: Upload additional test artifact (2).
-        uses: actions/upload-artifact@v2
+          path: testdata/test_additional_one.zip
+      - name: Upload a test artifact.
+        uses: actions/upload-artifact@v3
         with:
-          path: testdata/additional-zips/test_additional_two.zip
           name: test_additional_two.zip
+          path: testdata/test_additional_two.zip
+      - name: Upload a test artifact.
+        uses: actions/upload-artifact@v3
+        with:
+          name: test_additional_with_eula_one.zip
+          path: testdata/test_additional_with_eula_one.zip
+      - name: Upload a test artifact.
+        uses: actions/upload-artifact@v3
+        with:
+          name: test_additional_with_eula_two.zip
+          path: testdata/test_additional_with_eula_two.zip
 
   action-test-dockerfile-in-root:
     runs-on: ubuntu-latest
@@ -246,11 +259,12 @@ jobs:
           version: 1.0.0
           target: default
           arch: amd64
-          zip_artifact_name: test_bin.zip
+          zip_artifact_name: |
+            test_bin.zip
+            test_additional_one.zip
+            test_additional_two.zip
+            test_additional_with_eula_two.zip
           bin_name: test_bin
           tags: |
             ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag1
             ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag2
-          additional_zips: |
-            test_additional_one.zip
-            test_additional_two.zip

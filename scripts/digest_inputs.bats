@@ -32,7 +32,6 @@ set_all_optional_env_vars_empty() {
 	export DEV_TAGS=
 	export DOCKERFILE=
 	export TAGS=
-  export ADDITIONAL_ZIPS=
 }
 
 assert_exported_in_github_env() {

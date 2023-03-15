@@ -2,32 +2,44 @@
 
 set -Eeuo pipefail
 
-# Prior to Bash 4.4, testing the length of an empty array or string with 
+# Prior to Bash 4.4, testing the length of an empty array or string with
 # set -u results in an unbound variable error. This provides a backwards
 # compatible, if arcane, way to check if ADDITIONAL_ZIPS is empty.
 # shellcheck disable=SC2199
-if [[ ! ${ADDITIONAL_ZIPS[@]:-${ADDITIONAL_ZIPS[@]}} ]]; then
-  echo "==> No additional artifacts specified"
-  exit 0
+if [[ ! ${ZIP_NAME[@]:-${ZIP_NAME[@]}} ]]; then
+  echo "==> No artifacts specified"
+  exit 1
 fi
 
-cd "$ZIP_LOCATION"/additional
-
 # shellcheck disable=SC2068
-for artifact in ${ADDITIONAL_ZIPS[@]}; do 
+for artifact in ${ZIP_NAME[@]}; do
   # actions/download-artifact, when no `name` is specified downloads each
   # artifact to a directory named the same as the artifact. Ex: foo.zip 
-  # would be downloaded to foo.zip/foo.zip  
-  if [ ! -f "${artifact}/${artifact}" ]; then
-    echo "==> Additional file '${artifact}' not found in $PWD"
+  # would be downloaded to foo.zip/foo.zip
+  if [ ! -f "${ZIP_LOCATION}/${artifact}/${artifact}" ]; then
+    echo "==> Archive '${artifact}' not found in $ZIP_LOCATION"
     exit 1
   fi
 
-  unzip -j "${artifact}/${artifact}"
+  unzip -o -v -d "$ZIP_LOCATION" -j "$ZIP_LOCATION/${artifact}/${artifact}"
 
   echo "==> Success! Extracted zip $artifact"
 done
 
 echo "==> DEBUGS"
-pwd
-ls -la .
+(
+set -x
+apt update &>/dev/null && apt install -y tree
+tree "$ZIP_LOCATION"
+)
+if [ ! -f "$ZIP_LOCATION/$BIN_NAME" ]; then
+  echo "==> ERROR: File $BIN_NAME not found after extracting zip; got files:"
+  ls -lah "$ZIP_LOCATION"
+  if $BIN_NAME_GUESSED; then
+    echo "--> TIP: The name $BIN_NAME was inferred from your repo name."
+    echo "         You can set the bin_name input for this Action explicitly."
+  else
+    echo "--> TIP: You may need to change the 'bin_name' input for this Action."
+  fi
+  exit 1
+fi

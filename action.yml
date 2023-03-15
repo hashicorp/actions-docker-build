@@ -62,11 +62,6 @@ inputs:
       ${PKG_NAME}_${OS}_${ARCH}.zip.
     default: ""
 
-  additional_zips:
-    description: >
-      Whitespace-separated list of zip artifacts to download and extract
-    default: ""
-
   pkg_name:
     description: >
       Only used to determine default zip name.
@@ -128,7 +123,6 @@ runs:
         PKG_NAME: "${{ inputs.pkg_name }}"
         WORKDIR: "${{ inputs.workdir }}"
         ZIP_NAME: "${{ inputs.zip_artifact_name }}"
-        ADDITIONAL_ZIPS: "${{ inputs.additional_zips }}"
         BIN_NAME: "${{ inputs.bin_name }}"
 
         DOCKERFILE: "${{ inputs.dockerfile }}"
@@ -142,20 +136,9 @@ runs:
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@v3
       with:
-        name: ${{ env.ZIP_NAME }}
         path: ${{ env.ZIP_LOCATION }}
 
-    - name: Download all Artifacts
-      uses: actions/download-artifact@v3
-      with:
-        path: ${{ env.ZIP_LOCATION }}/additional
-
-    - name: Extract Product Zip Artifact
-      shell: bash
-      run: ${{ github.action_path }}/scripts/extract_product_zip
-
-    - name: Extract Additional Zip Artifacts
-      if: ${{ inputs.additional_zips != '' }}
+    - name: Extract Artifacts
       shell: bash
       run: ${{ github.action_path }}/scripts/extract_additional_zips
 
