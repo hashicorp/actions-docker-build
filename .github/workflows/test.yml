@@ -236,7 +236,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       # Test setup
-      - name: Move Dockefile to Repo Root
+      - name: Move Dockerfile to Repo Root
         run: |
           mv testdata/additional-zips/Dockerfile ./
           ls -lah

@@ -155,7 +155,7 @@ runs:
       run: ${{ github.action_path }}/scripts/extract_product_zip
 
     - name: Extract Additional Zip Artifacts
-      if: inputs.additional_zips != ""
+      if: ${{ inputs.additional_zips != '' }}
       shell: bash
       run: ${{ github.action_path }}/scripts/extract_additional_zips
 
