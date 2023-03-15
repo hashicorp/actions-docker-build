@@ -29,3 +29,9 @@ endef
 workflow_action_targets := $(shell egrep --only-match '^  (action-test-.+):' .github/workflows/test.yml | egrep -o '(action-[^:]+)')
 # create the dynamic targets
 $(foreach target,$(workflow_action_targets),$(eval $(call create_target,$(target))))
+
+.PHONY: help
+help:
+	@echo '==> The following make targets are available:'
+	@-LC_ALL=C $(MAKE) -pRrq -f $(firstword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print "  " $$1}}' | sort | egrep -v -e '  ^[^[:alnum:]]' -e '^$@$$'
+
