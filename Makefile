@@ -14,7 +14,8 @@ bats-tests:
 
 .PHONY: workflow-test
 workflow-test:
-	@act --rm --artifact-server-path "${TMPDIR}$(@)" --workflows ./.github/workflows/test.yml
+	$(eval TMP := $(shell mktemp -d -t actions-docker-build.$(@)))
+	@act --rm --artifact-server-path "${TMP}" --workflows ./.github/workflows/test.yml
 
 # Dynamically create test targets for our workflow actions
 # Each target is named after the job itself
@@ -23,7 +24,8 @@ define create_target
 .PHONY: $(1)
 $(1):
 	@echo '==> Testing workflow job: `$$@`'
-	@act --rm --artifact-server-path "$${TMPDIR}$$(@)" --workflows ./.github/workflows/test.yml --job $$(@)
+	$$(eval TMP := $$(shell mktemp -d -t actions-docker-build.$$(@)))
+	act --rm --artifact-server-path "$${TMP}" --workflows ./.github/workflows/test.yml --job $$(@)
 endef
 
 workflow_action_targets := $(shell egrep --only-match '^  (action-test-.+):' .github/workflows/test.yml | egrep -o '(action-[^:]+)')
@@ -34,4 +36,3 @@ $(foreach target,$(workflow_action_targets),$(eval $(call create_target,$(target
 help:
 	@echo '==> The following make targets are available:'
 	@-LC_ALL=C $(MAKE) -pRrq -f $(firstword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/(^|\n)# Files(\n|$$)/,/(^|\n)# Finished Make data base/ {if ($$1 !~ "^[#.]") {print "  " $$1}}' | sort | egrep -v -e '  ^[^[:alnum:]]' -e '^$@$$'
-
