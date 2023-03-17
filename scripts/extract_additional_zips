@@ -21,17 +21,13 @@ for artifact in ${ZIP_NAME[@]}; do
     exit 1
   fi
 
-  unzip -o -v -d "$ZIP_LOCATION" -j "$ZIP_LOCATION/${artifact}/${artifact}"
-
+  (
+    set -x
+    unzip -o -j "${ZIP_LOCATION}/${artifact}/${artifact}" -d "$ZIP_LOCATION"
+  )
   echo "==> Success! Extracted zip $artifact"
 done
 
-echo "==> DEBUGS"
-(
-set -x
-apt update &>/dev/null && apt install -y tree
-tree "$ZIP_LOCATION"
-)
 if [ ! -f "$ZIP_LOCATION/$BIN_NAME" ]; then
   echo "==> ERROR: File $BIN_NAME not found after extracting zip; got files:"
   ls -lah "$ZIP_LOCATION"
