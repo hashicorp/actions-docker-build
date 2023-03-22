@@ -140,7 +140,7 @@ runs:
 
     - name: Extract Artifacts
       shell: bash
-      run: ${{ github.action_path }}/scripts/extract_additional_zips
+      run: ${{ github.action_path }}/scripts/extract_product_zip
 
     - name: Docker Build
       shell: bash
