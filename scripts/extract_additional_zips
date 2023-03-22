@@ -30,7 +30,6 @@ done
 
 if [ ! -f "$ZIP_LOCATION/$BIN_NAME" ]; then
   echo "==> ERROR: File $BIN_NAME not found after extracting zip; got files:"
-  ls -lah "$ZIP_LOCATION"
   if $BIN_NAME_GUESSED; then
     echo "--> TIP: The name $BIN_NAME was inferred from your repo name."
     echo "         You can set the bin_name input for this Action explicitly."
