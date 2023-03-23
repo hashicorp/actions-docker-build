@@ -1,0 +1,3 @@
+#!/bin/sh
+
+echo "👋 Hello from the actions-docker-bin script. You said $1 :o"

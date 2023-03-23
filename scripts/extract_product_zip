@@ -2,33 +2,39 @@
 
 set -Eeuo pipefail
 
-cd "$ZIP_LOCATION"
+# Prior to Bash 4.4, testing the length of an empty array or string with
+# set -u results in an unbound variable error. This provides a backwards
+# compatible, if arcane, way to check if ADDITIONAL_ZIPS is empty.
+# shellcheck disable=SC2199
+if [[ ! ${ZIP_NAME[@]:-${ZIP_NAME[@]}} ]]; then
+  echo "==> No artifacts specified"
+  exit 1
+fi
 
-[ -f "$ZIP_NAME" ] || {
-	echo "==> File '$ZIP_NAME' not found in $PWD:"
-	ls -lAh
-	exit 1
-}
+# shellcheck disable=SC2068
+for artifact in ${ZIP_NAME[@]}; do
+  # actions/download-artifact, when no `name` is specified downloads each
+  # artifact to a directory named the same as the artifact. Ex: foo.zip 
+  # would be downloaded to foo.zip/foo.zip
+  if [ ! -f "${ZIP_LOCATION}/${artifact}/${artifact}" ]; then
+    echo "==> Archive '${artifact}' not found in $ZIP_LOCATION"
+    exit 1
+  fi
 
-unzip -j "$ZIP_NAME"
+  (
+    set -x
+    unzip -o -j "${ZIP_LOCATION}/${artifact}/${artifact}" -d "$ZIP_LOCATION"
+  )
+  echo "==> Success! Extracted zip $artifact"
+done
 
-# This check guides the user to explicitly specify BIN_NAME if the guessed
-# one is wrong, or to update their bin_name input if it's already set.
-[ -f "$BIN_NAME" ] || {
+if [ ! -f "$ZIP_LOCATION/$BIN_NAME" ]; then
   echo "==> ERROR: File $BIN_NAME not found after extracting zip; got files:"
-  ls -lah
-  if $BIN_NAME_GUESSED; then 
+  if $BIN_NAME_GUESSED; then
     echo "--> TIP: The name $BIN_NAME was inferred from your repo name."
     echo "         You can set the bin_name input for this Action explicitly."
   else
     echo "--> TIP: You may need to change the 'bin_name' input for this Action."
   fi
   exit 1
-}
-
-[ -x "$BIN_NAME" ] || {
-  echo "==> ERROR: $BIN_NAME is not executable."
-  exit 1
-}
-
-echo "==> Success! Extracted needed binary $BIN_NAME"
+fi

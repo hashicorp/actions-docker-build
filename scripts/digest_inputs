@@ -192,3 +192,4 @@ fi
 add_var PLATFORM
 
 add_var MINOR
+
