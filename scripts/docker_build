@@ -58,7 +58,9 @@ DEV_TARBALL_PATH="$PWD/$DEV_TARBALL_NAME"
 REDHAT_TARBALL_PATH="$PWD/$REDHAT_TARBALL_NAME"
 
 cd "$WORKDIR"
-
+(apt update && apt install -y tree) &>/dev/null
+echo "==> Docker work directory:"
+tree .
 docker buildx create --use
 
 echo "==> Building image with tags:"
