@@ -145,7 +145,6 @@ runs:
         GH_TOKEN: ${{ github.token }}
       shell: bash
       run: |-
-        matrix="$(echo "${{ env.ZIP_NAME }}" | jq --slurp --compact-output --raw-input 'split("%0A") | map(split("_")[0]) | unique')"
         ZIP_FILES="$(xargs <<< "${{ env.ZIP_NAME }}")"
   
         read -ra ZIPS <<< "ZIP_FILES"
