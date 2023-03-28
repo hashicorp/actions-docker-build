@@ -150,9 +150,9 @@ runs:
         read -ra ZIPS <<< "ZIP_FILES"
         ZIP_ARTIFACTS=("${ZIPS[@]}")
         
-        for product in "${ZIP_ARTIFACTS[@]}"
-          echo "Downloading: $product"
-          ./bin/gh run download ${{ github.run_id }} -n "$product"
+        for artifact in "${ZIP_ARTIFACTS[@]}"; do
+          echo "Downloading: $artifact"
+          ./bin/gh run download ${{ github.run_id }} -n "$artifact"
         done
 
     - name: Extract Artifacts
