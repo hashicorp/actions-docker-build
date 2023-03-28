@@ -1,0 +1,42 @@
+---
+name: download_binaries
+
+on:
+  workflow_call:
+    inputs:
+      zip-files:
+        required: false
+        type: string
+      zip-location:
+        required: false
+        type: string
+jobs:
+  determine-matrix:
+    outputs:
+      matrix: ${{ steps.get-matrix.outputs.matrix }}
+    runs-on: ubuntu-latest
+    name: Set matrix for download
+    steps:
+      - name: Determine matrix
+        id: get-matrix
+        shell: bash
+        run: |
+          matrix="$(echo "${{ inputs.zip-files }}" | jq --slurp --compact-output --raw-input 'split("%0A") | map(split("_")[0]) | unique')"
+          echo "matrix=${matrix}" | tee -a "${GITHUB_OUTPUT}"
+          matrix_len=${#matrix[@]}
+          if [[ $matrix_len -lt 1 ]]; then
+            echo "error- product name could not be determined"
+            exit 1
+          fi
+  download:
+    needs: determine-matrix
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        product: ${{ fromJson(needs.pre-promotion.outputs.product-matrix) }}
+    steps:
+      - name: Download Product Zip Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ matrix.product }}
+          path: ${{ inputs.zip-location }}

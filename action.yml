@@ -134,9 +134,11 @@ runs:
       run: ${{ github.action_path }}/scripts/register_qemu_binfmt
 
     - name: Download Product Zip Artifact
-      uses: actions/download-artifact@v3
+      uses: ./.github/workflows/download.yml
       with:
-        path: ${{ env.ZIP_LOCATION }}
+        zip-location: ${{ env.ZIP_LOCATION }}
+        zip-files: ${{ inputs.zip_artifact_name }}
+      secrets: inherit
 
     - name: Extract Artifacts
       shell: bash
