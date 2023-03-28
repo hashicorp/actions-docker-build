@@ -141,6 +141,8 @@ runs:
         tar -xvzf gh.tar.gz && mkdir -p bin && mv "gh_${version}_linux_amd64/bin/gh" bin/
 
     - name: Determine matrix
+      env:
+        GH_TOKEN: ${{ github.token }}
       shell: bash
       run: |-
         matrix="$(echo "${{ inputs.zip-files }}" | jq --slurp --compact-output --raw-input 'split("%0A") | map(split("_")[0]) | unique')"
