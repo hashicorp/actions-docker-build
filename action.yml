@@ -138,7 +138,6 @@ runs:
       with:
         zip-location: ${{ env.ZIP_LOCATION }}
         zip-files: ${{ inputs.zip_artifact_name }}
-      secrets: inherit
 
     - name: Extract Artifacts
       shell: bash
