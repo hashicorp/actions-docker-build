@@ -147,7 +147,7 @@ runs:
       run: |-
         ZIP_FILES="$(xargs <<< "${{ env.ZIP_NAME }}")"
   
-        read -ra ZIPS <<< "ZIP_FILES"
+        read -ra ZIPS <<< "$ZIP_FILES"
         ZIP_ARTIFACTS=("${ZIPS[@]}")
         
         for artifact in "${ZIP_ARTIFACTS[@]}"; do
