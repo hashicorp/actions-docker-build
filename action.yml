@@ -137,7 +137,7 @@ runs:
       uses: actions/checkout@v3
 
     - name: Download Product Zip Artifact
-      uses: hashicorp/actions-docker-build/github/workflows/download.yml
+      uses: .github/workflows/download.yml
       with:
         zip-location: ${{ env.ZIP_LOCATION }}
         zip-files: ${{ inputs.zip_artifact_name }}
