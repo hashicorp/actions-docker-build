@@ -146,16 +146,11 @@ runs:
       shell: bash
       run: |-
         matrix="$(echo "${{ env.ZIP_NAME }}" | jq --slurp --compact-output --raw-input 'split("%0A") | map(split("_")[0]) | unique')"
-        matrix_len=${#matrix[@]}
-        if [[ $matrix_len -lt 1 ]]; then
-          echo "error- product name could not be determined"
-          exit 1
-        fi
+        ZIP_FILES="$(xargs <<< "${{ env.ZIP_NAME }}")"
+  
+        read -ra ZIPS <<< "ZIP_FILES"
         
-        echo "Matrix: ${matrix}"
-        
-        for product in "${matrix[@]}"
-        do
+        for product in "${ZIPS[@]}"
           echo "Downloading: ${product}"
           ./bin/gh run download ${{ github.run_id }} -n "$product"
         done
