@@ -145,7 +145,7 @@ runs:
         GH_TOKEN: ${{ github.token }}
       shell: bash
       run: |-
-        matrix="$(echo "${{ inputs.zip-files }}" | jq --slurp --compact-output --raw-input 'split("%0A") | map(split("_")[0]) | unique')"
+        matrix="$(echo "${{ env.ZIP_NAME }}" | jq --slurp --compact-output --raw-input 'split("%0A") | map(split("_")[0]) | unique')"
         matrix_len=${#matrix[@]}
         if [[ $matrix_len -lt 1 ]]; then
           echo "error- product name could not be determined"
@@ -159,12 +159,6 @@ runs:
           echo "Downloading: ${product}"
           ./bin/gh run download ${{ github.run_id }} -n ${product}
         done
-
-    - name: Download Product Zip Artifact
-      uses: ./.github/workflows/download.yml
-      with:
-        zip-location: ${{ env.ZIP_LOCATION }}
-        zip-files: ${{ inputs.zip_artifact_name }}
 
     - name: Extract Artifacts
       shell: bash
