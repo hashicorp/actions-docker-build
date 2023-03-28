@@ -133,8 +133,28 @@ runs:
       shell: bash
       run: ${{ github.action_path }}/scripts/register_qemu_binfmt
 
-    - name: Checkout
-      uses: actions/checkout@v3
+    - name: install gh tool
+      shell: bash
+      run: |-
+        version="2.22.1"
+        curl --show-error --silent --location --output "gh.tar.gz" "https://github.com/cli/cli/releases/download/v${version}/gh_${version}_linux_amd64.tar.gz"
+        tar -xvzf gh.tar.gz && mkdir -p bin && mv "gh_${version}_linux_amd64/bin/gh" bin/
+
+    - name: Determine matrix
+      shell: bash
+      run: |-
+        matrix="$(echo "${{ inputs.zip-files }}" | jq --slurp --compact-output --raw-input 'split("%0A") | map(split("_")[0]) | unique')"
+        matrix_len=${#matrix[@]}
+        if [[ $matrix_len -lt 1 ]]; then
+          echo "error- product name could not be determined"
+          exit 1
+        fi
+        
+        for product in "${matrix[@]}"
+        do
+          echo "Downloading: ${product}"
+          ./bin/gh run download ${{ github.run_id }} -n ${product}
+        done
 
     - name: Download Product Zip Artifact
       uses: ./.github/workflows/download.yml
