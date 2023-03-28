@@ -148,9 +148,10 @@ runs:
         ZIP_FILES="$(xargs <<< "${{ env.ZIP_NAME }}")"
   
         read -ra ZIPS <<< "ZIP_FILES"
+        ZIP_ARTIFACTS=("${ZIPS[@]}")
         
-        for product in "${ZIPS[@]}"
-          echo "Downloading: ${product}"
+        for product in "${ZIP_ARTIFACTS[@]}"
+          echo "Downloading: $product"
           ./bin/gh run download ${{ github.run_id }} -n "$product"
         done
 
