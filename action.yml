@@ -157,7 +157,7 @@ runs:
         for product in "${matrix[@]}"
         do
           echo "Downloading: ${product}"
-          ./bin/gh run download ${{ github.run_id }} -n ${product}
+          ./bin/gh run download ${{ github.run_id }} -n "$product"
         done
 
     - name: Extract Artifacts
