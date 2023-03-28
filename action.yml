@@ -152,6 +152,8 @@ runs:
           exit 1
         fi
         
+        echo "Matrix: ${matrix}"
+        
         for product in "${matrix[@]}"
         do
           echo "Downloading: ${product}"
