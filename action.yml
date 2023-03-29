@@ -145,7 +145,6 @@ runs:
         GH_TOKEN: ${{ github.token }}
       shell: bash
       run: |-
-        ./bin/gh run list
         ZIP_FILES="$(xargs <<< "${{ env.ZIP_NAME }}")"
   
         read -ra ZIPS <<< "$ZIP_FILES"
@@ -153,7 +152,7 @@ runs:
         
         for artifact in "${ZIP_ARTIFACTS[@]}"; do
           echo "Downloading: $artifact"
-          ./bin/gh run download ${{ github.run_id }} -n "test_bin.zip"
+          ./bin/gh run download ${{ github.run_id }} -n "$artifact"
         done
 
     - name: Extract Artifacts
