@@ -153,7 +153,7 @@ runs:
         
         for artifact in "${ZIP_ARTIFACTS[@]}"; do
           echo "Downloading: $artifact"
-          ./bin/gh run download ${{ github.run_id }} -n test_bin.zip
+          ./bin/gh run download ${{ github.run_id }} -n "test_bin.zip"
         done
 
     - name: Extract Artifacts
