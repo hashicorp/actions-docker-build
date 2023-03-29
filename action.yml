@@ -142,7 +142,7 @@ runs:
 
     - name: Determine matrix
       env:
-        GH_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
       run: |-
         ZIP_FILES="$(xargs <<< "${{ env.ZIP_NAME }}")"
