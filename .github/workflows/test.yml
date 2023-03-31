@@ -31,11 +31,17 @@ jobs:
       - name: Zip Test Bin
         run: |
           zip ./testdata/test_bin.zip ./testdata/test_bin
+          zip ./testdata/actions-docker-build.zip ./testdata/actions-docker-build
       - name: Upload a test artifact.
         uses: actions/upload-artifact@v2
         with:
           path: testdata/test_bin.zip
           name: test_bin.zip
+      - name: Upload a test artifact.
+        uses: actions/upload-artifact@v2
+        with:
+          path: testdata/actions-docker-build.zip
+          name: actions-docker-build.zip
 
   action-test-dockerfile-in-root:
     runs-on: ubuntu-latest
