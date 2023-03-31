@@ -136,9 +136,10 @@ runs:
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@v3
       with:
+        name: ${{ env.ZIP_NAME }}
         path: ${{ env.ZIP_LOCATION }}
 
-    - name: Extract Artifacts
+    - name: Extract Product Zip Artifact
       shell: bash
       run: ${{ github.action_path }}/scripts/extract_product_zip
 
