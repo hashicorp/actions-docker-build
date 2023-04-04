@@ -140,19 +140,10 @@ runs:
 
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@v3
-      #if: ${{ inputs.do_zip_extract_step == true }}
-      if: ${{ inputs.do_zip_extract_step  == 'true'  && !contains(inputs.zip_name, '\n') }}
+      if: ${{ inputs.do_zip_extract_step == 'true'  }}
       with:
         path: ${{ env.ZIP_LOCATION }}
         name: ${{ env.ZIP_NAME }}
-
-    - name: Download Product Zip Artifact
-      uses: actions/download-artifact@v3
-      #if: ${{ inputs.do_zip_extract_step == true }}
-      if: ${{ inputs.do_zip_extract_step  == 'true' && contains(inputs.zip_name, '\n') }}
-      with:
-        name: ${{ env.ZIP_NAME }}
-        path: ${{ env.ZIP_LOCATION }}
 
     - name: Extract Product Zip Artifact
       if: ${{ inputs.do_zip_extract_step == 'true' }}
