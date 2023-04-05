@@ -93,6 +93,11 @@ inputs:
     description: Dockerfile path relative to workdir.
     default: Dockerfile
 
+  do_zip_extract_step:
+    description: Should zip archives be extracted? (optional)
+    default: true
+    type: boolean
+
 # action runner (golang:latest image)
 runs:
   using: composite
@@ -135,11 +140,13 @@ runs:
 
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@v3
+      if: ${{ inputs.do_zip_extract_step == 'true'  }}
       with:
-        name: ${{ env.ZIP_NAME }}
         path: ${{ env.ZIP_LOCATION }}
+        name: ${{ env.ZIP_NAME }}
 
     - name: Extract Product Zip Artifact
+      if: ${{ inputs.do_zip_extract_step == 'true' }}
       shell: bash
       run: ${{ github.action_path }}/scripts/extract_product_zip
 

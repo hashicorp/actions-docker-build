@@ -31,11 +31,17 @@ jobs:
       - name: Zip Test Bin
         run: |
           zip ./testdata/test_bin.zip ./testdata/test_bin
+          zip ./testdata/actions-docker-build.zip ./testdata/actions-docker-build
       - name: Upload a test artifact.
         uses: actions/upload-artifact@v2
         with:
           path: testdata/test_bin.zip
           name: test_bin.zip
+      - name: Upload a test artifact.
+        uses: actions/upload-artifact@v2
+        with:
+          path: testdata/actions-docker-build.zip
+          name: actions-docker-build.zip
 
   action-test-dockerfile-in-root:
     runs-on: ubuntu-latest
@@ -215,3 +221,56 @@ jobs:
         run: |
           source scripts/assertions.bash
           assert_tarball_contains_tags "$OVERRIDE_REDHAT_TARBALL_NAME" "$TEST_REDHAT_TAG"
+
+  action-test-guessed-bin-name:
+    runs-on: ubuntu-latest
+    needs:
+      - action-test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Test setup
+      - name: Move Dockerfile to Repo Root
+        run: |
+          mv testdata/Dockerfile ./
+      - name: Invoke Action
+        uses: ./
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          zip_artifact_name: actions-docker-build.zip
+          #bin_name: actions-docker-build # (which matches the $reponame)
+          tags: ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag1
+
+  action-test-opt-out-extract:
+    runs-on: ubuntu-latest
+    needs:
+      - action-test-prep
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Handle the artifact download ourselves
+      - name: Download Product Zip Artifact
+        uses: actions/download-artifact@v3
+        with:
+          path: archive
+          name: actions-docker-build.zip
+      # Construct the custom context,
+      # This is "required" because normally our extraction process puts the artifacts in deeply nested
+      # `dist/$TARGETOS/$TARGETARCH/$BIN_NAME` paths.
+      # As the caller, I don't even want to guess what that should be.
+      - name: Custom context
+        run: |
+          mkdir -p my-context-dir
+          cp -v testdata/opt-out.Dockerfile ./my-context-dir/Dockerfile
+          unzip -j archive/actions-docker-build.zip -d ./my-context-dir
+      - name: Invoke Action
+        uses: ./
+        with:
+          version: 1.0.0
+          target: default
+          arch: amd64
+          do_zip_extract_step: false
+          workdir: ./my-context-dir
+          tags: ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag1
