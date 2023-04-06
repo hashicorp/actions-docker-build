@@ -154,7 +154,7 @@ runs:
       shell: bash
       run: ${{ github.action_path}}/scripts/docker_build
 
-    - name: Run Test
+    - name: Run Smoke Test
       if: ${{ env.PLATFORM == 'linux/amd64' && inputs.smoke_test != '' }}
       shell: bash
       run: ${{ inputs.smoke_test }}
