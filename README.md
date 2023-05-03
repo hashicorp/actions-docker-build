@@ -84,6 +84,8 @@ see note on `redhat_tag` below.
   NOTE: If you specify `redhat_tag` you may not also specify `tags` or `dev_tags`.
 - **`smoke_test`** allows specifying a script to run immediately after the image
   is built, to perform some basic checks on the image. See note on `smoke_test` below.
+- **`dockerfile`** allows specifying the path to the Dockerfile with the intended build 
+  targets. This defaults to `Dockerfile` if unspecified. 
 
 #### Note on `target`
 
