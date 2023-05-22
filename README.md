@@ -1,4 +1,4 @@
-# Docker Build Action
+n Docker Build Action
 
 _For internal HashiCorp use only. The output of this action is specifically
 designed to satisfy the needs of our internal deployment system, and may not be
@@ -180,9 +180,9 @@ jobs:
           - {go: "1.16", goos: "solaris", goarch: "amd64"}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v3
       - name: Setup go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go }}
       - name: Compile Binary
