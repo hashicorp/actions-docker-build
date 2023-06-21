@@ -1,4 +1,4 @@
-# Docker Build Action
+# Docker Build Action [![Heimdall](https://heimdall.hashicorp.services/api/v1/assets/actions-docker-build/badge.svg?key=b4d9245b2984d0d8c0ce7d59a1ff2eb41cf188cf5bef2d391d09c59b18c584b6)](https://heimdall.hashicorp.services/site/assets/actions-docker-build) [![CI](https://github.com/hashicorp/actions-docker-build/actions/workflows/test.yml/badge.svg)](https://github.com/hashicorp/actions-docker-build/actions/workflows/test.yml)
 
 _For internal HashiCorp use only. The output of this action is specifically
 designed to satisfy the needs of our internal deployment system, and may not be
