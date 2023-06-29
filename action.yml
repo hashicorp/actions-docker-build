@@ -16,6 +16,13 @@ inputs:
     description: Target image architecture.
     required: true
 
+  revision:
+    description: >
+      Full sha of the commit that is being built.
+      This may differ from the default <github.sha> which is the ref the action
+      was invoked at.
+    default: "${{ github.sha }}"
+
   tags:
     description: >
       Whitespace-separated fully-qualified image names to use for production releases.
@@ -114,7 +121,7 @@ runs:
       env:
 
         # Required.
-        REVISION: "${{ github.sha }}"
+        REVISION: "${{ inputs.revision }}"
         VERSION: "${{ inputs.version }}"
         ARCH: "${{ inputs.arch }}"
         TAGS: "${{ inputs.tags }}"

@@ -64,6 +64,8 @@ see note on `redhat_tag` below.
 ### Action Inputs Explained
 
 - **`version`** is the product version we are building a docker image for.
+- **`revision`** is the revision that's being built. 
+  This may differ from the default <github.sha> which is the ref the action was invoked at.
 - **`target`** is the name of the "stage" or "target" in the Dockerfile to build.
 - **`arch`** is the architecture we're building for.
 - **`tags`** is a newline-separated list of the "production tags" for this image.
