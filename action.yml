@@ -193,7 +193,7 @@ runs:
     - name: Extract Product Zip Artifact
       if: ${{ inputs.do_zip_extract_step == 'true' && env.PLATFORM == 'windows' }}
       shell: bash
-      run: ${{ github.action_path }}/scripts/extract_product_zip
+      run: ${{ github.action_path }}\scripts\extract_product_zip
 
     - name: Docker Build
       shell: bash
