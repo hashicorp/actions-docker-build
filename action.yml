@@ -196,8 +196,14 @@ runs:
       run: ${{ github.action_path }}\scripts\extract_product_zip
 
     - name: Docker Build
+      if: ${{ env.PLATFORM != 'windows' }}
       shell: bash
       run: ${{ github.action_path}}/scripts/docker_build
+
+    - name: Docker Build
+      if: ${{ env.PLATFORM == 'windows' }}
+      shell: bash
+      run: ${{ github.action_path}}\scripts\docker_build
 
     - name: Run Test
       if: ${{ env.PLATFORM == 'linux/amd64' && inputs.smoke_test != '' }}
