@@ -11,7 +11,6 @@ die() { echo "$1" 1>&2; exit 1; }
 [ -n "${TARBALL_NAME:-}" ] || die "Must set TARBALL_NAME"
 [ -n "${DEV_TARBALL_NAME:-}" ] || die "Must set DEV_TARBALL_NAME"
 [ -n "${REDHAT_TARBALL_NAME:-}" ] || die "Must set REDHAT_TARBALL_NAME"
-[ -n "${PLATFORM:-}" ] || die "Must set PLATFORM"
 [ -n "${AUTO_TAG:-}" ] || die "Must set AUTO_TAG"
 [ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG"
 [ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG (not both)"
@@ -64,7 +63,6 @@ done
 
 docker build \
   --target "$TARGET" \
-  --platform "$PLATFORM" \
   "${TAG_FLAGS[@]}" \
   "${BA_FLAGS[@]}" \
   -f "$DOCKERFILE" \
