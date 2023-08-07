@@ -166,7 +166,7 @@ runs:
 
         DOCKERFILE: "${{ inputs.dockerfile }}"
 
-      run: bash ${{ github.action_path }}\\scripts\\digest_inputs
+      run: bash $GITHUB_ACTION_PATH/scripts/digest_inputs
 
     - name: Setup QEMU in binfmt_misc filesystem
       if: ${{ runner.os != 'Windows' }}
@@ -176,7 +176,7 @@ runs:
     - name: Setup QEMU in binfmt_misc filesystem
       if: ${{ runner.os == 'Windows' }}
       shell: bash
-      run: bash ${{ github.action_path }}\\scripts\\register_qemu_binfmt
+      run: bash $GITHUB_ACTION_PATH/scripts/register_qemu_binfmt
 
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
@@ -193,7 +193,7 @@ runs:
     - name: Extract Product Zip Artifact
       if: ${{ inputs.do_zip_extract_step == 'true' && runner.os == 'Windows' }}
       shell: bash
-      run: bash ${{ github.action_path }}\\scripts\\extract_product_zip
+      run: bash $GITHUB_ACTION_PATH/scripts/extract_product_zip
 
     - name: Docker Build
       if: ${{ runner.os != 'Windows' }}
@@ -203,7 +203,7 @@ runs:
     - name: Docker Build
       if: ${{ runner.os == 'Windows' }}
       shell: bash
-      run: bash ${{ github.action_path}}\\scripts\\docker_build
+      run: bash $GITHUB_ACTION_PATH/scripts/docker_build
 
     - name: Run Test
       if: ${{ runner.os == 'linux/amd64' && inputs.smoke_test != '' }}
@@ -215,7 +215,7 @@ runs:
     - name: Generate Docker metadata
       if: ${{ runner.os == 'Windows' }}
       shell: bash
-      run: bash ${{ github.action_path}}\\scripts\\create_metadata
+      run: bash $GITHUB_ACTION_PATH/scripts/create_metadata
 
     - name: Generate Docker metadata
       if: ${{ runner.os != 'Windows' }}
