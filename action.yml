@@ -114,7 +114,7 @@ runs:
   steps:
     - name: Set required repo name env var
       shell: bash
-      run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
+      run: bash echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
 
     - name: Digest Inputs - Calculate Variables for Later Steps
       if: ${{ runner.os != 'Windows' }}
@@ -140,7 +140,7 @@ runs:
 
         DOCKERFILE: "${{ inputs.dockerfile }}"
 
-      run: ${{ github.action_path }}/scripts/digest_inputs
+      run: bash ${{ github.action_path }}/scripts/digest_inputs
 
     - name: Digest Inputs - Calculate Variables for Later Steps Windows
       if: ${{ runner.os == 'Windows' }}
@@ -166,17 +166,17 @@ runs:
 
         DOCKERFILE: "${{ inputs.dockerfile }}"
 
-      run: ${{ github.action_path }}\scripts\digest_inputs
+      run: bash ${{ github.action_path }}\scripts\digest_inputs
 
     - name: Setup QEMU in binfmt_misc filesystem
       if: ${{ runner.os != 'Windows' }}
       shell: bash
-      run: ${{ github.action_path }}/scripts/register_qemu_binfmt
+      run: bash ${{ github.action_path }}/scripts/register_qemu_binfmt
 
     - name: Setup QEMU in binfmt_misc filesystem
       if: ${{ runner.os == 'Windows' }}
       shell: bash
-      run: ${{ github.action_path }}\scripts\register_qemu_binfmt
+      run: bash ${{ github.action_path }}\scripts\register_qemu_binfmt
 
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
@@ -188,39 +188,39 @@ runs:
     - name: Extract Product Zip Artifact
       if: ${{ inputs.do_zip_extract_step == 'true' && runner.os != 'Windows' }}
       shell: bash
-      run: ${{ github.action_path }}/scripts/extract_product_zip
+      run: bash ${{ github.action_path }}/scripts/extract_product_zip
 
     - name: Extract Product Zip Artifact
       if: ${{ inputs.do_zip_extract_step == 'true' && runner.os == 'Windows' }}
       shell: bash
-      run: ${{ github.action_path }}\scripts\extract_product_zip
+      run: bash ${{ github.action_path }}\scripts\extract_product_zip
 
     - name: Docker Build
       if: ${{ runner.os != 'Windows' }}
       shell: bash
-      run: ${{ github.action_path}}/scripts/docker_build
+      run: bash ${{ github.action_path}}/scripts/docker_build
 
     - name: Docker Build
       if: ${{ runner.os == 'Windows' }}
       shell: bash
-      run: ${{ github.action_path}}\scripts\docker_build
+      run: bash ${{ github.action_path}}\scripts\docker_build
 
     - name: Run Test
       if: ${{ runner.os == 'linux/amd64' && inputs.smoke_test != '' }}
       shell: bash
-      run: ${{ inputs.smoke_test }}
+      run: bash ${{ inputs.smoke_test }}
       env:
         IMAGE_NAME: ${{env.AUTO_TAG}}
 
     - name: Generate Docker metadata
       if: ${{ runner.os == 'Windows' }}
       shell: bash
-      run: ${{ github.action_path}}\scripts\create_metadata
+      run: bash ${{ github.action_path}}\scripts\create_metadata
 
     - name: Generate Docker metadata
       if: ${{ runner.os != 'Windows' }}
       shell: bash
-      run: ${{ github.action_path}}/scripts/create_metadata
+      run: bash ${{ github.action_path}}/scripts/create_metadata
 
     - name: Upload Docker Image metadata
       uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
