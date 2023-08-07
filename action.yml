@@ -117,7 +117,7 @@ runs:
       run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
 
     - name: Digest Inputs - Calculate Variables for Later Steps
-      if: ${{ env.PLATFORM != 'windows' }}
+      if: ${{ runner.os != 'Windows' }}
       shell: bash
       env:
 
@@ -143,7 +143,7 @@ runs:
       run: ${{ github.action_path }}/scripts/digest_inputs
 
     - name: Digest Inputs - Calculate Variables for Later Steps Windows
-      if: ${{ env.PLATFORM == 'windows' }}
+      if: ${{ runner.os == 'Windows' }}
       shell: bash
       env:
 
@@ -169,12 +169,12 @@ runs:
       run: ${{ github.action_path }}\scripts\digest_inputs
 
     - name: Setup QEMU in binfmt_misc filesystem
-      if: ${{ env.PLATFORM != 'windows' }}
+      if: ${{ runner.os != 'Windows' }}
       shell: bash
       run: ${{ github.action_path }}/scripts/register_qemu_binfmt
 
     - name: Setup QEMU in binfmt_misc filesystem
-      if: ${{ env.PLATFORM == 'windows' }}
+      if: ${{ runner.os == 'Windows' }}
       shell: bash
       run: ${{ github.action_path }}\scripts\register_qemu_binfmt
 
@@ -186,39 +186,39 @@ runs:
         name: ${{ env.ZIP_NAME }}
 
     - name: Extract Product Zip Artifact
-      if: ${{ inputs.do_zip_extract_step == 'true' && env.PLATFORM != 'windows' }}
+      if: ${{ inputs.do_zip_extract_step == 'true' && runner.os != 'Windows' }}
       shell: bash
       run: ${{ github.action_path }}/scripts/extract_product_zip
 
     - name: Extract Product Zip Artifact
-      if: ${{ inputs.do_zip_extract_step == 'true' && env.PLATFORM == 'windows' }}
+      if: ${{ inputs.do_zip_extract_step == 'true' && runner.os == 'Windows' }}
       shell: bash
       run: ${{ github.action_path }}\scripts\extract_product_zip
 
     - name: Docker Build
-      if: ${{ env.PLATFORM != 'windows' }}
+      if: ${{ runner.os != 'Windows' }}
       shell: bash
       run: ${{ github.action_path}}/scripts/docker_build
 
     - name: Docker Build
-      if: ${{ env.PLATFORM == 'windows' }}
+      if: ${{ runner.os == 'Windows' }}
       shell: bash
       run: ${{ github.action_path}}\scripts\docker_build
 
     - name: Run Test
-      if: ${{ env.PLATFORM == 'linux/amd64' && inputs.smoke_test != '' }}
+      if: ${{ runner.os == 'linux/amd64' && inputs.smoke_test != '' }}
       shell: bash
       run: ${{ inputs.smoke_test }}
       env:
         IMAGE_NAME: ${{env.AUTO_TAG}}
 
     - name: Generate Docker metadata
-      if: ${{ env.PLATFORM == 'windows' }}
+      if: ${{ runner.os == 'Windows' }}
       shell: bash
       run: ${{ github.action_path}}\scripts\create_metadata
 
     - name: Generate Docker metadata
-      if: ${{ env.PLATFORM != 'windows' }}
+      if: ${{ runner.os != 'Windows' }}
       shell: bash
       run: ${{ github.action_path}}/scripts/create_metadata
 
