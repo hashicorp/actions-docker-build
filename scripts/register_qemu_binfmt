@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 set -Eeuo pipefail
 
 echo "==> Registering qemu into /proc/sys/fs/binfmt_misc"

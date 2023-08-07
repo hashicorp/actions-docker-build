@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # disable unused variable checking, as this script's purpose
 # is just to populate env vars for later scripts.
 # shellcheck disable=SC2034
