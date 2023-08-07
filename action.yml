@@ -114,7 +114,7 @@ runs:
   steps:
     - name: Set required repo name env var
       shell: bash
-      run: bash echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
+      run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
 
     - name: Digest Inputs - Calculate Variables for Later Steps
       if: ${{ runner.os != 'Windows' }}
