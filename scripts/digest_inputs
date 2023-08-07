@@ -141,6 +141,11 @@ add_vars PKG_NAME PKG_NAME_GUESSED
 # because we can't access files outside of this tree.
 # Hence this is prefixed with the workdir supplied.
 ZIP_LOCATION="$WORKDIR/dist/$OS/$ARCH"
+
+if [[ "$OS" == "windows" ]]; then
+    ZIP_LOCATION="$WORKDIR"
+fi
+
 ZIP_NAME_GUESSED=false
 [ -n "$ZIP_NAME" ] || {
   ZIP_NAME_GUESSED=true
