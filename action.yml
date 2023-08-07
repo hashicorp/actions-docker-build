@@ -146,28 +146,22 @@ runs:
     - name: Digest Inputs - Calculate Variables for Later Steps Windows
       if: ${{ runner.os == 'Windows' }}
       shell: bash
-      env:
-
-        # Required.
-        REVISION: "${{ inputs.revision }}"
-        VERSION: "${{ inputs.version }}"
-        ARCH: "${{ inputs.arch }}"
-        TAGS: "${{ inputs.tags }}"
-        REDHAT_TAG: "${{ inputs.redhat_tag }}"
-        TARGET: "${{ inputs.target }}"
-
-        # Optional.
-        DEV_TAGS: "${{ inputs.dev_tags }}"
-        PUSH_AUTO_DEV_TAGS: "${{ inputs.push_auto_dev_tags }}"
-        ARM_VERSION: "${{ inputs.arm_version }}"
-        PKG_NAME: "${{ inputs.pkg_name }}"
-        WORKDIR: "${{ inputs.workdir }}"
-        ZIP_NAME: "${{ inputs.zip_artifact_name }}"
-        BIN_NAME: "${{ inputs.bin_name }}"
-
-        DOCKERFILE: "${{ inputs.dockerfile }}"
-
-      run: bash $GITHUB_ACTION_PATH/scripts/digest_inputs
+      run:
+        export REVISION="${{ inputs.revision }}"
+        export VERSION="${{ inputs.version }}"
+        export ARCH="${{ inputs.arch }}"
+        export TAGS="${{ inputs.tags }}"
+        export REDHAT_TAG="${{ inputs.redhat_tag }}"
+        export TARGET="${{ inputs.target }}"
+        export DEV_TAGS="${{ inputs.dev_tags }}"
+        export PUSH_AUTO_DEV_TAGS="${{ inputs.push_auto_dev_tags }}"
+        export ARM_VERSION="${{ inputs.arm_version }}"
+        export PKG_NAME="${{ inputs.pkg_name }}"
+        export WORKDIR="${{ inputs.workdir }}"
+        export ZIP_NAME="${{ inputs.zip_artifact_name }}"
+        export BIN_NAME="${{ inputs.bin_name }}"
+        export DOCKERFILE= "${{ inputs.dockerfile }}"
+        bash ${{ github.action_path }}/scripts/digest_inputs
 
     - name: Setup QEMU in binfmt_misc filesystem
       if: ${{ runner.os != 'Windows' }}
