@@ -160,7 +160,7 @@ runs:
         export ZIP_NAME="${{ inputs.zip_artifact_name }}"
         export BIN_NAME="${{ inputs.bin_name }}"
         export DOCKERFILE="${{ inputs.dockerfile }}"
-        bash ${{ github.action_path }}/scripts/digest_inputs
+        bash $GITHUB_ACTION_PATH/scripts/digest_inputs
 
     - name: Setup QEMU in binfmt_misc filesystem
       if: ${{ runner.os != 'Windows' }}
