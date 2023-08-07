@@ -12,6 +12,11 @@ inputs:
     description: Version of the product, e.g. "X.Y.Z[-pre][+edition]".
     required: true
 
+  os:
+    description: Target image OS.
+    required: true
+    default: "linux"
+
   arch:
     description: Target image architecture.
     required: true
@@ -202,6 +207,7 @@ runs:
         export REVISION="${{ inputs.revision }}"
         export VERSION="${{ inputs.version }}"
         export ARCH="${{ inputs.arch }}"
+        export OS="${{ inputs.os }}"
         export TAGS="${{ inputs.tags }}"
         export REDHAT_TAG="${{ inputs.redhat_tag }}"
         export TARGET="${{ inputs.target }}"

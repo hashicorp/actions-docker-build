@@ -17,6 +17,7 @@ source "${BASH_SOURCE%/*}/validation.bash"
 [ -n "${VERSION:-}"    ] || die "Must set VERSION"
 [ -n "${ARCH:-}"       ] || die "Must set ARCH"
 [ -n "${TARGET:-}"     ] || die "Must set TARGET"
+[ -n "${OS:-}"         ] || die "Must set OS"
 [ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAGS or REDHAT_TAG"
 [ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAGS or REDHAT_TAG (not both)"
 
@@ -124,10 +125,6 @@ fi
 add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
 
 # Get some basic info needed to building and tagging the docker image.
-
-# OS is hard-coded here only, so if we later want to support other OSs,
-# we'll be able to easily parameterize it.
-OS="linux"
 
 add_vars TARGET OS ARCH VERSION REVISION
 
