@@ -198,7 +198,22 @@ runs:
     - name: Docker Build
       if: ${{ runner.os == 'Windows' }}
       shell: bash
-      run: bash $GITHUB_ACTION_PATH/scripts/docker_build
+      run: |
+        export REVISION="${{ inputs.revision }}"
+        export VERSION="${{ inputs.version }}"
+        export ARCH="${{ inputs.arch }}"
+        export TAGS="${{ inputs.tags }}"
+        export REDHAT_TAG="${{ inputs.redhat_tag }}"
+        export TARGET="${{ inputs.target }}"
+        export DEV_TAGS="${{ inputs.dev_tags }}"
+        export PUSH_AUTO_DEV_TAGS="${{ inputs.push_auto_dev_tags }}"
+        export ARM_VERSION="${{ inputs.arm_version }}"
+        export PKG_NAME="${{ inputs.pkg_name }}"
+        export WORKDIR="${{ inputs.workdir }}"
+        export ZIP_NAME="${{ inputs.zip_artifact_name }}"
+        export BIN_NAME="${{ inputs.bin_name }}"
+        export DOCKERFILE="${{ inputs.dockerfile }}"
+        bash $GITHUB_ACTION_PATH/scripts/docker_build
 
     - name: Run Test
       if: ${{ runner.os == 'linux/amd64' && inputs.smoke_test != '' }}
