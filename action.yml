@@ -167,10 +167,11 @@ runs:
       shell: bash
       run: bash ${{ github.action_path }}/scripts/register_qemu_binfmt
 
-    - name: Setup QEMU in binfmt_misc filesystem
-      if: ${{ runner.os == 'Windows' }}
-      shell: bash
-      run: bash $GITHUB_ACTION_PATH/scripts/register_qemu_binfmt
+# Skipping because https://hub.docker.com/r/tonistiigi/binfmt/tags?page=1 doesn't have windows distro
+#    - name: Setup QEMU in binfmt_misc filesystem
+#      if: ${{ runner.os == 'Windows' }}
+#      shell: bash
+#      run: bash $GITHUB_ACTION_PATH/scripts/register_qemu_binfmt
 
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
