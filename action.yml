@@ -195,6 +195,13 @@ runs:
       shell: bash
       run: bash ${{ github.action_path}}/scripts/docker_build
 
+    - name: Install Docker Buildx
+      if: ${{ runner.os == 'Windows' }}
+      shell: bash
+      run: |
+        mkdir -p $HOME/.docker/cli-plugins
+        Invoke-WebRequest -UseBasicParsing -OutFile $HOME/.docker/cli-plugins/docker-buildx.exe https://github.com/docker/buildx/releases/download/v0.6.3/buildx-v0.6.3.windows-amd64.exe
+
     - name: Docker Build
       if: ${{ runner.os == 'Windows' }}
       shell: bash
@@ -213,6 +220,7 @@ runs:
         export ZIP_NAME="${{ inputs.zip_artifact_name }}"
         export BIN_NAME="${{ inputs.bin_name }}"
         export DOCKERFILE="${{ inputs.dockerfile }}"
+        export DOCKER_CLI_EXPERIMENTAL=enabled
         bash $GITHUB_ACTION_PATH/scripts/docker_build
 
     - name: Run Test
