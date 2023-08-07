@@ -244,7 +244,7 @@ runs:
 
     - name: Upload Prod Tarball
       uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
-      if: ${{ env.TAGS != '' }}
+      if: ${{ env.TAGS != '' && runner.os != 'Windows' }}
       with:
         name: ${{ env.TARBALL_NAME }}
         path: ${{ env.TARBALL_NAME }}
@@ -252,7 +252,7 @@ runs:
 
     - name: Upload Dev Tarball
       uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
-      if: ${{ env.DEV_TAGS != '' }}
+      if: ${{ env.DEV_TAGS != '' && runner.os != 'Windows' }}
       with:
         name: ${{ env.DEV_TARBALL_NAME }}
         path: ${{ env.DEV_TARBALL_NAME }}
@@ -260,7 +260,7 @@ runs:
 
     - name: Upload Red Hat Tarball
       uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
-      if: ${{ env.REDHAT_TAG != '' }}
+      if: ${{ env.REDHAT_TAG != '' && runner.os != 'Windows' }}
       with:
         name: ${{ env.REDHAT_TARBALL_NAME }}
         path: ${{ env.REDHAT_TARBALL_NAME }}
