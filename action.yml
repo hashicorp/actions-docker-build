@@ -117,6 +117,7 @@ runs:
       run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
 
     - name: Digest Inputs - Calculate Variables for Later Steps
+      if: ${{ env.PLATFORM != 'windows' }}
       shell: bash
       env:
 
@@ -141,9 +142,41 @@ runs:
 
       run: ${{ github.action_path }}/scripts/digest_inputs
 
+    - name: Digest Inputs - Calculate Variables for Later Steps Windows
+      if: ${{ env.PLATFORM == 'windows' }}
+      shell: bash
+      env:
+
+        # Required.
+        REVISION: "${{ inputs.revision }}"
+        VERSION: "${{ inputs.version }}"
+        ARCH: "${{ inputs.arch }}"
+        TAGS: "${{ inputs.tags }}"
+        REDHAT_TAG: "${{ inputs.redhat_tag }}"
+        TARGET: "${{ inputs.target }}"
+
+        # Optional.
+        DEV_TAGS: "${{ inputs.dev_tags }}"
+        PUSH_AUTO_DEV_TAGS: "${{ inputs.push_auto_dev_tags }}"
+        ARM_VERSION: "${{ inputs.arm_version }}"
+        PKG_NAME: "${{ inputs.pkg_name }}"
+        WORKDIR: "${{ inputs.workdir }}"
+        ZIP_NAME: "${{ inputs.zip_artifact_name }}"
+        BIN_NAME: "${{ inputs.bin_name }}"
+
+        DOCKERFILE: "${{ inputs.dockerfile }}"
+
+      run: ${{ github.action_path }}\scripts\digest_inputs
+
     - name: Setup QEMU in binfmt_misc filesystem
+      if: ${{ env.PLATFORM != 'windows' }}
       shell: bash
       run: ${{ github.action_path }}/scripts/register_qemu_binfmt
+
+    - name: Setup QEMU in binfmt_misc filesystem
+      if: ${{ env.PLATFORM == 'windows' }}
+      shell: bash
+      run: ${{ github.action_path }}\scripts\register_qemu_binfmt
 
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
@@ -153,13 +186,24 @@ runs:
         name: ${{ env.ZIP_NAME }}
 
     - name: Extract Product Zip Artifact
-      if: ${{ inputs.do_zip_extract_step == 'true' }}
+      if: ${{ inputs.do_zip_extract_step == 'true' && env.PLATFORM != 'windows' }}
       shell: bash
       run: ${{ github.action_path }}/scripts/extract_product_zip
 
+    - name: Extract Product Zip Artifact
+      if: ${{ inputs.do_zip_extract_step == 'true' && env.PLATFORM == 'windows' }}
+      shell: bash
+      run: ${{ github.action_path }}\scripts\extract_product_zip
+
     - name: Docker Build
+      if: ${{ env.PLATFORM != 'windows' }}
       shell: bash
       run: ${{ github.action_path}}/scripts/docker_build
+
+    - name: Docker Build
+      if: ${{ env.PLATFORM == 'windows' }}
+      shell: bash
+      run: ${{ github.action_path}}\scripts\docker_build
 
     - name: Run Test
       if: ${{ env.PLATFORM == 'linux/amd64' && inputs.smoke_test != '' }}
@@ -169,6 +213,12 @@ runs:
         IMAGE_NAME: ${{env.AUTO_TAG}}
 
     - name: Generate Docker metadata
+      if: ${{ env.PLATFORM == 'windows' }}
+      shell: bash
+      run: ${{ github.action_path}}\scripts\create_metadata
+
+    - name: Generate Docker metadata
+      if: ${{ env.PLATFORM != 'windows' }}
       shell: bash
       run: ${{ github.action_path}}/scripts/create_metadata
 
