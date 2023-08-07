@@ -197,7 +197,7 @@ runs:
 
     - name: Install Docker Buildx
       if: ${{ runner.os == 'Windows' }}
-      shell: bash
+      shell: powershell
       run: |
         mkdir -p $HOME/.docker/cli-plugins
         Invoke-WebRequest -UseBasicParsing -OutFile $HOME/.docker/cli-plugins/docker-buildx.exe https://github.com/docker/buildx/releases/download/v0.6.3/buildx-v0.6.3.windows-amd64.exe
