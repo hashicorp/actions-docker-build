@@ -195,14 +195,6 @@ runs:
       shell: bash
       run: bash ${{ github.action_path}}/scripts/docker_build
 
-    - name: Install Docker Buildx
-      if: ${{ runner.os == 'Windows' }}
-      shell: bash
-      run: |
-        mkdir -p $HOME/.docker/cli-plugins
-        curl -o $HOME/.docker/cli-plugins/docker-buildx.exe https://github.com/docker/buildx/releases/download/v0.11.2/buildx-v0.11.2.windows-arm64.exe
-        chmod +x $HOME/.docker/cli-plugins/docker-buildx.exe
-
     - name: Docker Build
       if: ${{ runner.os == 'Windows' }}
       shell: bash
@@ -222,7 +214,7 @@ runs:
         export BIN_NAME="${{ inputs.bin_name }}"
         export DOCKERFILE="${{ inputs.dockerfile }}"
         export DOCKER_CLI_EXPERIMENTAL=enabled
-        bash $GITHUB_ACTION_PATH/scripts/docker_build
+        bash $GITHUB_ACTION_PATH/scripts/docker_build_windows
 
     - name: Run Test
       if: ${{ runner.os == 'linux/amd64' && inputs.smoke_test != '' }}

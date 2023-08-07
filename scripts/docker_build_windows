@@ -1,0 +1,71 @@
+set -Eeuo pipefail
+
+die() { echo "$1" 1>&2; exit 1; }
+
+# Required env vars.
+[ -n "${BIN_NAME:-}" ] || die "Must set BIN_NAME"
+[ -n "${VERSION:-}" ] || die "Must set VERSION"
+[ -n "${REVISION:-}" ] || die "Must set REVISION"
+[ -n "${DOCKERFILE:-}" ] || die "Must set DOCKERFILE"
+[ -n "${TARGET:-}" ] || die "Must set TARGET"
+[ -n "${TARBALL_NAME:-}" ] || die "Must set TARBALL_NAME"
+[ -n "${DEV_TARBALL_NAME:-}" ] || die "Must set DEV_TARBALL_NAME"
+[ -n "${REDHAT_TARBALL_NAME:-}" ] || die "Must set REDHAT_TARBALL_NAME"
+[ -n "${PLATFORM:-}" ] || die "Must set PLATFORM"
+[ -n "${AUTO_TAG:-}" ] || die "Must set AUTO_TAG"
+[ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG"
+[ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG (not both)"
+
+
+WORKDIR="${WORKDIR:-.}"
+
+export DEV_TAGS="${DEV_TAGS:-}"
+export REDHAT_TAG="${REDHAT_TAG:-}"
+
+# Convert all contiguous blocks of whitespace to single spaces using xargs.
+# This is needed to get all tags on one line for the read -ra below.
+PROD_TAGS="$(xargs <<< "$TAGS")"
+DEV_TAGS="$(xargs <<< "$DEV_TAGS")"
+
+read -ra DEV_TAGS_A <<< "$DEV_TAGS"
+read -ra PROD_TAGS_A <<< "$PROD_TAGS"
+
+ALL_TAGS=("${DEV_TAGS_A[@]}")
+ALL_TAGS+=("$AUTO_TAG")
+ALL_TAGS+=("${PROD_TAGS_A[@]}")
+if [ -n "$REDHAT_TAG" ]; then
+	ALL_TAGS+=("${REDHAT_TAG}")
+fi
+echo "ALL_TAGS:" "${ALL_TAGS[@]}"
+
+
+for T in "${ALL_TAGS[@]}"; do
+	TAG_FLAGS+=("--tag=$T")
+done
+
+BUILD_ARGS=("BIN_NAME=$BIN_NAME")
+BUILD_ARGS+=("PRODUCT_VERSION=$VERSION")
+BUILD_ARGS+=("PRODUCT_REVISION=$REVISION")
+
+for B in "${BUILD_ARGS[@]}"; do
+	BA_FLAGS+=("--build-arg=$B")
+done
+
+TARBALL_PATH="$PWD/$TARBALL_NAME"
+DEV_TARBALL_PATH="$PWD/$DEV_TARBALL_NAME"
+REDHAT_TARBALL_PATH="$PWD/$REDHAT_TARBALL_NAME"
+
+cd "$WORKDIR"
+
+echo "==> Building image with tags:"
+for T in "${ALL_TAGS[@]}"; do
+  echo "    - $T"
+done
+
+docker build --load \
+  --target "$TARGET" \
+  --platform "$PLATFORM" \
+  "${TAG_FLAGS[@]}" \
+  "${BA_FLAGS[@]}" \
+  -f "$DOCKERFILE" \
+  .
