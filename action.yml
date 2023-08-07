@@ -153,6 +153,7 @@ runs:
       run: |
         export REVISION="${{ inputs.revision }}"
         export VERSION="${{ inputs.version }}"
+        export OS="${{ inputs.os }}"
         export ARCH="${{ inputs.arch }}"
         export TAGS="${{ inputs.tags }}"
         export REDHAT_TAG="${{ inputs.redhat_tag }}"
