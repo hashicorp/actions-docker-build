@@ -145,7 +145,7 @@ runs:
     - name: Digest Inputs - Calculate Variables for Later Steps Windows
       if: ${{ runner.os == 'Windows' }}
       shell: bash
-      run:
+      run: |
         export REVISION="${{ inputs.revision }}"
         export VERSION="${{ inputs.version }}"
         export ARCH="${{ inputs.arch }}"
