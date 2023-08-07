@@ -159,7 +159,7 @@ runs:
         export WORKDIR="${{ inputs.workdir }}"
         export ZIP_NAME="${{ inputs.zip_artifact_name }}"
         export BIN_NAME="${{ inputs.bin_name }}"
-        export DOCKERFILE= "${{ inputs.dockerfile }}"
+        export DOCKERFILE="${{ inputs.dockerfile }}"
         bash ${{ github.action_path }}/scripts/digest_inputs
 
     - name: Setup QEMU in binfmt_misc filesystem
