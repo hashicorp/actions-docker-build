@@ -1,4 +1,4 @@
-d#!/usr/bin/env bash
+#!/usr/bin/env bash
 
 # disable unused variable checking, as this script's purpose
 # is just to populate env vars for later scripts.
@@ -127,8 +127,6 @@ add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
 
 # Get some basic info needed to building and tagging the docker image.
 
-# OS is hard-coded here only, so if we later want to support other OSs,
-# we'll be able to easily parameterize it.
 case "$(uname -s)" in
     Linux*)     OS=linux;;
     Darwin*)    OS=osx;;
