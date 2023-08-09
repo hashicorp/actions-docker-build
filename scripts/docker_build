@@ -59,13 +59,13 @@ REDHAT_TARBALL_PATH="$PWD/$REDHAT_TARBALL_NAME"
 
 cd "$WORKDIR"
 
-BUILDX_BUILDER=$(docker buildx create)
 
 echo "==> Building image with tags:"
 for T in "${ALL_TAGS[@]}"; do
   echo "    - $T"
 done
 
+BUILDX_BUILDER=$(docker buildx create)
 docker buildx build --load \
   --target "$TARGET" \
   --platform "$PLATFORM" \
