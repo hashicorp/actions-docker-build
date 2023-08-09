@@ -52,6 +52,16 @@ BUILD_ARGS+=("PRODUCT_REVISION=$REVISION")
 for B in "${BUILD_ARGS[@]}"; do
 	BA_FLAGS+=("--build-arg=$B")
 done
+if [[ "$OS" == "windows" ]]; then
+  # Warning: Our Dockerfiles refer to TARGETOS and TARGETARCH.
+  # They claim it's set "automatically when --platform is provided."
+  # Lies.
+  # Maybe that's a buildx feature, because build doesn't. So we need to manually inject it.
+  BA_FLAGS+=(
+    "--build-arg=TARGETOS=${$PLATFORM%_*}"
+    "--build-arg=TARGETARCH=${$PLATFORM#*_}"
+  )
+fi
 
 TARBALL_PATH="$PWD/$TARBALL_NAME"
 DEV_TARBALL_PATH="$PWD/$DEV_TARBALL_NAME"
