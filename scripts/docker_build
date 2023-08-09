@@ -75,7 +75,7 @@ docker buildx build --load \
   -f "$DOCKERFILE" \
   .
 else
-  docker build --output=type=docker \
+  docker build \
   --target "$TARGET" \
   --platform "$PLATFORM" \
   "${TAG_FLAGS[@]}" \
