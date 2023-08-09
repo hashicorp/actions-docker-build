@@ -65,7 +65,8 @@ for T in "${ALL_TAGS[@]}"; do
   echo "    - $T"
 done
 
-#BUILDX_BUILDER=$(docker buildx create)
+if [[ "$OS" == "linux" ]]; then
+docker buildx create --use
 docker buildx build --load \
   --target "$TARGET" \
   --platform "$PLATFORM" \
@@ -73,6 +74,15 @@ docker buildx build --load \
   "${BA_FLAGS[@]}" \
   -f "$DOCKERFILE" \
   .
+else
+  docker build --load \
+  --target "$TARGET" \
+  --platform "$PLATFORM" \
+  "${TAG_FLAGS[@]}" \
+  "${BA_FLAGS[@]}" \
+  -f "$DOCKERFILE" \
+  .
+fi
 
 # validate version label is set to the correct value
 version_label_validation() {
