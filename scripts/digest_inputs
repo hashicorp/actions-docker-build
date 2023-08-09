@@ -133,6 +133,7 @@ case "$(uname -s)" in
     Linux*)     OS=linux;;
     Darwin*)    OS=osx;;
     CYGWIN*)    OS=windows;;
+    MINGW*)     OS=windows;;
     *)
         echo "Unsupported OS: $(uname -s)"
         exit 1
