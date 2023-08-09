@@ -75,6 +75,7 @@ docker buildx build --load \
   -f "$DOCKERFILE" \
   .
 else
+  (set -x;
   docker build \
   --target "$TARGET" \
   --platform "$PLATFORM" \
@@ -82,6 +83,7 @@ else
   "${BA_FLAGS[@]}" \
   -f "$DOCKERFILE" \
   .
+  )
 fi
 
 # validate version label is set to the correct value
