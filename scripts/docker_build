@@ -65,7 +65,7 @@ for T in "${ALL_TAGS[@]}"; do
   echo "    - $T"
 done
 
-BUILDX_BUILDER=$(docker buildx create)
+#BUILDX_BUILDER=$(docker buildx create)
 docker buildx build --load \
   --target "$TARGET" \
   --platform "$PLATFORM" \
