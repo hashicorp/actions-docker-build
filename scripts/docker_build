@@ -58,8 +58,8 @@ if [[ "$OS" == "windows" ]]; then
   # Lies.
   # Maybe that's a buildx feature, because build doesn't. So we need to manually inject it.
   BA_FLAGS+=(
-    "--build-arg=TARGETOS=${PLATFORM%_*}"
-    "--build-arg=TARGETARCH=${PLATFORM#*_}"
+    "--build-arg=TARGETOS=${PLATFORM%/*}"
+    "--build-arg=TARGETARCH=${PLATFORM#*/}"
   )
 fi
 
