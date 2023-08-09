@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+d#!/usr/bin/env bash
 
 # disable unused variable checking, as this script's purpose
 # is just to populate env vars for later scripts.
@@ -129,7 +129,15 @@ add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
 
 # OS is hard-coded here only, so if we later want to support other OSs,
 # we'll be able to easily parameterize it.
-OS="linux"
+case "$(uname -s)" in
+    Linux*)     OS=linux;;
+    Darwin*)    OS=osx;;
+    CYGWIN*)    OS=windows;;
+    *)
+        echo "Unsupported OS: $(uname -s)"
+        exit 1
+        ;;
+esac
 
 add_vars TARGET OS ARCH VERSION REVISION
 
