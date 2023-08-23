@@ -120,7 +120,7 @@ runs:
       shell: bash
       run: |
         if [[ "${{ runner.os }}" == "windows" ]]; then
-          echo "Release: ${{ runner.os }}"
+          echo "Release: ${{ runner.release }}"
         else
           echo ""
         fi
