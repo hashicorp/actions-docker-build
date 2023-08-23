@@ -116,6 +116,15 @@ runs:
       shell: bash
       run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
 
+    - name: Set OS version
+      shell: bash
+      run: |
+        if [[ "${{ runner.os }}" == "windows" ]]; then
+          echo "Release: ${{ runner.os }}"
+        else
+          echo ""
+        fi
+
     - name: Digest Inputs - Calculate Variables for Later Steps
       shell: bash
       env:

@@ -33,6 +33,7 @@ DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 TAGS="${TAGS:-}"
 REDHAT_TAG="${REDHAT_TAG:-}"
 PUSH_AUTO_DEV_TAGS="${PUSH_AUTO_DEV_TAGS:=false}"
+OS_VERSION=""${OS_VERSION:-}"
 
 # Strip version to MAJOR.MINOR
 get_minor_version() {
