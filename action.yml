@@ -120,7 +120,7 @@ runs:
       shell: bash
       run: |
         if [[ "${{ runner.os }}" == "windows" ]]; then
-          winver
+          ver
         else
           echo ""
         fi
