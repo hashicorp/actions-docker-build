@@ -139,6 +139,10 @@ case "$(uname -s)" in
         ;;
 esac
 
+if [[ $OS == "windows" ]]; then
+  OS=$OS-$OS_VERSION
+fi
+
 add_vars TARGET OS ARCH VERSION REVISION
 
 # Determine package name used for default zip file name.

@@ -116,13 +116,23 @@ runs:
       shell: bash
       run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
 
-    - name: Set OS version
+    - name: Get windows version
+      if: runner.os == 'Windows'
+      id: windows-version
+      shell: pwsh
+      run: |
+        $info = Get-ComputerInfo | select OsHardwareAbstractionLayer
+        $version = $info.OsHardwareAbstractionLayer
+        Write-Output "os-version=$($version)" >> $Env:GITHUB_OUTPUT
+
+    - name: Get os version
+      id: os-version
       shell: bash
       run: |
-        if [[ "${{ runner.os }}" == "windows" ]]; then
-          ver
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          echo "os-version=${{ steps.windows-version.outputs.os-version }}" >> "$GITHUB_OUTPUT"
         else
-          echo ""
+          echo "os-version=" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Digest Inputs - Calculate Variables for Later Steps
@@ -147,6 +157,8 @@ runs:
         BIN_NAME: "${{ inputs.bin_name }}"
 
         DOCKERFILE: "${{ inputs.dockerfile }}"
+
+        OS_VERSION: "${{ steps.os-version.outputs.os-version }}"
 
       run: $GITHUB_ACTION_PATH/scripts/digest_inputs
 
