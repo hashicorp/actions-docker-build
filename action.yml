@@ -121,9 +121,9 @@ runs:
       id: windows-version
       shell: pwsh
       run: |
-        $info = Get-ComputerInfo | select OsHardwareAbstractionLayer
-        $version = $info.OsHardwareAbstractionLayer
-        Write-Output "os-version=$($version)" >> $Env:GITHUB_OUTPUT
+        $info = Get-ComputerInfo | select OsName
+        $version = $info.OsName -split " "
+        Write-Output "os-version=$($version[3])" >> $Env:GITHUB_OUTPUT
 
     - name: Get os version
       id: os-version
