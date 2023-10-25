@@ -119,7 +119,6 @@ runs:
     - name: Get windows version
       if: runner.os == 'Windows'
       id: windows-version
-      shell: pwsh
       run: |
         $info = Get-ComputerInfo | select OsName
         $version = $info.OsName -split " "
