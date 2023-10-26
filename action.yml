@@ -8,7 +8,7 @@ description: Builds and stores Docker images.
 inputs:
 
   # Required explicit inputs.
-  VERSION:
+  version:
     description: Version of the product, e.g. "X.Y.Z[-pre][+edition]".
     required: true
 
