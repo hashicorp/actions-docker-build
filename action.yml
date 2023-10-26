@@ -131,6 +131,7 @@ runs:
       id: os-version
       shell: bash
       run: |
+        echo "Version from OS version calculation ${{steps.windows-version.outputs.os-version}}"
         if [[ "${{ runner.os }}" == "Windows" ]]; then
           echo "os-version=${{ steps.windows-version.outputs.os-version }}" >> "$GITHUB_OUTPUT"
         else
