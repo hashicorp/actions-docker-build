@@ -120,16 +120,15 @@ runs:
       if: runner.os == 'Windows'
       id: windows-version
       shell: powershell
+      # language=Powershell
       run: |
-        $info = Get-ComputerInfo | select OsName
-        $version = $info.OsName -split " "
-        echo $info
-        echo $version
-        Write-Output "os-version=$($version[3])" >> $ENV:GITHUB_OUTPUT
+        $version = Get-CimInstance -ClassName Win32_OperatingSystem | Select-Object -Property Version
+        Write-Output "os-version=$version" >> $ENV:GITHUB_OUTPUT
 
     - name: Get os version
       id: os-version
       shell: bash
+      # language=Powershell
       run: |
         echo "Version from OS version calculation ${{steps.windows-version.outputs.os-version}}"
         if [[ "${{ runner.os }}" == "Windows" ]]; then
