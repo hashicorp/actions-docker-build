@@ -125,7 +125,7 @@ runs:
         $version = $info.OsName -split " "
         echo $info
         echo $version
-        Write-Output "os-version=$($version[3])" >> $Env:GITHUB_OUTPUT
+        Write-Output "os-version=$($version[3])" >> $ENV:GITHUB_OUTPUT
 
     - name: Get os version
       id: os-version
