@@ -121,7 +121,7 @@ runs:
       shell: powershell
       # language=powershell
       run: |
-        $version = Get-CimInstance -ClassName Win32_OperatingSystem | Select-Object -Property Version
+        $version = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" | Select-Object -Property ReleaseId
         Write-Output "os-version=$version" >> $ENV:GITHUB_OUTPUT
 
     - name: Get os version
