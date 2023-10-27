@@ -48,7 +48,7 @@ inputs:
 
   arm_version:
     description: Version of arm architecture to use (ignored unless arch == arm).
-    default: 6
+    default: "6"
 
   smoke_test:
     description: >
@@ -102,8 +102,7 @@ inputs:
 
   do_zip_extract_step:
     description: Should zip archives be extracted? (optional)
-    default: true
-    type: boolean
+    default: "true"
 
 # action runner (golang:latest image)
 runs:
@@ -120,7 +119,7 @@ runs:
       if: runner.os == 'Windows'
       id: windows-version
       shell: powershell
-      # language=Powershell
+      # language=powershell
       run: |
         $version = Get-CimInstance -ClassName Win32_OperatingSystem | Select-Object -Property Version
         Write-Output "os-version=$version" >> $ENV:GITHUB_OUTPUT
@@ -128,7 +127,6 @@ runs:
     - name: Get os version
       id: os-version
       shell: bash
-      # language=Powershell
       run: |
         echo "Version from OS version calculation ${{steps.windows-version.outputs.os-version}}"
         if [[ "${{ runner.os }}" == "Windows" ]]; then
