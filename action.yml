@@ -121,7 +121,7 @@ runs:
       shell: powershell
       # language=powershell
       run: |
-        $version = Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" | Select-Object -Property ReleaseId
+        $version = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").LCUVer
         Write-Output "os-version=$version" >> $ENV:GITHUB_OUTPUT
 
     - name: Get os version
