@@ -35,10 +35,6 @@ REDHAT_TAG="${REDHAT_TAG:-}"
 PUSH_AUTO_DEV_TAGS="${PUSH_AUTO_DEV_TAGS:=false}"
 OS_VERSION="${OS_VERSION:-}"
 
-if [[ "$OS" == "windows" ]]; then
-  BIN_NAME="${BIN_NAME:-}.exe"
-fi
-
 # Strip version to MAJOR.MINOR
 get_minor_version() {
   MINOR=$(cut -c 1-3 <<< "$1")
@@ -196,6 +192,9 @@ BIN_NAME_GUESSED=false
 # Guess bin name if none provided.
 if [ -z "$BIN_NAME" ]; then
   BIN_NAME="$REPO_NAME_MINUS_ENTERPRISE"
+  if [[ "$OS" == "windows" ]]; then
+  BIN_NAME="${BIN_NAME:-}.exe"
+  fi
   BIN_NAME_GUESSED=true
 fi
 
