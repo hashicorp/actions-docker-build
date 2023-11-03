@@ -278,66 +278,93 @@ images need to be stitched together using `docker manifest create`.
 ## FAQ
 **Q: How do I create create a multi-arch manifest?**
 
-A: The Docker output type does NOT support exporting multi-arch manifests. The OCI type (which is recommended) does not support mulit-platform builds: https://github.com/docker/roadmap/issues/371.
+A: Invoke `actions-docker-build` and to generate one image per platform and use the same tags for all of them. CRT will see the multiple images with the shared tag and merge them together into a manifest for publishing.
 
-**Q: What happens when we are asked to create a manifest from two different images that have the same platform?**
+Here's an example that one manifest tag `1.0.0` with all the platforms:
 
-A: In the old action, one of the images would get dropped/discarded. In the new action, both images will get included in the manifest. It will get shipped together without issue. However, what the end-user client does with that is up to them. The likely result, based on the [suggested algorithm](https://github.com/opencontainers/image-spec/issues/581#issuecomment-304668722) is:
+```yaml
+docker:
+  strategy:
+    matrix:
+      include:
+        - {arch: "386"}
+        - {arch: "amd64"}
+        - {arch: "arm"}
+        - {arch: "arm64"}
+  steps:
+    - uses: hashicorp/actions-docker-build@latest
+      with:
+        version: 1.0
+        arch: ${{matrix.arch}}
+        tags: docker.io/hashicorp/my-product:1.0.0
+```
+
+In this example, in addition to the manifest list with all platforms `1.0.0-dev`, we also create per-arch tags. But generally, we would recommend pushing them in a combined set for a consistent look and feel for users.
+
+```yaml
+with:
+  dev-tags:
+     docker.io/hashicorppreview/my-product:1.0.0-dev
+     docker.io/hashicorppreview/my-product:1.0.0-dev-${{matrix.arch}}
+```
+
+Background: Unfortunately the doocker output type does NOT support exporting multi-arch manifests. There is an OCI type but it does not yet support mulit-platform builds https://github.com/docker/roadmap/issues/371.
+
+**Q: What happens when we are asked to create a manifest from two different images that share a tag but have the same platform?**
+
+A: Previously, one of the images would get dropped/discarded. CRT will reject the publishing of a manifest list in this manner.
+
+Background: Technically, we could publish them. However, what the end-user client does with that is up to them. The likely result, based on the [suggested algorithm](https://github.com/opencontainers/image-spec/issues/581#issuecomment-304668722) is:
 > If there are more than one image manifests matching user's request, return an error.
 
-So we fail the input by blocking publishing when this happens.
+So we fail the input by blocking publishing when this happens. If one has identified a situtation where this is useful behavior or the support is required, please let us know! We'd very much like to hear from you.
 
 **Q: I am adding Windows Docker image support to my repo, but the workflow is throwing a `Must set VERSION` error. Why am I getting this error?**
 
-A: There is a step in Docker build that calculate all the digest inputs. This calculation sets environment variables needed to build a Docker image and one of the variable is uppercase `VERSION`. Environment variables in Windows are not case-sensitive. If the build step defines the `version` variable in lower case, Windows thinks the `version` variable already exists so it does not set the upper case `VERSION` variable. To fix this, make sure to set your `version` environment variable in the build step to a different name, something like `env-version`:
-```
-  build-docker-default:
-    name: Docker ${{ matrix.os }} ${{ matrix.arch }} default release build
-    needs:
-      - get-product-version
-      - build
-    runs-on: ["self-hosted", "ondemand", "os=${{ matrix.runson }}"]
-    strategy:
-      matrix:
-        include:
-          - {runson: "windows-2019", os: "windows", arch: "amd64", bin: ".exe", dockerfile: "Dockerfile.windows-2019"}
-          # Note: windows ~~ windows-2022
-          - {runson: "windows", os: "windows", arch: "amd64", bin: ".exe", dockerfile: "Dockerfile.windows-2022"}
-          - {runson: "linux", os: "linux", arch: "386", dockerfile: "Dockerfile"}
-          - {runson: "linux", os: "linux", arch: "amd64", dockerfile: "Dockerfile"}
-          - {runson: "linux", os: "linux", arch: "arm", dockerfile: "Dockerfile"}
-          - {runson: "linux", os: "linux", arch: "arm64", dockerfile: "Dockerfile"}
+A: There is a step in Docker build that calculate all the digest inputs. This calculation sets environment variables needed to build a Docker image and one of the variable is uppercase `VERSION`. Environment variables in Windows are not case-sensitive. If the build step defines the `version` variable in lower case, Windows thinks the `version` variable already exists so it does not set the upper case `VERSION` variable. 
+
+To fix this, make sure to set your `version` environment variable in the build step to a different name, something like `env-version`:
+
+```yaml
+  windows-docker:
     env:
       repo: ${{github.event.repository.name}}
+      # this will fail, rename the variable
+      # version: ${{needs.get-product-version.outputs.product-version}}
       env-version: ${{needs.get-product-version.outputs.product-version}}
-```
-
-**Q:The Windows docker build is in the COPY layer but is failing with `file not found in build context or excluded by .dockerignore:...file does not exist`. How do I fix this?**
-
-A: Make sure you set the binary extension in the Windows Matrix:
-```
-- {runson: "windows-2019", os: "windows", arch: "amd64", bin: ".exe", dockerfile: "Dockerfile.windows-2019"}
-```
-Then specify the `pkg_name` and `bin_name` inputs in `actions-docker-build` step:
-```
-      - uses: hashicorp/actions-docker-build@releng/windows-test
+    steps:
+      - uses: hashicorp/actions-docker-build@latest
         with:
-          smoke_test: |
-            TEST_VERSION="$(docker run "${IMAGE_NAME}" helloworld --version | awk '/helloworld /{print $2}')"
-            if [ "${TEST_VERSION}" != "v${VERSION}" ]; then
-              echo "Test FAILED"
-              exit 1
-            fi
-            echo "Test PASSED"
-          version: ${{env.env-version}}
-          target: release-default
-          dockerfile: ${{matrix.dockerfile}}
-          arch: ${{matrix.arch}}
-          pkg_name: helloworld_${{ env.env-version }}
-          bin_name: helloworld${{ matrix.bin }}
-          tags: |
-            docker.io/hashicorp/${{env.repo}}:${{env.env-version}}
-            public.ecr.aws/hashicorp/${{env.repo}}:${{env.env-version}}
+          version: ${{ env.env-version }}
+```
+
+**Q: The Windows docker build is in the COPY layer but is failing with `file not found in build context or excluded by .dockerignore:...file does not exist`. How do I fix this?**
+
+A: Windows binaries should have an `.exe` suffix on them, so we need to make sure the `bin_name` input is correct for the OS.
+
+Specify the `pkg_name` and `bin_name` inputs in the build step:
+
+```yaml
+  - uses: hashicorp/actions-docker-build@latest
+    with:
+      pkg_name: helloworld_1.0.0
+      bin_name: helloworld${{ matrix.bin }}
+```
+
+In a matrix, this might look like:
+
+```yaml
+docker:
+  strategy:
+    matrix:
+      include:
+        - {os: "windows", arch: "amd64", bin: ".exe", }
+        - {os: "linux", arch: "amd64"}
+  steps:
+    - uses: hashicorp/actions-docker-build@latest
+      with:
+        pkg_name: helloworld_1.0.0
+        bin_name: helloworld${{ matrix.bin }}
 ```
 
 **Q: How can I submit an image to multiple repositories?**
@@ -347,9 +374,25 @@ A: You need to define the following inputs in the `actions-docker-build` step: \
 `dev_tags:` to push to hashicorpreview \
 `redhat_tag:` to push to Red Hat registry
 
-**Q: How do I make sure tag X is marked as latest?"
+**Q: How do I make sure tag X is also published as "latest"?**
 
-A: The tag should be defined under the release default target build for each image type - Docker, Red Hat, etc.
+A: CRT will update `latest` to the *first* tag in alphabetical order. The image must also have a `LABEL version=x.y.z` defined. 
+
+We do not currently support updating other aliases, if needed please add the appropriate tag to the build.
+
+Before updating an alias, CRT will confirm the new image is a _newer_ version than the currently published under that alias. This check is performed by reading the `version` label on the image. Multi-image manifests must all have the same `version`.
+
+Only stable releases will be allowed.
+
+| New version     | Existing `latest` | Will update? |
+| --------------- | ----------------- | ------------ |
+| `1.0.0`         | (missing tag)     | ✅ |
+| `1.0.0`         | (missing label)   | ✖️ |
+| `1.0.0-rc1`     | `2.0.0`           | ⚠️ |
+| `1.0.0-rc1`     | `1.0.0`           | ✔️ (noop) |
+| `1.0.0`         | `2.0.0`           | ⚠️ |
+| `2.0.5`         | `2.0.0`           | ✅ |
+| (missing label) | `2.0.0`           | ✖️ |
 
 ## Releasing This Action
 
