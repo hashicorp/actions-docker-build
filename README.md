@@ -40,7 +40,7 @@ is affected. Therefore you should only use tags for the following services:
 Because this action is designed to enable continuous delivery and testing of
 container images, containing continuously delivered product binaries, the Dockerfile
 must always COPY a _local_ product binary, rather than pulling a binary from
-elsewhere. Therefore, prior to calling this action, you should have already built a 
+elsewhere. Therefore, prior to calling this action, you should have already built a
 product binary matching the target platform of the docker image, zipped it
 and stored it as an artifact using the [actions/upload-artifact@v2] action.
 
@@ -64,7 +64,7 @@ see note on `redhat_tag` below.
 ### Action Inputs Explained
 
 - **`version`** is the product version we are building a docker image for.
-- **`revision`** is the revision that's being built. 
+- **`revision`** is the revision that's being built.
   This may differ from the default <github.sha> which is the ref the action was invoked at.
 - **`target`** is the name of the "stage" or "target" in the Dockerfile to build.
 - **`arch`** is the architecture we're building for.
@@ -74,9 +74,9 @@ see note on `redhat_tag` below.
 - **`dev_tags`** is similar to **tags** except these tags are not intended for
   production/final releases; **dev_tags** are typically published much more
   frequently than production tags, and are used for early access to the latest code.
-  Currently `dev_tags` must begin with `[docker.io/]hashicorppreview`. 
-- **`push_auto_dev_tags`** is a flag that can be passed in when calling the action to 
-  define whether the dev tags are pushed. Note that the default behaviour, when dev 
+  Currently `dev_tags` must begin with `[docker.io/]hashicorppreview`.
+- **`push_auto_dev_tags`** is a flag that can be passed in when calling the action to
+  define whether the dev tags are pushed. Note that the default behaviour, when dev
   tags are defined, is to push dev tags:
   - PUSH_AUTO_DEV_TAGS=true & no dev-tags defined: push default dev tags
   - PUSH_AUTO_DEV_TAGS=true & dev-tags defined: push non-default dev tags
@@ -182,7 +182,7 @@ jobs:
           - {go: "1.16", goos: "solaris", goarch: "amd64"}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v2
       - name: Setup go
         uses: actions/setup-go@v2
         with:
@@ -216,7 +216,7 @@ jobs:
           - {arch: "arm64"}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2 
+        uses: actions/checkout@v2
       - name: Build
         uses: hashicorp/actions-docker-build@v1
         with:
@@ -275,6 +275,82 @@ call points all the user-defined tags to the new single-arch image. However, the
 different for each image, is retained after each `docker load` and can be used to identify which
 images need to be stitched together using `docker manifest create`.
 
+## FAQ
+**Q: How do I create create a multi-arch manifest?**
+
+A: The Docker output type does NOT support exporting multi-arch manifests. The OCI type (which is recommended) does not support mulit-platform builds: https://github.com/docker/roadmap/issues/371.
+
+**Q: What happens when we are asked to create a manifest from two different images that have the same platform?**
+
+A: In the old action, one of the images would get dropped/discarded. In the new action, both images will get included in the manifest. It will get shipped together without issue. However, what the end-user client does with that is up to them. The likely result, based on the [suggested algorithm](https://github.com/opencontainers/image-spec/issues/581#issuecomment-304668722) is:
+> If there are more than one image manifests matching user's request, return an error.
+
+So we fail the input by blocking publishing when this happens.
+
+**Q: I am adding Windows Docker image support to my repo, but the workflow is throwing a `Must set VERSION` error. Why am I getting this error?**
+
+A: There is a step in Docker build that calculate all the digest inputs. This calculation sets environment variables needed to build a Docker image and one of the variable is uppercase `VERSION`. Environment variables in Windows are not case-sensitive. If the build step defines the `version` variable in lower case, Windows thinks the `version` variable already exists so it does not set the upper case `VERSION` variable. To fix this, make sure to set your `version` environment variable in the build step to a different name, something like `env-version`:
+```
+  build-docker-default:
+    name: Docker ${{ matrix.os }} ${{ matrix.arch }} default release build
+    needs:
+      - get-product-version
+      - build
+    runs-on: ["self-hosted", "ondemand", "os=${{ matrix.runson }}"]
+    strategy:
+      matrix:
+        include:
+          - {runson: "windows-2019", os: "windows", arch: "amd64", bin: ".exe", dockerfile: "Dockerfile.windows-2019"}
+          # Note: windows ~~ windows-2022
+          - {runson: "windows", os: "windows", arch: "amd64", bin: ".exe", dockerfile: "Dockerfile.windows-2022"}
+          - {runson: "linux", os: "linux", arch: "386", dockerfile: "Dockerfile"}
+          - {runson: "linux", os: "linux", arch: "amd64", dockerfile: "Dockerfile"}
+          - {runson: "linux", os: "linux", arch: "arm", dockerfile: "Dockerfile"}
+          - {runson: "linux", os: "linux", arch: "arm64", dockerfile: "Dockerfile"}
+    env:
+      repo: ${{github.event.repository.name}}
+      env-version: ${{needs.get-product-version.outputs.product-version}}
+```
+
+**Q:The Windows docker build is in the COPY layer but is failing with `file not found in build context or excluded by .dockerignore:...file does not exist`. How do I fix this?**
+
+A: Make sure you set the binary extension in the Windows Matrix:
+```
+- {runson: "windows-2019", os: "windows", arch: "amd64", bin: ".exe", dockerfile: "Dockerfile.windows-2019"}
+```
+Then specify the `pkg_name` and `bin_name` inputs in `actions-docker-build` step:
+```
+      - uses: hashicorp/actions-docker-build@releng/windows-test
+        with:
+          smoke_test: |
+            TEST_VERSION="$(docker run "${IMAGE_NAME}" helloworld --version | awk '/helloworld /{print $2}')"
+            if [ "${TEST_VERSION}" != "v${VERSION}" ]; then
+              echo "Test FAILED"
+              exit 1
+            fi
+            echo "Test PASSED"
+          version: ${{env.env-version}}
+          target: release-default
+          dockerfile: ${{matrix.dockerfile}}
+          arch: ${{matrix.arch}}
+          pkg_name: helloworld_${{ env.env-version }}
+          bin_name: helloworld${{ matrix.bin }}
+          tags: |
+            docker.io/hashicorp/${{env.repo}}:${{env.env-version}}
+            public.ecr.aws/hashicorp/${{env.repo}}:${{env.env-version}}
+```
+
+**Q: How can I submit an image to multiple repositories?**
+
+A: You need to define the following inputs in the `actions-docker-build` step: \
+`tags:` to push to prod DockerHub and ECR registry \
+`dev_tags:` to push to hashicorpreview \
+`redhat_tag:` to push to Red Hat registry
+
+**Q: How do I make sure tag X is marked as latest?"
+
+A: The tag should be defined under the release default target build for each image type - Docker, Red Hat, etc.
+
 ## Releasing This Action
 
 ### Determine the New Version
@@ -315,7 +391,7 @@ Locally fetch the new tag created by the release:
 git fetch vX.Y.Z
 ```
 
-Add the new tags 
+Add the new tags
 
 ```
 git tag -f vX.Y vX.Y.Z
