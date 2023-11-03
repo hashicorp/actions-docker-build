@@ -193,7 +193,7 @@ BIN_NAME_GUESSED=false
 if [ -z "$BIN_NAME" ]; then
   BIN_NAME="$REPO_NAME_MINUS_ENTERPRISE"
   if [[ "$OS" == "windows" ]]; then
-  BIN_NAME="${BIN_NAME:-}.exe"
+  BIN_NAME="${BIN_NAME}.exe"
   fi
   BIN_NAME_GUESSED=true
 fi
