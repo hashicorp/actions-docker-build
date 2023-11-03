@@ -35,6 +35,10 @@ REDHAT_TAG="${REDHAT_TAG:-}"
 PUSH_AUTO_DEV_TAGS="${PUSH_AUTO_DEV_TAGS:=false}"
 OS_VERSION="${OS_VERSION:-}"
 
+if [[ "$OS" == "windows" ]]; then
+  BIN_NAME="${BIN_NAME:-}.exe"
+fi
+
 # Strip version to MAJOR.MINOR
 get_minor_version() {
   MINOR=$(cut -c 1-3 <<< "$1")
