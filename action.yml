@@ -121,7 +121,13 @@ runs:
       shell: powershell
       # language=powershell
       run: |
-        $version = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").LCUVer
+        # $version = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").LCUVer
+        $majorVersion = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentMajorVersionNumber
+        $minorVersion = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentMinorVersionNumber
+        $buildNumber = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").CurrentBuild
+        $ubr = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").UBR
+
+        $version = "$($majorVersion).$($minorVersion).$($buildNumber).$($ubr)"
         Write-Output "os-version=$version" >> $ENV:GITHUB_OUTPUT
 
     - name: Get os version
