@@ -11,7 +11,7 @@ testing of container images in CRT.
 
 -----
 
-This action is used to build and tag a single-architecture Linux Docker image,
+This action is used to build and tag a single-architecture Linux and Windows Docker image,
 and save it as a tarball artifact. Typically the action is called multiple times
 in a workflow, once for each target architecture, and thus multiple such tarball
 artifacts are produced.
@@ -321,7 +321,7 @@ So we fail the input by blocking publishing when this happens. If one has identi
 
 **Q: I am adding Windows Docker image support to my repo, but the workflow is throwing a `Must set VERSION` error. Why am I getting this error?**
 
-A: There is a step in Docker build that calculate all the digest inputs. This calculation sets environment variables needed to build a Docker image and one of the variable is uppercase `VERSION`. Environment variables in Windows are not case-sensitive. If the build step defines the `version` variable in lower case, Windows thinks the `version` variable already exists so it does not set the upper case `VERSION` variable. 
+A: There is a step in Docker build that calculate all the digest inputs. This calculation sets environment variables needed to build a Docker image and one of the variable is uppercase `VERSION`. Environment variables in Windows are not case-sensitive. If the build step defines the `version` variable in lower case, Windows thinks the `version` variable already exists so it does not set the upper case `VERSION` variable.
 
 To fix this, make sure to set your `version` environment variable in the build step to a different name, something like `env-version`:
 
@@ -338,35 +338,6 @@ To fix this, make sure to set your `version` environment variable in the build s
           version: ${{ env.env-version }}
 ```
 
-**Q: The Windows docker build is in the COPY layer but is failing with `file not found in build context or excluded by .dockerignore:...file does not exist`. How do I fix this?**
-
-A: Windows binaries should have an `.exe` suffix on them, so we need to make sure the `bin_name` input is correct for the OS.
-
-Specify the `pkg_name` and `bin_name` inputs in the build step:
-
-```yaml
-  - uses: hashicorp/actions-docker-build@latest
-    with:
-      pkg_name: helloworld_1.0.0
-      bin_name: helloworld${{ matrix.bin }}
-```
-
-In a matrix, this might look like:
-
-```yaml
-docker:
-  strategy:
-    matrix:
-      include:
-        - {os: "windows", arch: "amd64", bin: ".exe", }
-        - {os: "linux", arch: "amd64"}
-  steps:
-    - uses: hashicorp/actions-docker-build@latest
-      with:
-        pkg_name: helloworld_1.0.0
-        bin_name: helloworld${{ matrix.bin }}
-```
-
 **Q: How can I submit an image to multiple repositories?**
 
 A: You need to define the following inputs in the `actions-docker-build` step: \
@@ -376,7 +347,7 @@ A: You need to define the following inputs in the `actions-docker-build` step: \
 
 **Q: How do I make sure tag X is also published as "latest"?**
 
-A: CRT will update `latest` to the *first* tag in alphabetical order. The image must also have a `LABEL version=x.y.z` defined. 
+A: CRT will update `latest` to the *first* tag in alphabetical order. The image must also have a `LABEL version=x.y.z` defined.
 
 We do not currently support updating other aliases, if needed please add the appropriate tag to the build.
 

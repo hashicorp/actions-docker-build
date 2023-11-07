@@ -121,7 +121,7 @@ runs:
       shell: powershell
       # language=powershell
       run: |
-        # $version = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion").LCUVer
+        # Get the OS Version and take out the revision since it's not relevant to us
         $version = (([Environment]::OSVersion.version) -replace '-+') -replace '\.\d+$'
         Write-Output "os-version=$version" >> $ENV:GITHUB_OUTPUT
 
