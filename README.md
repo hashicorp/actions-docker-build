@@ -11,7 +11,7 @@ testing of container images in CRT.
 
 -----
 
-This action is used to build and tag a single-architecture Linux and Windows Docker image,
+This action is used to build and tag a single-architecture Linux or Windows Docker image,
 and save it as a tarball artifact. Typically the action is called multiple times
 in a workflow, once for each target architecture, and thus multiple such tarball
 artifacts are produced.
