@@ -139,12 +139,6 @@ case "$(uname -s)" in
         ;;
 esac
 
-if [[ $OS == "windows" ]]; then
-  OS_VERSION=$OS-$OS_VERSION
-else
-  OS_VERSION=$OS
-fi
-
 add_vars TARGET OS ARCH VERSION REVISION OS_VERSION
 
 # Determine package name used for default zip file name.
@@ -159,7 +153,7 @@ add_vars PKG_NAME PKG_NAME_GUESSED
 # always be within the filesystem tree rooted at workdir
 # because we can't access files outside of this tree.
 # Hence this is prefixed with the workdir supplied.
-ZIP_LOCATION="$WORKDIR/dist/$OS_VERSION/$ARCH"
+ZIP_LOCATION="$WORKDIR/dist/$OS/$ARCH"
 ZIP_NAME_GUESSED=false
 [ -n "$ZIP_NAME" ] || {
   ZIP_NAME_GUESSED=true
@@ -169,7 +163,12 @@ ZIP_NAME_GUESSED=false
 add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
 
 # Determine tarball and auto-tag names.
-TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS_VERSION}_${ARCH}_${VERSION}_${REVISION}"
+
+TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}"
+# Some OS's like windows need to specify an os version. If it's set, let's embed it in the docker tarball name
+if [[ -n "${OS_VERSION}" ]]; then
+  TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${OS_VERSION}_${ARCH}_${VERSION}_${REVISION}"
+fi
 DEFAULT_TARBALL_NAME="${TARBALL_ROOT}.docker.tar"
 DEFAULT_DEV_TARBALL_NAME="${TARBALL_ROOT}.docker.dev.tar"
 DEFAULT_REDHAT_TARBALL_NAME="${TARBALL_ROOT}.docker.redhat.tar"
