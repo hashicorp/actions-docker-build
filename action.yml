@@ -122,6 +122,13 @@ runs:
       # language=powershell
       run: |
         # Get the OS Version including the revision and trim any white spaces.
+        # We added the revision due to compatibility reasons. Microsoft may need
+        # to break compatibility even with matching major.minor.build. To support this case,
+        # Windows has some additional registry keys on the host and inside the container image to
+        # specify the minimum update version that is supported on each side. Windows will look at this
+        # at container start time to determine whether it should attempt to launch the container
+        # References: https://learn.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility?tabs=windows-server-2022%2Cwindows-11#matching-container-host-version-with-container-image-versions
+        # https://github.com/opencontainers/image-spec/pull/632#issuecomment-295018429
         $version = (Get-ItemProperty -Path C:\Windows\System32\hal.dll).VersionInfo.ProductVersion.Trim()
         Write-Output "os-version=$version" >> $ENV:GITHUB_OUTPUT
 
