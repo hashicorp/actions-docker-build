@@ -14,7 +14,6 @@ die() { echo "$1" 1>&2; exit 1; }
 [ -n "${DEV_TARBALL_NAME:-}" ] || die "Must set DEV_TARBALL_NAME"
 [ -n "${REDHAT_TARBALL_NAME:-}" ] || die "Must set REDHAT_TARBALL_NAME"
 [ -n "${PLATFORM:-}" ] || die "Must set PLATFORM"
-[ -n "${OS_VERSION:-}" ] || die "Must set OS_VERSION"
 [ -n "${AUTO_TAG:-}" ] || die "Must set AUTO_TAG"
 [ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG"
 [ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG (not both)"
@@ -59,7 +58,7 @@ if [[ "$OS" == "windows" ]]; then
   # Lies.
   # Maybe that's a buildx feature, because build doesn't. So we need to manually inject it.
   BA_FLAGS+=(
-    "--build-arg=TARGETOS=${OS_VERSION}"
+    "--build-arg=TARGETOS=${OS}"
     "--build-arg=TARGETARCH=${PLATFORM#*/}"
   )
 fi
