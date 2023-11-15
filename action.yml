@@ -121,8 +121,8 @@ runs:
       shell: powershell
       # language=powershell
       run: |
-        # Get the OS Version and take out the revision since it's not relevant to us
-        $version = (([Environment]::OSVersion.version) -replace '-+') -replace '\.\d+$'
+        # Get the OS Version including the revision and trim any white spaces.
+        $version = (Get-ItemProperty -Path C:\Windows\System32\hal.dll).VersionInfo.ProductVersion.Trim()
         Write-Output "os-version=$version" >> $ENV:GITHUB_OUTPUT
 
     - name: Get os version
