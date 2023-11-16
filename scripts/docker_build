@@ -52,6 +52,16 @@ BUILD_ARGS+=("PRODUCT_REVISION=$REVISION")
 for B in "${BUILD_ARGS[@]}"; do
 	BA_FLAGS+=("--build-arg=$B")
 done
+if [[ "$OS" == "windows" ]]; then
+  # Warning: Our Dockerfiles refer to TARGETOS and TARGETARCH.
+  # They claim it's set "automatically when --platform is provided."
+  # Lies.
+  # Maybe that's a buildx feature, because build doesn't. So we need to manually inject it.
+  BA_FLAGS+=(
+    "--build-arg=TARGETOS=${OS}"
+    "--build-arg=TARGETARCH=${PLATFORM#*/}"
+  )
+fi
 
 TARBALL_PATH="$PWD/$TARBALL_NAME"
 DEV_TARBALL_PATH="$PWD/$DEV_TARBALL_NAME"
@@ -59,13 +69,14 @@ REDHAT_TARBALL_PATH="$PWD/$REDHAT_TARBALL_NAME"
 
 cd "$WORKDIR"
 
-docker buildx create --use
 
 echo "==> Building image with tags:"
 for T in "${ALL_TAGS[@]}"; do
   echo "    - $T"
 done
 
+if [[ "$OS" == "linux" ]]; then
+docker buildx create --use
 docker buildx build --load \
   --target "$TARGET" \
   --platform "$PLATFORM" \
@@ -73,6 +84,17 @@ docker buildx build --load \
   "${BA_FLAGS[@]}" \
   -f "$DOCKERFILE" \
   .
+else
+  (set -x;
+  docker build \
+  --target "$TARGET" \
+  --platform "$PLATFORM" \
+  "${TAG_FLAGS[@]}" \
+  "${BA_FLAGS[@]}" \
+  -f "$DOCKERFILE" \
+  .
+  )
+fi
 
 # validate version label is set to the correct value
 version_label_validation() {

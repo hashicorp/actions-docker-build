@@ -48,7 +48,7 @@ inputs:
 
   arm_version:
     description: Version of arm architecture to use (ignored unless arch == arm).
-    default: 6
+    default: "6"
 
   smoke_test:
     description: >
@@ -102,8 +102,7 @@ inputs:
 
   do_zip_extract_step:
     description: Should zip archives be extracted? (optional)
-    default: true
-    type: boolean
+    default: "true"
 
 # action runner (golang:latest image)
 runs:
@@ -115,6 +114,34 @@ runs:
     - name: Set required repo name env var
       shell: bash
       run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
+
+    - name: Get windows version
+      if: runner.os == 'Windows'
+      id: windows-version
+      shell: powershell
+      # language=powershell
+      run: |
+        # Get the OS Version including the revision and trim any white spaces.
+        # We added the revision due to compatibility reasons. Microsoft may need
+        # to break compatibility even with matching major.minor.build. To support this case,
+        # Windows has some additional registry keys on the host and inside the container image to
+        # specify the minimum update version that is supported on each side. Windows will look at this
+        # at container start time to determine whether it should attempt to launch the container
+        # References: https://learn.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility?tabs=windows-server-2022%2Cwindows-11#matching-container-host-version-with-container-image-versions
+        # https://github.com/opencontainers/image-spec/pull/632#issuecomment-295018429
+        $version = (Get-ItemProperty -Path C:\Windows\System32\hal.dll).VersionInfo.ProductVersion.Trim()
+        Write-Output "os-version=$version" >> $ENV:GITHUB_OUTPUT
+
+    - name: Get os version
+      id: os-version
+      shell: bash
+      run: |
+        echo "Version from OS version calculation ${{steps.windows-version.outputs.os-version}}"
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          echo "os-version=${{ steps.windows-version.outputs.os-version }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "os-version=" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Digest Inputs - Calculate Variables for Later Steps
       shell: bash
@@ -139,11 +166,14 @@ runs:
 
         DOCKERFILE: "${{ inputs.dockerfile }}"
 
-      run: ${{ github.action_path }}/scripts/digest_inputs
+        OS_VERSION: "${{ steps.os-version.outputs.os-version }}"
+
+      run: $GITHUB_ACTION_PATH/scripts/digest_inputs
 
     - name: Setup QEMU in binfmt_misc filesystem
       shell: bash
-      run: ${{ github.action_path }}/scripts/register_qemu_binfmt
+      if: runner.os == 'Linux'
+      run: $GITHUB_ACTION_PATH/scripts/register_qemu_binfmt
 
     - name: Download Product Zip Artifact
       uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
@@ -155,14 +185,16 @@ runs:
     - name: Extract Product Zip Artifact
       if: ${{ inputs.do_zip_extract_step == 'true' }}
       shell: bash
-      run: ${{ github.action_path }}/scripts/extract_product_zip
+      run: $GITHUB_ACTION_PATH/scripts/extract_product_zip
 
     - name: Docker Build
       shell: bash
-      run: ${{ github.action_path}}/scripts/docker_build
+      run: $GITHUB_ACTION_PATH/scripts/docker_build
 
     - name: Run Test
-      if: ${{ env.PLATFORM == 'linux/amd64' && inputs.smoke_test != '' }}
+      # On linux only test the am64 image
+      # On windows, just test it. We don't have cross-platform builds anyway.
+      if: ${{ (env.PLATFORM == 'linux/amd64' || runner.os == 'Windows') && inputs.smoke_test != '' }}
       shell: bash
       run: ${{ inputs.smoke_test }}
       env:
@@ -170,7 +202,7 @@ runs:
 
     - name: Generate Docker metadata
       shell: bash
-      run: ${{ github.action_path}}/scripts/create_metadata
+      run: $GITHUB_ACTION_PATH/scripts/create_metadata
 
     - name: Upload Docker Image metadata
       uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2

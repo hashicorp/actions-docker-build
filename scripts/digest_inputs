@@ -33,6 +33,7 @@ DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 TAGS="${TAGS:-}"
 REDHAT_TAG="${REDHAT_TAG:-}"
 PUSH_AUTO_DEV_TAGS="${PUSH_AUTO_DEV_TAGS:=false}"
+OS_VERSION="${OS_VERSION:-}"
 
 # Strip version to MAJOR.MINOR
 get_minor_version() {
@@ -127,11 +128,18 @@ add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
 
 # Get some basic info needed to building and tagging the docker image.
 
-# OS is hard-coded here only, so if we later want to support other OSs,
-# we'll be able to easily parameterize it.
-OS="linux"
+case "$(uname -s)" in
+    Linux*)     OS=linux;;
+    Darwin*)    OS=osx;;
+    CYGWIN*)    OS=windows;;
+    MINGW*)     OS=windows;;
+    *)
+        echo "Unsupported OS: $(uname -s)"
+        exit 1
+        ;;
+esac
 
-add_vars TARGET OS ARCH VERSION REVISION
+add_vars TARGET OS ARCH VERSION REVISION OS_VERSION
 
 # Determine package name used for default zip file name.
 PKG_NAME_GUESSED=false
@@ -155,7 +163,12 @@ ZIP_NAME_GUESSED=false
 add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
 
 # Determine tarball and auto-tag names.
+
 TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}"
+# Some OS's like windows need to specify an os version. If it's set, let's embed it in the docker tarball name
+if [[ -n "${OS_VERSION}" ]]; then
+  TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${OS_VERSION}_${ARCH}_${VERSION}_${REVISION}"
+fi
 DEFAULT_TARBALL_NAME="${TARBALL_ROOT}.docker.tar"
 DEFAULT_DEV_TARBALL_NAME="${TARBALL_ROOT}.docker.dev.tar"
 DEFAULT_REDHAT_TARBALL_NAME="${TARBALL_ROOT}.docker.redhat.tar"
@@ -178,6 +191,10 @@ BIN_NAME_GUESSED=false
 # Guess bin name if none provided.
 if [ -z "$BIN_NAME" ]; then
   BIN_NAME="$REPO_NAME_MINUS_ENTERPRISE"
+  # Windows binaries need the .exe suffix so we need to make sure that it is there for the OS.
+  if [[ "$OS" == "windows" ]]; then
+  BIN_NAME="${BIN_NAME}.exe"
+  fi
   BIN_NAME_GUESSED=true
 fi
 
