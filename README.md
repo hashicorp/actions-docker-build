@@ -58,8 +58,6 @@ you can set the `bin_name` input.
 Since the action itself only builds a single image for a single architecture,
 you must call it multiple times in order to build multiple architectures.
 
-NOTE: If using the `redhat_tag` input, you must not use an architecture matrix,
-see note on `redhat_tag` below.
 
 ### Action Inputs Explained
 
@@ -114,6 +112,17 @@ can reference each different image by its target name, in a separate call to thi
 action. You must be careful to ensure that the tags are different for images built
 from different targets.
 
+#### Note on builds of the same `os`/`arch` and `target`
+There cannot exist more than one docker builds that uses artifacts of the same 
+`os`/`arch` and specifies the same docker `target`. Under the hood, `actions-docker-build`
+auto-assigns tags to images based on `os`/`arch` and `target`; therefore if two
+builds have these same exact parameters, two distinct images will have the same
+(duplicate) tags. The docker publish pipeline is then unable to distinguish these 
+images, and the docker publish steps will fail. See 
+[here](https://github.com/hashicorp/crt-workflows-common/pull/407#issue-1999804835) 
+for additional context.
+
+
 #### Note on `tags`
 
 The `tags` and `dev_tags` you define are really the tags which are used for the
@@ -122,18 +131,6 @@ and `dev_tags` for a single image target must all be exactly the same, for all t
 architectures.
 
 In other words, never reference the `arch` inside the `tags` or `dev_tags` inputs.
-
-#### Note on `redhat_tag`
-
-If you specify `redhat_tag` then you can't also specify `tags` or `dev_tags`. Red Hat
-Certified Container Image tags need special handling by downstream processes, and
-do not support multiple architectures, so if needed, they must be built and tagged
-separately.
-
-Before using `redhat_tag` you will need to set up a project and obtain the project
-ID, as well as the project-specific login key, which needs to be made available in
-Vault under a specific path and key. There is internal-only documentation in the
-wiki detailing how to do this.
 
 #### Note on `smoke_test`
 
