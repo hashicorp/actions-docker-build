@@ -117,7 +117,7 @@ There cannot exist more than one docker builds that uses artifacts of the same
 `os`/`arch` and specifies the same docker `target`. Under the hood, `actions-docker-build`
 auto-assigns tags to images based on `os`/`arch` and `target`; therefore if two
 builds have these same exact parameters, two distinct images will have the same
-(duplicate) tags. THe docker publish pipeline is then unable to distinguish these 
+(duplicate) tags. The docker publish pipeline is then unable to distinguish these 
 images, and the docker publish steps will fail. See 
 [here](https://github.com/hashicorp/crt-workflows-common/pull/407#issue-1999804835) 
 for additional context.
