@@ -285,13 +285,6 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 
 }
 
-@test "redhat_tag and tags set / error" {
-	set_all_required_env_vars_and_tags
-	export REDHAT_TAG="blah"
-	WANT_ERR="Must set either TAGS or REDHAT_TAG (not both)"
-	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
-}
-
 @test "redhat_tags contains an old redhat tag / error" {
 	set_all_required_env_vars_and_tags
 	TAGS=""

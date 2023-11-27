@@ -16,7 +16,6 @@ die() { echo "$1" 1>&2; exit 1; }
 [ -n "${PLATFORM:-}" ] || die "Must set PLATFORM"
 [ -n "${AUTO_TAG:-}" ] || die "Must set AUTO_TAG"
 [ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG"
-[ -z "${TAGS:-}" ] || [ -z "${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG (not both)"
 
 
 WORKDIR="${WORKDIR:-.}"
