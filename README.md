@@ -30,8 +30,7 @@ is affected. Therefore you should only use tags for the following services:
 
 - DockerHub `docker.io` (this is the default, you can optionally omit this hostname)
 - AWS ECR Public `public.ecr.aws`
-- Red Hat Certified Container Registry `scan.connect.redhat.com`
-  (note there are special rules to follow when specifying `redhat_tag`, see below).
+- Red Hat Certified Container Registry `quay.io`
 
 ## Usage
 
@@ -80,8 +79,6 @@ you must call it multiple times in order to build multiple architectures.
   - PUSH_AUTO_DEV_TAGS=true & dev-tags defined: push non-default dev tags
   - PUSH_AUTO_DEV_TAGS=false/empty & no dev-tags defined: do NOT push dev tags
   - PUSH_AUTO_DEV_TAGS=false/empty & dev-tags defined: push non-default dev tags
-- **`redhat_tag`** allows specifying a Red Hat tag to apply to the image.
-  NOTE: If you specify `redhat_tag` you may not also specify `tags` or `dev_tags`.
 - **`smoke_test`** allows specifying a script to run immediately after the image
   is built, to perform some basic checks on the image. See note on `smoke_test` below.
 
