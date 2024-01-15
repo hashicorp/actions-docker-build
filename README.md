@@ -81,6 +81,8 @@ you must call it multiple times in order to build multiple architectures.
   - PUSH_AUTO_DEV_TAGS=false/empty & dev-tags defined: push non-default dev tags
 - **`smoke_test`** allows specifying a script to run immediately after the image
   is built, to perform some basic checks on the image. See note on `smoke_test` below.
+- `extra_build_args` is a newline-separated list of extra build args to pass
+  to `docker build`. (optional)
 
 #### Note on `target`
 
