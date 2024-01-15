@@ -2,10 +2,7 @@
 
 set -Eeuo pipefail
 
-die() {
-	echo "$1" 1>&2
-	exit 1
-}
+die() { echo "$1" 1>&2; exit 1; }
 
 # Required env vars.
 [ -n "${BIN_NAME:-}" ] || die "Must set BIN_NAME"
@@ -20,20 +17,20 @@ die() {
 [ -n "${AUTO_TAG:-}" ] || die "Must set AUTO_TAG"
 [ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG"
 
+
 WORKDIR="${WORKDIR:-.}"
 
-# Optional environment variables
 export DEV_TAGS="${DEV_TAGS:-}"
 export REDHAT_TAG="${REDHAT_TAG:-}"
 export EXTRA_BUILD_ARGS="${EXTRA_BUILD_ARGS:-}"
 
 # Convert all contiguous blocks of whitespace to single spaces using xargs.
 # This is needed to get all tags on one line for the read -ra below.
-PROD_TAGS="$(xargs <<<"$TAGS")"
-DEV_TAGS="$(xargs <<<"$DEV_TAGS")"
+PROD_TAGS="$(xargs <<< "$TAGS")"
+DEV_TAGS="$(xargs <<< "$DEV_TAGS")"
 
-read -ra DEV_TAGS_A <<<"$DEV_TAGS"
-read -ra PROD_TAGS_A <<<"$PROD_TAGS"
+read -ra DEV_TAGS_A <<< "$DEV_TAGS"
+read -ra PROD_TAGS_A <<< "$PROD_TAGS"
 
 ALL_TAGS=("${DEV_TAGS_A[@]}")
 ALL_TAGS+=("$AUTO_TAG")
@@ -42,6 +39,7 @@ if [ -n "$REDHAT_TAG" ]; then
 	ALL_TAGS+=("${REDHAT_TAG}")
 fi
 echo "ALL_TAGS:" "${ALL_TAGS[@]}"
+
 
 for T in "${ALL_TAGS[@]}"; do
 	TAG_FLAGS+=("--tag=$T")
@@ -57,25 +55,25 @@ done
 
 # Append any extra build args to the final list of build args.
 if [ -n "$EXTRA_BUILD_ARGS" ]; then
-	# Convert all contiguous blocks of whitespace to single spaces using xargs.
-	# This is needed to get all tags on one line for the read -ra below.
-	EXTRA_BUILD_ARGS="$(xargs <<<"$EXTRA_BUILD_ARGS")"
+  # Convert all contiguous blocks of whitespace to single spaces using xargs.
+  # This is needed to get all tags on one line for the read -ra below.
+  EXTRA_BUILD_ARGS="$(xargs <<<"$EXTRA_BUILD_ARGS")"
 
-	read -ra EXTRA_BUILD_ARGS_A <<<"$EXTRA_BUILD_ARGS"
-	for E in "${EXTRA_BUILD_ARGS_A[@]}"; do
-		BA_FLAGS+=("--build-arg=$E")
-	done
+  read -ra EXTRA_BUILD_ARGS_A <<<"$EXTRA_BUILD_ARGS"
+  for E in "${EXTRA_BUILD_ARGS_A[@]}"; do
+    BA_FLAGS+=("--build-arg=$E")
+  done
 fi
 
 if [[ "$OS" == "windows" ]]; then
-	# Warning: Our Dockerfiles refer to TARGETOS and TARGETARCH.
-	# They claim it's set "automatically when --platform is provided."
-	# Lies.
-	# Maybe that's a buildx feature, because build doesn't. So we need to manually inject it.
-	BA_FLAGS+=(
-		"--build-arg=TARGETOS=${OS}"
-		"--build-arg=TARGETARCH=${PLATFORM#*/}"
-	)
+  # Warning: Our Dockerfiles refer to TARGETOS and TARGETARCH.
+  # They claim it's set "automatically when --platform is provided."
+  # Lies.
+  # Maybe that's a buildx feature, because build doesn't. So we need to manually inject it.
+  BA_FLAGS+=(
+    "--build-arg=TARGETOS=${OS}"
+    "--build-arg=TARGETARCH=${PLATFORM#*/}"
+  )
 fi
 
 TARBALL_PATH="$PWD/$TARBALL_NAME"
@@ -84,31 +82,31 @@ REDHAT_TARBALL_PATH="$PWD/$REDHAT_TARBALL_NAME"
 
 cd "$WORKDIR"
 
+
 echo "==> Building image with tags:"
 for T in "${ALL_TAGS[@]}"; do
-	echo "    - $T"
+  echo "    - $T"
 done
 
 if [[ "$OS" == "linux" ]]; then
-	docker buildx create --use
-	docker buildx build --load \
-		--target "$TARGET" \
-		--platform "$PLATFORM" \
-		"${TAG_FLAGS[@]}" \
-		"${BA_FLAGS[@]}" \
-		-f "$DOCKERFILE" \
-		.
+docker buildx create --use
+docker buildx build --load \
+  --target "$TARGET" \
+  --platform "$PLATFORM" \
+  "${TAG_FLAGS[@]}" \
+  "${BA_FLAGS[@]}" \
+  -f "$DOCKERFILE" \
+  .
 else
-	(
-		set -x
-		docker build \
-			--target "$TARGET" \
-			--platform "$PLATFORM" \
-			"${TAG_FLAGS[@]}" \
-			"${BA_FLAGS[@]}" \
-			-f "$DOCKERFILE" \
-			.
-	)
+  (set -x;
+  docker build \
+  --target "$TARGET" \
+  --platform "$PLATFORM" \
+  "${TAG_FLAGS[@]}" \
+  "${BA_FLAGS[@]}" \
+  -f "$DOCKERFILE" \
+  .
+  )
 fi
 
 # validate version label is set to the correct value
