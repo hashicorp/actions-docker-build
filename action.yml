@@ -173,6 +173,7 @@ runs:
         DOCKERFILE: "${{ inputs.dockerfile }}"
 
         OS_VERSION: "${{ steps.os-version.outputs.os-version }}"
+        EXTRA_BUILD_ARGS: "${{ inputs.extra_build_args }}"
 
       run: $GITHUB_ACTION_PATH/scripts/digest_inputs
 
