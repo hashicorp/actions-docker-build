@@ -35,6 +35,8 @@ set_all_optional_env_vars() {
 	export DEV_TARBALL_NAME=blahblah.docker.dev.tar
 	export REDHAT_TARBALL_NAME=blahblah.docker.redhat.tar
 	export DEV_TAGS=""
+	export EXTRA_BUILD_ARGS=""
+	export OS=""
 }
 
 set_all_env_vars() {
@@ -67,6 +69,16 @@ set_test_dev_tags() {
 		$DEV_TAG1
 		$DEV_TAG2
 	"
+}
+
+set_test_extra_build_args() {
+    EXTRA_BUILD_ARG1="FOO=foo"
+    EXTRA_BUILD_ARG2="BAR=bar"
+
+    export EXTRA_BUILD_ARGS="
+        $EXTRA_BUILD_ARG1
+        $EXTRA_BUILD_ARG2
+    "
 }
 
 @test "only prod tags set - all prod and staging tags built" {
@@ -141,3 +153,23 @@ exercise_docker_build_script() {
 	run exercise_docker_build_script
 	[ $status -eq 1 ]
 }
+
+@test "build with extra args" {
+	set_test_prod_tags
+	set_test_extra_build_args
+	export DOCKERFILE=extra_build_args.Dockerfile
+	run exercise_docker_build_script
+    [[ "$output" =~ "--build-arg=FOO=foo" ]]
+    [[ "$output" =~ "--build-arg=BAR=bar" ]]
+	[ $status -eq 0 ]
+}
+
+@test "build with missing extra args" {
+	set_test_prod_tags
+	export DOCKERFILE=extra_build_args.Dockerfile
+	run exercise_docker_build_script
+    [[ "$output" =~ "FOO not set" ]]
+	[ $status -eq 1 ]
+}
+
+

@@ -14,11 +14,11 @@ source "${BASH_SOURCE%/*}/validation.bash"
 
 # Required env vars.
 [ -n "${GITHUB_ENV:-}" ] || die "Must set GITHUB_ENV"
-[ -n "${REPO_NAME:-}"  ] || die "Must set REPO_NAME"
-[ -n "${REVISION:-}"   ] || die "Must set REVISION"
-[ -n "${VERSION:-}"    ] || die "Must set VERSION"
-[ -n "${ARCH:-}"       ] || die "Must set ARCH"
-[ -n "${TARGET:-}"     ] || die "Must set TARGET"
+[ -n "${REPO_NAME:-}" ] || die "Must set REPO_NAME"
+[ -n "${REVISION:-}" ] || die "Must set REVISION"
+[ -n "${VERSION:-}" ] || die "Must set VERSION"
+[ -n "${ARCH:-}" ] || die "Must set ARCH"
+[ -n "${TARGET:-}" ] || die "Must set TARGET"
 [ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAGS or REDHAT_TAG"
 
 # Optional env vars.
@@ -28,6 +28,7 @@ WORKDIR="${WORKDIR:-}"
 ZIP_NAME="${ZIP_NAME:-}"
 BIN_NAME="${BIN_NAME:-}"
 DEV_TAGS="${DEV_TAGS:-}"
+EXTRA_BUILD_ARGS="${EXTRA_BUILD_ARGS:-}"
 DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 TAGS="${TAGS:-}"
 REDHAT_TAG="${REDHAT_TAG:-}"
@@ -36,35 +37,35 @@ OS_VERSION="${OS_VERSION:-}"
 
 # Strip version to MAJOR.MINOR
 get_minor_version() {
-  MINOR=$(cut -c 1-3 <<< "$1")
+	MINOR=$(cut -c 1-3 <<<"$1")
 
-  # check that minor version is formatted correctly
-  patch='^[0-9]+$'
-  if [ ${#MINOR} != 3 ]; then
-    die "Version must be of format: MAJOR.MINOR.PATCH"
-  elif (! [[ $(cut -c 1-1 <<< ${MINOR}) =~ $patch ]]) || (! [[ $(cut -c 3-3 <<< ${MINOR}) =~ $patch ]]); then
-    die "Version must be of format: MAJOR.MINOR.PATCH"
-  elif [ $(cut -c 2-2 <<< ${MINOR}) != '.' ]; then
-    die "Version must be of format: MAJOR.MINOR.PATCH"
-  fi
+	# check that minor version is formatted correctly
+	patch='^[0-9]+$'
+	if [ ${#MINOR} != 3 ]; then
+		die "Version must be of format: MAJOR.MINOR.PATCH"
+	elif (! [[ $(cut -c 1-1 <<<${MINOR}) =~ $patch ]]) || (! [[ $(cut -c 3-3 <<<${MINOR}) =~ $patch ]]); then
+		die "Version must be of format: MAJOR.MINOR.PATCH"
+	elif [ $(cut -c 2-2 <<<${MINOR}) != '.' ]; then
+		die "Version must be of format: MAJOR.MINOR.PATCH"
+	fi
 }
 get_minor_version ${VERSION}
 
 # Set default dev tags
 if [ "$PUSH_AUTO_DEV_TAGS" = true ] || ([[ ! -z "${DEV_TAGS}" ]]); then
-  DEV_TAGS=${DEV_TAGS:=("hashicorppreview/${REPO_NAME}:${MINOR}-dev" "hashicorppreview/${REPO_NAME}:${MINOR}-dev-${REVISION}")}
+	DEV_TAGS=${DEV_TAGS:=("hashicorppreview/${REPO_NAME}:${MINOR}-dev" "hashicorppreview/${REPO_NAME}:${MINOR}-dev-${REVISION}")}
 fi
 
 autocorrect_tags() {
 	local TAGS="$2" NEW_TAGS
 	trap 'echo "$NEW_TAGS"' RETURN
-	NEW_TAGS="$(tr + - <<< "$TAGS")"
+	NEW_TAGS="$(tr + - <<<"$TAGS")"
 	[[ "$NEW_TAGS" = "$TAGS" ]] || warn "Input '$1' contains '+' character(s), replacing them with '-'."
 }
 
 # Autocorrect tags.
-TAGS="$(autocorrect_tags       tags       "$TAGS")"
-DEV_TAGS="$(autocorrect_tags   dev_tags   "$DEV_TAGS")"
+TAGS="$(autocorrect_tags tags "$TAGS")"
+DEV_TAGS="$(autocorrect_tags dev_tags "$DEV_TAGS")"
 REDHAT_TAG="$(autocorrect_tags redhat_tag "$REDHAT_TAG")"
 
 # Validate tags.
@@ -74,13 +75,13 @@ dev_tags_validation "$DEV_TAGS"
 
 # Funcs to add variables to GITHUB_ENV.
 add_var() {
-  {
-    echo "$1<<EOF"
-    echo "${!1}"
-    echo "EOF"
-  } >> "$GITHUB_ENV"
-  echo "export $1='${!1}'" >> "$GITHUB_ENV.export"
-  echo "--> Set $1 to '${!1}'"
+	{
+		echo "$1<<EOF"
+		echo "${!1}"
+		echo "EOF"
+	} >>"$GITHUB_ENV"
+	echo "export $1='${!1}'" >>"$GITHUB_ENV.export"
+	echo "--> Set $1 to '${!1}'"
 }
 
 add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
@@ -102,13 +103,13 @@ ENTERPRISE_DETECTED=false
 # This checks if removing '-enterprise' suffix actually did anything.
 # If it did, then we've detected a likely enterprise repo.
 [ "$REPO_NAME" != "$REPO_NAME_MINUS_ENTERPRISE" ] && {
-  ENTERPRISE_DETECTED=true
-  # If the version doesn't contain a '+' or '-ent' then add the '+ent' suffix.
-  if [[ ! "$VERSION" =~ .*\+.* ]] && [[ ! "$VERSION" =~ .*-ent.* ]]; then
-	NEW_VERSION="$VERSION+ent"
-    warn "Appending '+ent' to the version string '$VERSION' -> '$NEW_VERSION' add '+ent' to the version input to remove this warning."
-	VERSION="$NEW_VERSION"
-  fi
+	ENTERPRISE_DETECTED=true
+	# If the version doesn't contain a '+' or '-ent' then add the '+ent' suffix.
+	if [[ ! "$VERSION" =~ .*\+.* ]] && [[ ! "$VERSION" =~ .*-ent.* ]]; then
+		NEW_VERSION="$VERSION+ent"
+		warn "Appending '+ent' to the version string '$VERSION' -> '$NEW_VERSION' add '+ent' to the version input to remove this warning."
+		VERSION="$NEW_VERSION"
+	fi
 }
 
 # If the version contains '-ent' then rectify this to '+ent' for the sake
@@ -128,14 +129,14 @@ add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
 # Get some basic info needed to building and tagging the docker image.
 
 case "$(uname -s)" in
-    Linux*)     OS=linux;;
-    Darwin*)    OS=osx;;
-    CYGWIN*)    OS=windows;;
-    MINGW*)     OS=windows;;
-    *)
-        echo "Unsupported OS: $(uname -s)"
-        exit 1
-        ;;
+Linux*) OS=linux ;;
+Darwin*) OS=osx ;;
+CYGWIN*) OS=windows ;;
+MINGW*) OS=windows ;;
+*)
+	echo "Unsupported OS: $(uname -s)"
+	exit 1
+	;;
 esac
 
 add_vars TARGET OS ARCH VERSION REVISION OS_VERSION
@@ -143,7 +144,7 @@ add_vars TARGET OS ARCH VERSION REVISION OS_VERSION
 # Determine package name used for default zip file name.
 PKG_NAME_GUESSED=false
 [ -n "$PKG_NAME" ] || {
-  PKG_NAME="${REPO_NAME_MINUS_ENTERPRISE}_${VERSION}"
+	PKG_NAME="${REPO_NAME_MINUS_ENTERPRISE}_${VERSION}"
 }
 
 add_vars PKG_NAME PKG_NAME_GUESSED
@@ -155,8 +156,8 @@ add_vars PKG_NAME PKG_NAME_GUESSED
 ZIP_LOCATION="$WORKDIR/dist/$OS/$ARCH"
 ZIP_NAME_GUESSED=false
 [ -n "$ZIP_NAME" ] || {
-  ZIP_NAME_GUESSED=true
-  ZIP_NAME="${PKG_NAME}_${OS}_${ARCH}.zip"
+	ZIP_NAME_GUESSED=true
+	ZIP_NAME="${PKG_NAME}_${OS}_${ARCH}.zip"
 }
 
 add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
@@ -166,7 +167,7 @@ add_vars ZIP_LOCATION ZIP_NAME ZIP_NAME_GUESSED
 TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${ARCH}_${VERSION}_${REVISION}"
 # Some OS's like windows need to specify an os version. If it's set, let's embed it in the docker tarball name
 if [[ -n "${OS_VERSION}" ]]; then
-  TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${OS_VERSION}_${ARCH}_${VERSION}_${REVISION}"
+	TARBALL_ROOT="${REPO_NAME}_${TARGET}_${OS}_${OS_VERSION}_${ARCH}_${VERSION}_${REVISION}"
 fi
 DEFAULT_TARBALL_NAME="${TARBALL_ROOT}.docker.tar"
 DEFAULT_DEV_TARBALL_NAME="${TARBALL_ROOT}.docker.dev.tar"
@@ -183,18 +184,18 @@ REDHAT_TARBALL_NAME="${OVERRIDE_REDHAT_TARBALL_NAME:-$DEFAULT_REDHAT_TARBALL_NAM
 
 AUTO_TAG="${REPO_NAME}/${TARGET}/${OS}/${ARCH}:${VERSION//+/-}_${REVISION}"
 
-add_vars TARBALL_NAME DEV_TARBALL_NAME REDHAT_TARBALL_NAME  AUTO_TAG
+add_vars TARBALL_NAME DEV_TARBALL_NAME REDHAT_TARBALL_NAME AUTO_TAG
 
 # Determine product bin name.
 BIN_NAME_GUESSED=false
 # Guess bin name if none provided.
 if [ -z "$BIN_NAME" ]; then
-  BIN_NAME="$REPO_NAME_MINUS_ENTERPRISE"
-  # Windows binaries need the .exe suffix so we need to make sure that it is there for the OS.
-  if [[ "$OS" == "windows" ]]; then
-  BIN_NAME="${BIN_NAME}.exe"
-  fi
-  BIN_NAME_GUESSED=true
+	BIN_NAME="$REPO_NAME_MINUS_ENTERPRISE"
+	# Windows binaries need the .exe suffix so we need to make sure that it is there for the OS.
+	if [[ "$OS" == "windows" ]]; then
+		BIN_NAME="${BIN_NAME}.exe"
+	fi
+	BIN_NAME_GUESSED=true
 fi
 
 add_vars BIN_NAME BIN_NAME_GUESSED
@@ -202,9 +203,13 @@ add_vars BIN_NAME BIN_NAME_GUESSED
 # Docker Platform
 PLATFORM="$OS/$ARCH"
 if [ "$ARCH" = "arm" ]; then
-  PLATFORM="$PLATFORM/v$ARM_VERSION"
+	PLATFORM="$PLATFORM/v$ARM_VERSION"
 fi
 
 add_var PLATFORM
 
 add_var MINOR
+
+if [ -n "$EXTRA_BUILD_ARGS" ]; then
+	add_var EXTRA_BUILD_ARGS
+fi
