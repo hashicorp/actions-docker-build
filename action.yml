@@ -91,6 +91,12 @@ inputs:
     description: Tag to determine whether to push default dev tags (optional).
     default: "false"
 
+  extra_build_args:
+    description: >
+      Whitespace-separated list of extra build arguments that get passed to docker 
+      build (optional).
+    default: ""
+
   # Escape hatch inputs (use sparingly if at all).
   workdir:
     description: Working directory in which to run 'docker build'.
@@ -167,6 +173,7 @@ runs:
         DOCKERFILE: "${{ inputs.dockerfile }}"
 
         OS_VERSION: "${{ steps.os-version.outputs.os-version }}"
+        EXTRA_BUILD_ARGS: "${{ inputs.extra_build_args }}"
 
       run: $GITHUB_ACTION_PATH/scripts/digest_inputs
 

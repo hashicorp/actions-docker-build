@@ -33,6 +33,7 @@ TAGS="${TAGS:-}"
 REDHAT_TAG="${REDHAT_TAG:-}"
 PUSH_AUTO_DEV_TAGS="${PUSH_AUTO_DEV_TAGS:=false}"
 OS_VERSION="${OS_VERSION:-}"
+EXTRA_BUILD_ARGS="${EXTRA_BUILD_ARGS:-}"
 
 # Strip version to MAJOR.MINOR
 get_minor_version() {
@@ -208,3 +209,7 @@ fi
 add_var PLATFORM
 
 add_var MINOR
+
+if [ -n "$EXTRA_BUILD_ARGS" ]; then
+  add_var EXTRA_BUILD_ARGS
+fi
