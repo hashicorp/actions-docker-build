@@ -40,7 +40,7 @@ jobs:
         run: |
           go build -o "$product_name" .
           zip "${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip" "$product_name"
-      - name: Upload product artifact-${{ env.product_name }}-${{ env.version }}-${{ matrix.goos }}-${{ matrix.goarch }}-${{ github.job }}
+      - name: Upload product artifact-${{ env.product_name }}-${{ env.version }}-${{ matrix.goos }}-${{ matrix.goarch }}-${{ github.run_id }}
         uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
         with:
           path: example/${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
@@ -63,7 +63,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-      - name: Build
+      - name: Build-${{ env.product_name }}-${{ env.version }}-${{ matrix.arch }}-${{ github.run_id }}
         # To run the example with the current commit use 'uses: ./'
         uses: ./
         # For real usages, you will reference the action like this:
