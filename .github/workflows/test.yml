@@ -32,12 +32,12 @@ jobs:
         run: |
           zip ./testdata/test_bin.zip ./testdata/test_bin
           zip ./testdata/actions-docker-build.zip ./testdata/actions-docker-build
-      - name: Upload test artifacts
+      - name: Upload test artifacts-${{ github.job }}
         uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
         with:
           path: testdata/test_bin.zip
           name: test_bin.zip
-      - name: Upload a test artifact.
+      - name: Upload a test artifact-${{ github.job }}
         uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
         with:
           path: testdata/actions-docker-build.zip
