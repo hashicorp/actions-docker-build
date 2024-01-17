@@ -32,12 +32,12 @@ jobs:
         run: |
           zip ./testdata/test_bin.zip ./testdata/test_bin
           zip ./testdata/actions-docker-build.zip ./testdata/actions-docker-build
-      - name: Upload test artifacts-${{ github.job }}
+      - name: Upload test artifacts
         uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
         with:
           path: testdata/test_bin.zip
           name: test_bin.zip
-      - name: Upload a test artifact-${{ github.job }}
+      - name: Upload a test artifact
         uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
         with:
           path: testdata/actions-docker-build.zip
@@ -66,7 +66,7 @@ jobs:
           tags: |
             ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag1
             ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag2
-          zip_artifact_name: test_bin.zip
+          zip_artifact_name: test_bin-${{ env.OVERRIDE_TARBALL_NAME }}.zip
           bin_name: test_bin
           # No overrides to Dockerfile path.
       - name: Assert Tarball Created And Contains Correct Tags
@@ -93,7 +93,7 @@ jobs:
           tags: |
             ${{env.TAG_PREFIX}}/action-test-setting-dockerfile:tag1
             ${{env.TAG_PREFIX}}/action-test-setting-dockerfile:tag2
-          zip_artifact_name: test_bin.zip
+          zip_artifact_name: test_bin-${{ env.OVERRIDE_TARBALL_NAME }}.zip
           bin_name: test_bin
           # Test setting just dockerfile.
           dockerfile: testdata/Dockerfile
@@ -121,7 +121,7 @@ jobs:
           tags: |
             ${{env.TAG_PREFIX}}/action-test-setting-workdir:tag1
             ${{env.TAG_PREFIX}}/action-test-setting-workdir:tag2
-          zip_artifact_name: test_bin.zip
+          zip_artifact_name: test_bin-${{ env.OVERRIDE_TARBALL_NAME }}.zip
           bin_name: test_bin
           # Test setting just workdir.
           workdir: testdata
@@ -149,7 +149,7 @@ jobs:
           tags: |
             ${{env.TAG_PREFIX}}/action-test-smoke-test-pass:tag1
             ${{env.TAG_PREFIX}}/action-test-smoke-test-pass:tag2
-          zip_artifact_name: test_bin.zip
+          zip_artifact_name: test_bin-${{ env.OVERRIDE_TARBALL_NAME }}.zip
           bin_name: test_bin
           dockerfile: testdata/Dockerfile
           #test smoke test. This should pass
@@ -175,7 +175,7 @@ jobs:
           tags: |
             ${{env.TAG_PREFIX}}/action-test-smoke-test-fail:tag1
             ${{env.TAG_PREFIX}}/action-test-smoke-test-fail:tag2
-          zip_artifact_name: test_bin.zip
+          zip_artifact_name: test_bin-${{ env.OVERRIDE_TARBALL_NAME }}.zip
           bin_name: test_bin
           dockerfile: testdata/Dockerfile
           # Test smoke test failure
@@ -255,7 +255,9 @@ jobs:
         uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
         with:
           path: archive
-          name: actions-docker-build.zip
+          pattern: archive-*
+          name: actions-docker-build-${{ github.run_id }}.zip
+          merge-multiple: true
       # Construct the custom context,
       # This is "required" because normally our extraction process puts the artifacts in deeply nested
       # `dist/$TARGETOS/$TARGETARCH/$BIN_NAME` paths.
