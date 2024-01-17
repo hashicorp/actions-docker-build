@@ -225,7 +225,7 @@ runs:
       uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.TAGS != '' }}
       with:
-        name: ${{ env.TARBALL_NAME }}
+        name: ${{ env.TARBALL_NAME }}-*
         path: ${{ env.TARBALL_NAME }}
         if-no-files-found: error
 
@@ -233,7 +233,7 @@ runs:
       uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.DEV_TAGS != '' }}
       with:
-        name: ${{ env.DEV_TARBALL_NAME }}
+        name: ${{ env.DEV_TARBALL_NAME }}-*
         path: ${{ env.DEV_TARBALL_NAME }}
         if-no-files-found: error
 
@@ -241,6 +241,6 @@ runs:
       uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.REDHAT_TAG != '' }}
       with:
-        name: ${{ env.REDHAT_TARBALL_NAME }}
+        name: ${{ env.REDHAT_TARBALL_NAME }}-*
         path: ${{ env.REDHAT_TARBALL_NAME }}
         if-no-files-found: error
