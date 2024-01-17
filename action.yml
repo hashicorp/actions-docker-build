@@ -183,7 +183,7 @@ runs:
       run: $GITHUB_ACTION_PATH/scripts/register_qemu_binfmt
 
     - name: Download Product Zip Artifact
-      uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+      uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
       if: ${{ inputs.do_zip_extract_step == 'true'  }}
       with:
         path: ${{ env.ZIP_LOCATION }}
@@ -212,7 +212,7 @@ runs:
       run: $GITHUB_ACTION_PATH/scripts/create_metadata
 
     - name: Upload Docker Image metadata
-      uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+      uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       env:
         # Add _redhat if this is a redhat call.
         REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
@@ -222,7 +222,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload Prod Tarball
-      uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+      uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.TAGS != '' }}
       with:
         name: ${{ env.TARBALL_NAME }}
@@ -230,7 +230,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload Dev Tarball
-      uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+      uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.DEV_TAGS != '' }}
       with:
         name: ${{ env.DEV_TARBALL_NAME }}
@@ -238,7 +238,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload Red Hat Tarball
-      uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+      uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.REDHAT_TAG != '' }}
       with:
         name: ${{ env.REDHAT_TARBALL_NAME }}
