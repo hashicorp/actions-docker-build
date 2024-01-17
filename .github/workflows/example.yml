@@ -40,7 +40,7 @@ jobs:
         run: |
           go build -o "$product_name" .
           zip "${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip" "$product_name"
-      - name: Upload product artifact.
+      - name: Upload product artifact-${{ env.product_name }}-${{ env.version }}-${{ matrix.goos }}-${{ matrix.goarch }}-${{ github.job }}
         uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
         with:
           path: example/${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
