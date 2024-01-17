@@ -32,7 +32,7 @@ jobs:
         run: |
           zip ./testdata/test_bin.zip ./testdata/test_bin
           zip ./testdata/actions-docker-build.zip ./testdata/actions-docker-build
-      - name: Upload a test artifact.
+      - name: Upload test artifacts
         uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
         with:
           path: testdata/test_bin.zip
