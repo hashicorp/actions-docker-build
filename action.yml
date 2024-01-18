@@ -214,35 +214,39 @@ runs:
       run: $GITHUB_ACTION_PATH/scripts/create_metadata
 
     - name: Upload Docker Image metadata
+      id: docker-image-metadata
       uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       env:
         # Add _redhat if this is a redhat call.
         REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
       with:
-        name: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}-${{ inputs.arch }}
+        name: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}-${{ matrix.id }}
         path: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.json
         if-no-files-found: error
 
     - name: Upload Prod Tarball
+      id: prod-tarball
       uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.TAGS != '' }}
       with:
-        name: ${{ env.TARBALL_NAME }}-${{ inputs.arch }}
+        name: ${{ env.TARBALL_NAME }}-${{ matrix.id }}
         path: ${{ env.TARBALL_NAME }}
         if-no-files-found: error
 
     - name: Upload Dev Tarball
+      id: dev-tarball
       uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.DEV_TAGS != '' }}
       with:
-        name: ${{ env.DEV_TARBALL_NAME }}-${{ inputs.arch }}
+        name: ${{ env.DEV_TARBALL_NAME }}-${{ matrix.id }}
         path: ${{ env.DEV_TARBALL_NAME }}
         if-no-files-found: error
 
     - name: Upload Red Hat Tarball
+      id: redhat-tarball
       uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.REDHAT_TAG != '' }}
       with:
-        name: ${{ env.REDHAT_TARBALL_NAME }}-${{ inputs.arch }}
+        name: ${{ env.REDHAT_TARBALL_NAME }}-${{ matrix.id }}
         path: ${{ env.REDHAT_TARBALL_NAME }}
         if-no-files-found: error
