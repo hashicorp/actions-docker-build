@@ -220,7 +220,7 @@ runs:
         # Add _redhat if this is a redhat call.
         REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
       with:
-        name: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}-${{ steps.docker-image-metadata.outputs }}
+        name: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}-docker-image-metadata
         path: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.json
         if-no-files-found: error
 
@@ -229,7 +229,7 @@ runs:
       uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.TAGS != '' }}
       with:
-        name: ${{ env.TARBALL_NAME }}-${{ steps.prod-tarball.outputs }}
+        name: ${{ env.TARBALL_NAME }}-prod-tarball
         path: ${{ env.TARBALL_NAME }}
         if-no-files-found: error
 
@@ -238,7 +238,7 @@ runs:
       uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.DEV_TAGS != '' }}
       with:
-        name: ${{ env.DEV_TARBALL_NAME }}-${{ steps.dev-tarball.outputs }}
+        name: ${{ env.DEV_TARBALL_NAME }}-dev-tarball
         path: ${{ env.DEV_TARBALL_NAME }}
         if-no-files-found: error
 
@@ -247,6 +247,6 @@ runs:
       uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
       if: ${{ env.REDHAT_TAG != '' }}
       with:
-        name: ${{ env.REDHAT_TARBALL_NAME }}-${{ steps.redhat-tarball.outputs }}
+        name: ${{ env.REDHAT_TARBALL_NAME }}-redhat-tarball
         path: ${{ env.REDHAT_TARBALL_NAME }}
         if-no-files-found: error
