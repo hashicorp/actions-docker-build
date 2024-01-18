@@ -70,7 +70,7 @@ jobs:
         # 'uses: hashicorp/actions-docker-build@v1'
         with:
           version: 1.0.0
-          target: default-${{ strategy.job-index }}
+          target: default
           arch: ${{ matrix.arch }}
           # Production tags. (These are the tags used for the multi-arch images
           # we eventually push, they must never be architecture/platform-specific.)

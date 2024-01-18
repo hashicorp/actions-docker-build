@@ -61,7 +61,7 @@ jobs:
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
-          target: default
+          target: default-dockerfile-in-root
           arch: amd64
           tags: |
             ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag1
@@ -88,7 +88,7 @@ jobs:
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
-          target: default
+          target: default-setting-dockerfile
           arch: amd64
           tags: |
             ${{env.TAG_PREFIX}}/action-test-setting-dockerfile:tag1
@@ -116,7 +116,7 @@ jobs:
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
-          target: default
+          target: default-setting-workdir
           arch: amd64
           tags: |
             ${{env.TAG_PREFIX}}/action-test-setting-workdir:tag1
@@ -144,7 +144,7 @@ jobs:
         uses: ./
         with:
           version: 1.0.0
-          target: default
+          target: default-smoke-test-pass
           arch: amd64
           tags: |
             ${{env.TAG_PREFIX}}/action-test-smoke-test-pass:tag1
@@ -170,7 +170,7 @@ jobs:
         uses: ./
         with:
           version: 1.0.0
-          target: default
+          target: default-smoke-test-fail
           arch: amd64
           tags: |
             ${{env.TAG_PREFIX}}/action-test-smoke-test-fail:tag1
@@ -212,7 +212,7 @@ jobs:
         uses: ./ # This is the action we're testing.
         with:
           version: 1.0.0
-          target: default
+          target: default-redhat-tag-only
           arch: amd64
           redhat_tag: ${{env.TEST_REDHAT_TAG}}
           zip_artifact_name: test_bin.zip
@@ -237,7 +237,7 @@ jobs:
         uses: ./
         with:
           version: 1.0.0
-          target: default
+          target: default-guessed-bin-name
           arch: amd64
           zip_artifact_name: actions-docker-build.zip
           #bin_name: actions-docker-build # (which matches the $reponame)
@@ -271,7 +271,7 @@ jobs:
         uses: ./
         with:
           version: 1.0.0
-          target: default
+          target: default-opt-out-extract
           id: opt-out-extract
           arch: amd64
           do_zip_extract_step: false
