@@ -256,7 +256,7 @@ jobs:
         with:
           path: archive
           pattern: archive-*
-          name: actions-docker-build-${{ github.run_id }}.zip
+          name: actions-docker-build.zip
           merge-multiple: true
       # Construct the custom context,
       # This is "required" because normally our extraction process puts the artifacts in deeply nested
@@ -272,6 +272,7 @@ jobs:
         with:
           version: 1.0.0
           target: default
+          id: opt-out-extract
           arch: amd64
           do_zip_extract_step: false
           workdir: ./my-context-dir
