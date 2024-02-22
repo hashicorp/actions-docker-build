@@ -87,12 +87,12 @@ jobs:
   build-windows-image:
     needs:
       - build-product-binary
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
-          - { arch: "amd64", Dockerfile: "Dockerfile.windows-2022" }
-          - { arch: "amd64", Dockerfile: "Dockerfile.windows-2019" }
+          - { runner: "windows-2022", arch: "amd64", Dockerfile: "Dockerfile.windows-2022" }
+          - { runner: "windows-2019", arch: "amd64", Dockerfile: "Dockerfile.windows-2019" }
+    runs-on: ${{matrix.runner}}
     steps:
       - name: Checkout
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
