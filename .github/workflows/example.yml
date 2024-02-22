@@ -47,7 +47,7 @@ jobs:
           name: ${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           if-no-files-found: error
 
-  build-product-docker-image:
+  build-linux-image:
     needs:
       - build-product-binary
     runs-on: ubuntu-latest
@@ -83,3 +83,37 @@ jobs:
             docker.io/hashicorppreview/${{env.product_name}}:${{env.version}}-dev
           # Usually you wouldn't need to set workdir, but this is just an example.
           workdir: example/
+
+  build-windows-image:
+    needs:
+      - build-product-binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - { arch: "amd64", Dockerfile: "Dockerfile.windows-2022" }
+          - { arch: "amd64", Dockerfile: "Dockerfile.windows-2019" }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - name: Build
+        # To run the example with the current commit use 'uses: ./'
+        uses: ./
+        # For real usages, you will reference the action like this:
+        # 'uses: hashicorp/actions-docker-build@v1'
+        with:
+          version: 1.0.0
+          target: default
+          arch: ${{ matrix.arch }}
+          # Production tags. (These are the tags used for the multi-arch images
+          # we eventually push, they need not be architecture/platform-specific.)
+          tags: |
+            docker.io/hashicorp/${{env.product_name}}:${{env.version}}
+            public.ecr.aws/hashicorp/${{env.product_name}}:${{env.version}}
+          # Dev tags are pushed more frequently by downstream processes. They also
+          # need not reference the architecture.
+          dev_tags: |
+            docker.io/hashicorppreview/${{env.product_name}}:${{env.version}}-dev
+          # Usually you wouldn't need to set workdir, but this is just an example.
+          workdir: example/
+          Dockerfile: ${{matrix.Dockerfile}}

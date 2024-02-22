@@ -1,0 +1,17 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2022 AS default
+LABEL maintainer="Team RelEng <team-rel-eng@hashicorp.com>"
+ARG PRODUCT_VERSION
+ARG PRODUCT_REVISION
+LABEL version=$PRODUCT_VERSION
+LABEL revision=$PRODUCT_REVISION
+# TARGETOS and TARGETARCH are set automatically when --platform is provided.
+ARG TARGETOS
+ARG TARGETARCH
+ARG BIN_NAME
+
+COPY dist/$TARGETOS/$TARGETARCH/$BIN_NAME /bin/
+
+CMD ["/bin/$BIN_NAME", "default"]
