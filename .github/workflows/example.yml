@@ -105,6 +105,8 @@ jobs:
           version: ${{env.product_version}}
           target: default
           arch: ${{ matrix.arch }}
+          # Go's -output flag during build doesn't auto-add .exe for windows, so we'll just ignore it here.
+          bin_name: actions-docker-build
           # Production tags. (These are the tags used for the multi-arch images
           # we eventually push, they need not be architecture/platform-specific.)
           tags: |
