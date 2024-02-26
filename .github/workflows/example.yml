@@ -1,9 +1,9 @@
 name: example
-on: [push]
+on: [pull_request]
 
 env:
   product_name: actions-docker-build
-  version: 1.0.0
+  product_version: 1.0.0
 
 defaults:
   run:
@@ -39,15 +39,15 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
         run: |
           go build -o "$product_name" .
-          zip "${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip" "$product_name"
+          zip "${{ env.product_name }}_${{ env.product_version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip" "$product_name"
       - name: Upload product artifact.
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
-          path: example/${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
-          name: ${{ env.product_name }}_${{ env.version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          path: example/${{ env.product_name }}_${{ env.product_version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
+          name: ${{ env.product_name }}_${{ env.product_version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           if-no-files-found: error
 
-  build-product-docker-image:
+  build-linux-image:
     needs:
       - build-product-binary
     runs-on: ubuntu-latest
@@ -69,17 +69,53 @@ jobs:
         # For real usages, you will reference the action like this:
         # 'uses: hashicorp/actions-docker-build@v1'
         with:
-          version: 1.0.0
+          version: ${{env.product_version}}
           target: default
           arch: ${{ matrix.arch }}
           # Production tags. (These are the tags used for the multi-arch images
           # we eventually push, they must never be architecture/platform-specific.)
           tags: |
-            docker.io/hashicorp/${{env.product_name}}:${{env.version}}
-            public.ecr.aws/hashicorp/${{env.product_name}}:${{env.version}}
+            docker.io/hashicorp/${{env.product_name}}:${{env.product_version}}
+            public.ecr.aws/hashicorp/${{env.product_name}}:${{env.product_version}}
           # Dev tags are pushed more frequently by downstream processes. They also
           # must not reference the architecture.
           dev_tags: |
-            docker.io/hashicorppreview/${{env.product_name}}:${{env.version}}-dev
+            docker.io/hashicorppreview/${{env.product_name}}:${{env.product_version}}-dev
           # Usually you wouldn't need to set workdir, but this is just an example.
           workdir: example/
+
+  build-windows-image:
+    needs:
+      - build-product-binary
+    strategy:
+      matrix:
+        include:
+          - { runner: "windows-2022", arch: "amd64", Dockerfile: "Dockerfile.windows-2022" }
+          - { runner: "windows-2019", arch: "amd64", Dockerfile: "Dockerfile.windows-2019" }
+    runs-on: ${{matrix.runner}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+      - name: Build
+        # To run the example with the current commit use 'uses: ./'
+        uses: ./
+        # For real usages, you will reference the action like this:
+        # 'uses: hashicorp/actions-docker-build@v1'
+        with:
+          version: ${{env.product_version}}
+          target: default
+          arch: ${{ matrix.arch }}
+          # Go's -output flag during build doesn't auto-add .exe for windows, so we'll just ignore it here.
+          bin_name: actions-docker-build
+          # Production tags. (These are the tags used for the multi-arch images
+          # we eventually push, they need not be architecture/platform-specific.)
+          tags: |
+            docker.io/hashicorp/${{env.product_name}}:${{env.product_version}}
+            public.ecr.aws/hashicorp/${{env.product_name}}:${{env.product_version}}
+          # Dev tags are pushed more frequently by downstream processes. They also
+          # need not reference the architecture.
+          dev_tags: |
+            docker.io/hashicorppreview/${{env.product_name}}:${{env.product_version}}-dev
+          # Usually you wouldn't need to set workdir, but this is just an example.
+          workdir: example/
+          Dockerfile: ${{matrix.Dockerfile}}
