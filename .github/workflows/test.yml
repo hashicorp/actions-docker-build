@@ -17,7 +17,7 @@ jobs:
         run: |
           sudo git clone --depth 1 --branch "v$BATS_VERSION" "$BATS_REPO" "$BATS_PATH"
           echo "$BATS_PATH/bin" >> "$GITHUB_PATH"
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Run BATS tests
         run: make test
 
@@ -27,18 +27,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Zip Test Bin
         run: |
           zip ./testdata/test_bin.zip ./testdata/test_bin
           zip ./testdata/actions-docker-build.zip ./testdata/actions-docker-build
       - name: Upload test artifacts
-        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           path: testdata/test_bin.zip
           name: test_bin.zip
       - name: Upload a test artifact
-        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4.1.0
+        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
         with:
           path: testdata/actions-docker-build.zip
           name: actions-docker-build.zip
@@ -51,7 +51,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       # Test setup.
       - name: Move Dockerfile to Repo Root
         run: |
@@ -83,7 +83,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
@@ -111,7 +111,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
@@ -139,7 +139,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Invoke Action
         uses: ./
         with:
@@ -164,7 +164,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       - name: Invoke Action
         id: docker-build
         uses: ./
@@ -202,7 +202,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       # Test setup.
       - name: Move Dockerfile to Repo Root
         run: |
@@ -228,7 +228,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       # Test setup
       - name: Move Dockerfile to Repo Root
         run: |
@@ -249,10 +249,10 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4.1.4
       # Handle the artifact download ourselves
       - name: Download Product Zip Artifact
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935 # v4.1.1
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
         with:
           path: archive
           pattern: archive-*
