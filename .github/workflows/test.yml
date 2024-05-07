@@ -272,7 +272,7 @@ jobs:
         with:
           version: 1.0.0
           target: default
-          arch: amd64
+          arch: arm64
           do_zip_extract_step: false
           workdir: ./my-context-dir
           tags: ${{env.TAG_PREFIX}}/action-test-dockerfile-in-root:tag1

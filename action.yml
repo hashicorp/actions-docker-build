@@ -207,8 +207,15 @@ runs:
       env:
         IMAGE_NAME: ${{env.AUTO_TAG}}
 
+    - name: Generate Random String to use for tag list json
+      shell: bash
+      run: |
+        echo "RANDOM_STRING=$(echo $((2000 + $RANDOM % 40000)))" >> $GITHUB_ENV
+
     - name: Generate Docker metadata
       shell: bash
+      env:
+        RANDOM_STRING: "${{ env.RANDOM_STRING }}"
       run: $GITHUB_ACTION_PATH/scripts/create_metadata
 
     - name: Upload Docker Image metadata
@@ -216,11 +223,11 @@ runs:
       env:
         # Add _redhat if this is a redhat call.
         REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
+        RANDOM: "${{ env.RANDOM_STRING }}"
       with:
-        name: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.json
-        path: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.json
+        name: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.${{ inputs.arch }}.${{ env.RANDOM_STRING }}.json
+        path: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.${{ inputs.arch }}.${{ env.RANDOM_STRING }}.json
         if-no-files-found: error
-        overwrite: true
 
     - name: Upload Prod Tarball
       uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
@@ -229,7 +236,6 @@ runs:
         name: ${{ env.TARBALL_NAME }}
         path: ${{ env.TARBALL_NAME }}
         if-no-files-found: error
-        overwrite: true
 
     - name: Upload Dev Tarball
       uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
@@ -238,7 +244,6 @@ runs:
         name: ${{ env.DEV_TARBALL_NAME }}
         path: ${{ env.DEV_TARBALL_NAME }}
         if-no-files-found: error
-        overwrite: true
 
     - name: Upload Red Hat Tarball
       uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
@@ -247,4 +252,3 @@ runs:
         name: ${{ env.REDHAT_TARBALL_NAME }}
         path: ${{ env.REDHAT_TARBALL_NAME }}
         if-no-files-found: error
-        overwrite: true
