@@ -223,7 +223,7 @@ runs:
       env:
         # Add _redhat if this is a redhat call.
         REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
-        RANDOM: "${{ env.RANDOM_STRING }}"
+        RANDOM_STRING: "${{ env.RANDOM_STRING }}"
       with:
         name: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.${{ inputs.arch }}.${{ env.RANDOM_STRING }}.json
         path: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.${{ inputs.arch }}.${{ env.RANDOM_STRING }}.json

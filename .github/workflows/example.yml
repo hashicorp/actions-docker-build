@@ -46,7 +46,6 @@ jobs:
           path: example/${{ env.product_name }}_${{ env.product_version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           name: ${{ env.product_name }}_${{ env.product_version }}_${{ matrix.goos }}_${{ matrix.goarch }}.zip
           if-no-files-found: error
-          overwrite: true
 
   build-linux-image:
     needs:
