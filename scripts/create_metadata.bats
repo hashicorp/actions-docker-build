@@ -41,7 +41,11 @@ assert_file_contains_json() { local FILEPATH="$1"; local JSON="$2"
 
 	export TARGET="target1"
 
-	WANT_FILENAME="docker_tag_list_target1.json"
+	export ARCH="arch1"
+
+	export RANDOM_STRING="12345"
+
+	WANT_FILENAME="docker_tag_list_target1.arch1.12345.json"
 	WANT_FILEPATH="$OUT_DIR/$WANT_FILENAME"
 
 	WANT_JSON='{
@@ -75,7 +79,11 @@ assert_file_contains_json() { local FILEPATH="$1"; local JSON="$2"
 
 	export TARGET="target1"
 
-	WANT_FILENAME="docker_tag_list_target1.json"
+	export ARCH="arch1"
+
+	export RANDOM_STRING=12345
+
+	WANT_FILENAME="docker_tag_list_target1.arch1.12345.json"
 	WANT_FILEPATH="$OUT_DIR/$WANT_FILENAME"
 
 	WANT_JSON='{
