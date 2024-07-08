@@ -219,7 +219,7 @@ runs:
       run: $GITHUB_ACTION_PATH/scripts/create_metadata
 
     - name: Upload Docker Image metadata
-      uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
       env:
         # Add _redhat if this is a redhat call.
         REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
@@ -230,7 +230,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload Prod Tarball
-      uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
       if: ${{ env.TAGS != '' }}
       with:
         name: ${{ env.TARBALL_NAME }}
@@ -238,7 +238,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload Dev Tarball
-      uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
       if: ${{ env.DEV_TAGS != '' }}
       with:
         name: ${{ env.DEV_TARBALL_NAME }}
@@ -246,7 +246,7 @@ runs:
         if-no-files-found: error
 
     - name: Upload Red Hat Tarball
-      uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+      uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
       if: ${{ env.REDHAT_TAG != '' }}
       with:
         name: ${{ env.REDHAT_TARBALL_NAME }}
