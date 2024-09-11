@@ -35,6 +35,17 @@ PUSH_AUTO_DEV_TAGS="${PUSH_AUTO_DEV_TAGS:=false}"
 OS_VERSION="${OS_VERSION:-}"
 EXTRA_BUILD_ARGS="${EXTRA_BUILD_ARGS:-}"
 
+# Funcs to add variables to GITHUB_ENV.
+add_var() {
+  {
+    echo "$1<<EOF"
+    echo "${!1}"
+    echo "EOF"
+  } >> "$GITHUB_ENV"
+  echo "export $1='${!1}'" >> "$GITHUB_ENV.export"
+  echo "--> Set $1 to '${!1}'"
+}
+
 # Strip version to MAJOR.MINOR
 get_minor_version() {
   MINOR=$(cut -c 1-3 <<< "$1")
@@ -49,11 +60,14 @@ get_minor_version() {
     die "Version must be of format: MAJOR.MINOR.PATCH"
   fi
 }
-get_minor_version ${VERSION}
 
 # Set default dev tags
-if [ "$PUSH_AUTO_DEV_TAGS" = true ] || ([[ ! -z "${DEV_TAGS}" ]]); then
-  DEV_TAGS=${DEV_TAGS:=("hashicorppreview/${REPO_NAME}:${MINOR}-dev" "hashicorppreview/${REPO_NAME}:${MINOR}-dev-${REVISION}")}
+if [ "$PUSH_AUTO_DEV_TAGS" = true ] && ([[ -z "${DEV_TAGS}" ]]); then
+  get_minor_version ${VERSION}
+  add_var MINOR
+  warn "$MINOR"
+  DEV_TAGS=${DEV_TAGS:="hashicorppreview/${REPO_NAME}:${MINOR}-dev" "hashicorppreview/${REPO_NAME}:${MINOR}-dev-${REVISION}"}
+  warn "$DEV_TAGS"
 fi
 
 autocorrect_tags() {
@@ -71,18 +85,9 @@ REDHAT_TAG="$(autocorrect_tags redhat_tag "$REDHAT_TAG")"
 # Validate tags.
 tags_validation "$TAGS"
 redhat_tag_validation "$REDHAT_TAG"
+warn "$DEV_TAGS"
 dev_tags_validation "$DEV_TAGS"
 
-# Funcs to add variables to GITHUB_ENV.
-add_var() {
-  {
-    echo "$1<<EOF"
-    echo "${!1}"
-    echo "EOF"
-  } >> "$GITHUB_ENV"
-  echo "export $1='${!1}'" >> "$GITHUB_ENV.export"
-  echo "--> Set $1 to '${!1}'"
-}
 
 add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
 
@@ -207,8 +212,6 @@ if [ "$ARCH" = "arm" ]; then
 fi
 
 add_var PLATFORM
-
-add_var MINOR
 
 if [ -n "$EXTRA_BUILD_ARGS" ]; then
   add_var EXTRA_BUILD_ARGS

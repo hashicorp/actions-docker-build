@@ -319,6 +319,7 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 @test "get minor version / no error" {
 	set_all_required_env_vars_and_tags
 	export VERSION=1.0.0-dev+hcp.int
+	export PUSH_AUTO_DEV_TAGS=true
   ./digest_inputs
 
 	assert_exported_in_github_env MINOR "1.0"
@@ -327,6 +328,7 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 @test "get minor version / missing delimiter (.)" {
 	set_all_required_env_vars_and_tags
 	export VERSION=100-dev+hcp.int
+	export PUSH_AUTO_DEV_TAGS=true
   WANT_ERR="Version must be of format: MAJOR.MINOR.PATCH"
 
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
@@ -335,6 +337,7 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 @test "get minor version / non-valid major version" {
 	set_all_required_env_vars_and_tags
 	export VERSION=x.0.0-dev+hcp.int
+	export PUSH_AUTO_DEV_TAGS=true
   WANT_ERR="Version must be of format: MAJOR.MINOR.PATCH"
 
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
@@ -343,6 +346,7 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 @test "get minor version / non-valid minor version" {
 	set_all_required_env_vars_and_tags
 	export VERSION=1.x.0-dev+hcp.int
+	export PUSH_AUTO_DEV_TAGS=true
   WANT_ERR="Version must be of format: MAJOR.MINOR.PATCH"
 
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
