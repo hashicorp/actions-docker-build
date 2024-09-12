@@ -34,6 +34,7 @@ REDHAT_TAG="${REDHAT_TAG:-}"
 PUSH_AUTO_DEV_TAGS="${PUSH_AUTO_DEV_TAGS:=false}"
 OS_VERSION="${OS_VERSION:-}"
 EXTRA_BUILD_ARGS="${EXTRA_BUILD_ARGS:-}"
+SSH_PRIVATE_KEY="${SSH_PRIVATE_KEY:-}"
 
 # Funcs to add variables to GITHUB_ENV.
 add_var() {
@@ -105,17 +106,17 @@ ENTERPRISE_DETECTED=false
 # Catch and auto-correct a few common mistakes with the version input.
 # Emit loud warnings when action is taken based on these rules.
 
-# This checks if removing '-enterprise' suffix actually did anything.
-# If it did, then we've detected a likely enterprise repo.
-[ "$REPO_NAME" != "$REPO_NAME_MINUS_ENTERPRISE" ] && {
-  ENTERPRISE_DETECTED=true
-  # If the version doesn't contain a '+' or '-ent' then add the '+ent' suffix.
-  if [[ ! "$VERSION" =~ .*\+.* ]] && [[ ! "$VERSION" =~ .*-ent.* ]]; then
-	NEW_VERSION="$VERSION+ent"
-    warn "Appending '+ent' to the version string '$VERSION' -> '$NEW_VERSION' add '+ent' to the version input to remove this warning."
-	VERSION="$NEW_VERSION"
-  fi
-}
+## This checks if removing '-enterprise' suffix actually did anything.
+## If it did, then we've detected a likely enterprise repo.
+#[ "$REPO_NAME" != "$REPO_NAME_MINUS_ENTERPRISE" ] && {
+#  ENTERPRISE_DETECTED=true
+#  # If the version doesn't contain a '+' or '-ent' then add the '+ent' suffix.
+#  if [[ ! "$VERSION" =~ .*\+.* ]] && [[ ! "$VERSION" =~ .*-ent.* ]]; then
+#	NEW_VERSION="$VERSION+ent"
+#    warn "Appending '+ent' to the version string '$VERSION' -> '$NEW_VERSION' add '+ent' to the version input to remove this warning."
+#	VERSION="$NEW_VERSION"
+#  fi
+#}
 
 # If the version contains '-ent' then rectify this to '+ent' for the sake
 # getting the correct default zip name for the product.
@@ -215,4 +216,8 @@ add_var PLATFORM
 
 if [ -n "$EXTRA_BUILD_ARGS" ]; then
   add_var EXTRA_BUILD_ARGS
+fi
+
+if [ -n "$SSH_PRIVATE_KEY" ]; then
+  add_var SSH_PRIVATE_KEY
 fi
