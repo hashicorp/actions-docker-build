@@ -23,6 +23,7 @@ WORKDIR="${WORKDIR:-.}"
 export DEV_TAGS="${DEV_TAGS:-}"
 export REDHAT_TAG="${REDHAT_TAG:-}"
 export EXTRA_BUILD_ARGS="${EXTRA_BUILD_ARGS:-}"
+export SSH_PRIVATE_KEY="${SSH_PRIVATE_KEY:-}"
 
 # Convert all contiguous blocks of whitespace to single spaces using xargs.
 # This is needed to get all tags on one line for the read -ra below.
@@ -76,6 +77,14 @@ if [[ "$OS" == "windows" ]]; then
   )
 fi
 
+# Check if the SSH_PRIVATE_KEY variable is set and non-empty
+if [ -n "$SSH_PRIVATE_KEY" ]; then
+  ssh_option="default"
+  SSH_FLAG=("--ssh=${ssh_option}")  # Set SSH flag to use default agent
+else
+  SSH_FLAG=()  # If SSH_PRIVATE_KEY is not set, leave SSH_FLAG empty
+fi
+
 TARBALL_PATH="$PWD/$TARBALL_NAME"
 DEV_TARBALL_PATH="$PWD/$DEV_TARBALL_NAME"
 REDHAT_TARBALL_PATH="$PWD/$REDHAT_TARBALL_NAME"
@@ -93,6 +102,7 @@ docker buildx create --use
 docker buildx build --load \
   --target "$TARGET" \
   --platform "$PLATFORM" \
+  "${SSH_FLAG[@]}" \
   "${TAG_FLAGS[@]}" \
   "${BA_FLAGS[@]}" \
   -f "$DOCKERFILE" \
