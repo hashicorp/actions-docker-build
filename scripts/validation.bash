@@ -64,7 +64,7 @@ dev_tags_validation() {
         fi
     done <<< "$1"
 
-    # If there are invalid tags, log the error and return 1
+    # If there are invalid tags, log the error and return 1.
     if [ ${#invalid_tags[@]} -ne 0 ]; then
         log "dev_tags must begin with 'hashicorppreview/' or 'docker.io/hashicorppreview/'. Invalid tags: ${invalid_tags[*]}"
         return 1
