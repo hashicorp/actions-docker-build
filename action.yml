@@ -93,8 +93,14 @@ inputs:
 
   extra_build_args:
     description: >
-      Whitespace-separated list of extra build arguments that get passed to docker 
+      Whitespace-separated list of extra build arguments that get passed to docker
       build (optional).
+    default: ""
+
+  outputs:
+    description: >
+      Whitespace-separated list of export outputs for the build result.
+      If empty, the default output for the `docker` build driver will be used.
     default: ""
 
   # Escape hatch inputs (use sparingly if at all).
@@ -180,6 +186,8 @@ runs:
         EXTRA_BUILD_ARGS: "${{ inputs.extra_build_args }}"
 
         SSH_PRIVATE_KEY: "${{ inputs.ssh_private_key }}"
+
+        OUTPUTS: "${{ inputs.outputs }}"
 
       run: $GITHUB_ACTION_PATH/scripts/digest_inputs
 
