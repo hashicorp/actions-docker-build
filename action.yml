@@ -114,6 +114,10 @@ inputs:
     description: ssh private key
     default: ""
 
+  compression_level:
+    description: actions upload artifact compression level
+    default: 6
+
 # action runner (golang:latest image)
 runs:
   using: composite
@@ -248,7 +252,7 @@ runs:
         name: ${{ env.TARBALL_NAME }}
         path: ${{ env.TARBALL_NAME }}
         if-no-files-found: error
-        compression-level: 0
+        compression-level: ${{ inputs.compression_level }}
 
     - name: Upload Dev Tarball
       uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
