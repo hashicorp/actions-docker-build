@@ -6,4 +6,4 @@ echo "==> Registering qemu into /proc/sys/fs/binfmt_misc"
 docker run --pull always \
            --privileged \
            --rm \
-           docker.mirror.hashicorp.services/tonistiigi/binfmt:qemu-v9.2.2 --install all
+           docker.mirror.hashicorp.services/tonistiigi/binfmt@sha256:1b804311fe87047a4c96d38b4b3ef6f62fca8cd125265917a9e3dc3c996c39e6 --install all
