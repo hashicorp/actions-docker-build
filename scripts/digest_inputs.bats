@@ -9,6 +9,9 @@ setup() {
 	export GITHUB_ENV=./.tmp/github.env
 	mkdir -p ./.tmp
 	echo "*" > ./.tmp/.gitignore
+
+    # Force OS to linux for consistent test results
+    export OS=linux
 }
 
 set_all_required_env_vars_and_tags() {
@@ -113,7 +116,7 @@ assert_exp_var() {
 	set_all_required_env_vars_and_tags
 
 	REPO_NAME="repo1-enterprise"
-	VERSION="1.2.3"
+	VERSION="1.2.3+ent"
 
 	# Execute the script under test: digest_inputs
 	./digest_inputs
