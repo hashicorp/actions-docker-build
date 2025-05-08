@@ -234,6 +234,8 @@ assert_exp_var() {
 @test "required env vars and tags set - GITHUB_ENV file written correctly" {
 	set_all_required_env_vars_and_tags
 
+	export PUSH_AUTO_DEV_TAGS=false
+
 	# Execute the script under test: digest_inputs
 	./digest_inputs
 
