@@ -63,8 +63,8 @@ get_minor_version() {
 }
 
 # Set default dev tags
-if [ "$PUSH_AUTO_DEV_TAGS" = true ] && ([[ -z "${DEV_TAGS}" ]]); then
-  get_minor_version ${VERSION}
+if [ "$PUSH_AUTO_DEV_TAGS" = "true" ] && [ -z "${DEV_TAGS}" ]; then
+  get_minor_version "${VERSION}"
   add_var MINOR
   warn "$MINOR"
   DEV_TAGS=${DEV_TAGS:="hashicorppreview/${REPO_NAME}:${MINOR}-dev" "hashicorppreview/${REPO_NAME}:${MINOR}-dev-${REVISION}"}
