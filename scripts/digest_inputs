@@ -134,14 +134,16 @@ add_vars REPO_NAME REPO_NAME_MINUS_ENTERPRISE ENTERPRISE_DETECTED
 
 # Get some basic info needed to building and tagging the docker image.
 
-if [[ -z "${OS:-}" ]]; then
-  case "$(uname -s)" in
-      Linux*)  OS=linux ;;
-      Darwin*) OS=osx ;;
-      CYGWIN*|MINGW*) OS=windows ;;
-      *) echo "Unsupported OS: $(uname -s)" >&2; exit 1 ;;
-  esac
-fi
+case "$(uname -s)" in
+    Linux*)     OS=linux;;
+    Darwin*)    OS=osx;;
+    CYGWIN*)    OS=windows;;
+    MINGW*)     OS=windows;;
+    *)
+        echo "Unsupported OS: $(uname -s)"
+        exit 1
+        ;;
+esac
 
 add_vars TARGET OS ARCH VERSION REVISION OS_VERSION
 
