@@ -398,20 +398,27 @@ so that they receive upgrades automatically. In order to do this:
 Locally fetch the new tag created by the release:
 
 ```
-git fetch vX.Y.Z
+git fetch origin vX.Y.Z (i.e. v2.2.0)
 ```
 
-Add the new tags
+If the `vX` tag does not exist, then proceed with the below: 
 
 ```
 git tag -f vX.Y vX.Y.Z
 git tag -f vX vX.Y.Z
 ```
-
 Push the new tags
 
 ```
 git push origin vX.Y vX
 ```
 
-And you're all done!
+If the `vX` (i.e. v2) tag already exists, you will need to delete it and repoint the major version to it: 
+```
+git tag -d vX
+git tag -f vX vX.Y.Z 
+```
+Update the major version tag upstream
+```
+git push origin :refs/tags/vX && git push origin vX
+```
