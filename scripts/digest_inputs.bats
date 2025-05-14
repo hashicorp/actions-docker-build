@@ -9,6 +9,9 @@ setup() {
 	export GITHUB_ENV=./.tmp/github.env
 	mkdir -p ./.tmp
 	echo "*" > ./.tmp/.gitignore
+
+    # Force OS to linux for consistent test results
+    export OS=linux
 }
 
 set_all_required_env_vars_and_tags() {
@@ -113,7 +116,7 @@ assert_exp_var() {
 	set_all_required_env_vars_and_tags
 
 	REPO_NAME="repo1-enterprise"
-	VERSION="1.2.3"
+	VERSION="1.2.3+ent"
 
 	# Execute the script under test: digest_inputs
 	./digest_inputs
@@ -234,6 +237,8 @@ assert_exp_var() {
 @test "required env vars and tags set - GITHUB_ENV file written correctly" {
 	set_all_required_env_vars_and_tags
 
+	export PUSH_AUTO_DEV_TAGS=false
+
 	# Execute the script under test: digest_inputs
 	./digest_inputs
 
@@ -319,6 +324,7 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 @test "get minor version / no error" {
 	set_all_required_env_vars_and_tags
 	export VERSION=1.0.0-dev+hcp.int
+	export PUSH_AUTO_DEV_TAGS=true
   ./digest_inputs
 
 	assert_exported_in_github_env MINOR "1.0"
@@ -327,6 +333,7 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 @test "get minor version / missing delimiter (.)" {
 	set_all_required_env_vars_and_tags
 	export VERSION=100-dev+hcp.int
+	export PUSH_AUTO_DEV_TAGS=true
   WANT_ERR="Version must be of format: MAJOR.MINOR.PATCH"
 
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
@@ -335,6 +342,7 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 @test "get minor version / non-valid major version" {
 	set_all_required_env_vars_and_tags
 	export VERSION=x.0.0-dev+hcp.int
+	export PUSH_AUTO_DEV_TAGS=true
   WANT_ERR="Version must be of format: MAJOR.MINOR.PATCH"
 
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs
@@ -343,6 +351,7 @@ assert_failure_with_message_when() { local MESSAGE="$1"; shift
 @test "get minor version / non-valid minor version" {
 	set_all_required_env_vars_and_tags
 	export VERSION=1.x.0-dev+hcp.int
+	export PUSH_AUTO_DEV_TAGS=true
   WANT_ERR="Version must be of format: MAJOR.MINOR.PATCH"
 
 	assert_failure_with_message_when "$WANT_ERR" ./digest_inputs

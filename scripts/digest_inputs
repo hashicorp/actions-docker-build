@@ -34,6 +34,18 @@ REDHAT_TAG="${REDHAT_TAG:-}"
 PUSH_AUTO_DEV_TAGS="${PUSH_AUTO_DEV_TAGS:=false}"
 OS_VERSION="${OS_VERSION:-}"
 EXTRA_BUILD_ARGS="${EXTRA_BUILD_ARGS:-}"
+SSH_PRIVATE_KEY="${SSH_PRIVATE_KEY:-}"
+
+# Funcs to add variables to GITHUB_ENV.
+add_var() {
+  {
+    echo "$1<<EOF"
+    echo "${!1}"
+    echo "EOF"
+  } >> "$GITHUB_ENV"
+  echo "export $1='${!1}'" >> "$GITHUB_ENV.export"
+  echo "--> Set $1 to '${!1}'"
+}
 
 # Strip version to MAJOR.MINOR
 get_minor_version() {
@@ -49,11 +61,14 @@ get_minor_version() {
     die "Version must be of format: MAJOR.MINOR.PATCH"
   fi
 }
-get_minor_version ${VERSION}
 
 # Set default dev tags
-if [ "$PUSH_AUTO_DEV_TAGS" = true ] || ([[ ! -z "${DEV_TAGS}" ]]); then
-  DEV_TAGS=${DEV_TAGS:=("hashicorppreview/${REPO_NAME}:${MINOR}-dev" "hashicorppreview/${REPO_NAME}:${MINOR}-dev-${REVISION}")}
+if [ "$PUSH_AUTO_DEV_TAGS" = true ] && ([[ -z "${DEV_TAGS}" ]]); then
+  get_minor_version ${VERSION}
+  add_var MINOR
+  warn "$MINOR"
+  DEV_TAGS=${DEV_TAGS:="hashicorppreview/${REPO_NAME}:${MINOR}-dev" "hashicorppreview/${REPO_NAME}:${MINOR}-dev-${REVISION}"}
+  warn "$DEV_TAGS"
 fi
 
 autocorrect_tags() {
@@ -71,18 +86,9 @@ REDHAT_TAG="$(autocorrect_tags redhat_tag "$REDHAT_TAG")"
 # Validate tags.
 tags_validation "$TAGS"
 redhat_tag_validation "$REDHAT_TAG"
+warn "$DEV_TAGS"
 dev_tags_validation "$DEV_TAGS"
 
-# Funcs to add variables to GITHUB_ENV.
-add_var() {
-  {
-    echo "$1<<EOF"
-    echo "${!1}"
-    echo "EOF"
-  } >> "$GITHUB_ENV"
-  echo "export $1='${!1}'" >> "$GITHUB_ENV.export"
-  echo "--> Set $1 to '${!1}'"
-}
 
 add_vars() { for NAME in "$@"; do add_var "$NAME"; done; }
 
@@ -93,24 +99,6 @@ REPO_NAME_MINUS_ENTERPRISE="${REPO_NAME%%-enterprise}"
 
 # Assume this is not enterprise.
 ENTERPRISE_DETECTED=false
-
-#
-## Version mangling.
-#
-# Catch and auto-correct a few common mistakes with the version input.
-# Emit loud warnings when action is taken based on these rules.
-
-# This checks if removing '-enterprise' suffix actually did anything.
-# If it did, then we've detected a likely enterprise repo.
-[ "$REPO_NAME" != "$REPO_NAME_MINUS_ENTERPRISE" ] && {
-  ENTERPRISE_DETECTED=true
-  # If the version doesn't contain a '+' or '-ent' then add the '+ent' suffix.
-  if [[ ! "$VERSION" =~ .*\+.* ]] && [[ ! "$VERSION" =~ .*-ent.* ]]; then
-	NEW_VERSION="$VERSION+ent"
-    warn "Appending '+ent' to the version string '$VERSION' -> '$NEW_VERSION' add '+ent' to the version input to remove this warning."
-	VERSION="$NEW_VERSION"
-  fi
-}
 
 # If the version contains '-ent' then rectify this to '+ent' for the sake
 # getting the correct default zip name for the product.
@@ -208,8 +196,10 @@ fi
 
 add_var PLATFORM
 
-add_var MINOR
-
 if [ -n "$EXTRA_BUILD_ARGS" ]; then
   add_var EXTRA_BUILD_ARGS
+fi
+
+if [ -n "$SSH_PRIVATE_KEY" ]; then
+  add_var SSH_PRIVATE_KEY
 fi

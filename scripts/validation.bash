@@ -45,11 +45,30 @@ DEV_TAG_PATTERN='^(docker\.io/)?hashicorppreview/.*'
 
 # Validates dev_tags for DockerHub only pushes to "hashicorppreview" org
 dev_tags_validation() {
-	[ -z "${1}" ] && return 0
-	for dt in ${1}; do
-		# dev_tags can only push to the 'hashicorppreview' dockerhub org
-		grep -qE "$DEV_TAG_PATTERN" <<<"$dt" && continue
-		log "dev_tags must begin with 'hashicorppreview/' or 'docker.io/hashicorppreview/' (Got: $dt)"
-		return 1
-	done
+    [ -z "${1}" ] && return 0
+
+    invalid_tags=()
+
+    # Loop through each tag by processing the multi-line string
+    while IFS= read -r dt; do
+        dt=$(echo "$dt" | xargs)  # Trim leading/trailing whitespace
+        # Skip empty lines
+        [ -z "$dt" ] && continue
+
+        log $dt
+
+        # Validate each tag
+        if ! grep -qE "$DEV_TAG_PATTERN" <<<"$dt"; then
+            # Collect invalid tags
+            invalid_tags+=("$dt")
+        fi
+    done <<< "$1"
+
+    # If there are invalid tags, log the error and return 1.
+    if [ ${#invalid_tags[@]} -ne 0 ]; then
+        log "dev_tags must begin with 'hashicorppreview/' or 'docker.io/hashicorppreview/'. Invalid tags: ${invalid_tags[*]}"
+        return 1
+    fi
+
+    return 0
 }

@@ -110,6 +110,14 @@ inputs:
     description: Should zip archives be extracted? (optional)
     default: "true"
 
+  ssh_private_key:
+    description: ssh private key
+    default: ""
+
+  compression_level:
+    description: actions upload artifact compression level
+    default: 6
+
 # action runner (golang:latest image)
 runs:
   using: composite
@@ -175,6 +183,8 @@ runs:
         OS_VERSION: "${{ steps.os-version.outputs.os-version }}"
         EXTRA_BUILD_ARGS: "${{ inputs.extra_build_args }}"
 
+        SSH_PRIVATE_KEY: "${{ inputs.ssh_private_key }}"
+
       run: $GITHUB_ACTION_PATH/scripts/digest_inputs
 
     - name: Setup QEMU in binfmt_misc filesystem
@@ -193,6 +203,12 @@ runs:
       if: ${{ inputs.do_zip_extract_step == 'true' }}
       shell: bash
       run: $GITHUB_ACTION_PATH/scripts/extract_product_zip
+
+    - name: Setup SSH agent
+      if: ${{ inputs.ssh_private_key != '' }}
+      uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
+      with:
+        ssh-private-key: ${{ inputs.ssh_private_key }}
 
     - name: Docker Build
       shell: bash
@@ -236,6 +252,7 @@ runs:
         name: ${{ env.TARBALL_NAME }}
         path: ${{ env.TARBALL_NAME }}
         if-no-files-found: error
+        compression-level: ${{ inputs.compression_level }}
 
     - name: Upload Dev Tarball
       uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
