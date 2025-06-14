@@ -272,7 +272,8 @@ different for each image, is retained after each `docker load` and can be used t
 images need to be stitched together using `docker manifest create`.
 
 ## FAQ
-**Q: How do I create create a multi-arch manifest?**
+
+### Q: How do I create create a multi-arch manifest?
 
 A: Invoke `actions-docker-build` and to generate one image per platform and use the same tags for all of them. CRT will see the multiple images with the shared tag and merge them together into a manifest for publishing.
 
@@ -306,7 +307,7 @@ with:
 
 Background: Unfortunately the doocker output type does NOT support exporting multi-arch manifests. There is an OCI type but it does not yet support mulit-platform builds https://github.com/docker/roadmap/issues/371.
 
-**Q: What happens when we are asked to create a manifest from two different images that share a tag but have the same platform?**
+### Q: What happens when we are asked to create a manifest from two different images that share a tag but have the same platform?
 
 A: Previously, one of the images would get dropped/discarded. CRT will reject the publishing of a manifest list in this manner.
 
@@ -315,7 +316,7 @@ Background: Technically, we could publish them. However, what the end-user clien
 
 So we fail the input by blocking publishing when this happens. If one has identified a situtation where this is useful behavior or the support is required, please let us know! We'd very much like to hear from you.
 
-**Q: I am adding Windows Docker image support to my repo, but the workflow is throwing a `Must set VERSION` error. Why am I getting this error?**
+### Q: I am adding Windows Docker image support to my repo, but the workflow is throwing a `Must set VERSION` error. Why am I getting this error?
 
 A: There is a step in Docker build that calculate all the digest inputs. This calculation sets environment variables needed to build a Docker image and one of the variable is uppercase `VERSION`. Environment variables in Windows are not case-sensitive. If the build step defines the `version` variable in lower case, Windows thinks the `version` variable already exists so it does not set the upper case `VERSION` variable.
 
@@ -334,14 +335,14 @@ To fix this, make sure to set your `version` environment variable in the build s
           version: ${{ env.env-version }}
 ```
 
-**Q: How can I submit an image to multiple repositories?**
+### Q: How can I submit an image to multiple repositories?
 
 A: You need to define the following inputs in the `actions-docker-build` step: \
 `tags:` to push to prod DockerHub and ECR registry \
 `dev_tags:` to push to hashicorpreview \
 `redhat_tag:` to push to Red Hat registry
 
-**Q: How do I make sure tag X is also published as "latest"?**
+### Q: How do I make sure tag X is also published as "latest"?
 
 A: CRT will update `latest` to the *first* tag in alphabetical order. The image must also have a `LABEL version=x.y.z` defined.
 
