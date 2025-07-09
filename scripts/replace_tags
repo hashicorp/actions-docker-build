@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+log() { echo "$*" 1>&2 ; }
+
+ERROR_COUNT=0
+err() { log "[error] $*" ; ERROR_COUNT=$((ERROR_COUNT + 1)) ; }
+
+# get_image_id takes an image:tag and returns the corresponding ID.
+get_image_id() { local image="$1"
+    local image_id
+    image_id="$(docker image ls --format='{{.ID}}' "$image")"
+    if [ -z "$image_id" ]; then
+        log "$image: image not found."
+    fi
+    echo "$image_id"
+}
+
+# get_existing_tags fetches the tags from an existing image by inspecting it.
+# Tags are returned as a space-delimited list.
+get_existing_tags() { local image="$1"
+    local -a tags
+    if ! read -a tags -r < <( docker image inspect "$image" | jq --raw-output '.[0].RepoTags[]' | xargs ) ; then
+        # failed to read tags, probabl the image doesn't exist
+        err "$image: failed to inspect image tags."
+        return 1
+    fi
+    echo "${tags[@]}"
+}
+
+# add tags adds tags to an image.  It does not err if a tag is already present on the image.
+add_tags() { local image="$1" add_tags="$2"
+    local tag
+    local ERROR_COUNT=0
+
+    local -a tags
+    read -a tags -r <<< "$add_tags"
+    for tag in "${tags[@]}" ; do
+        log "$tag: adding tag to image '$image'"
+        if ! docker image tag "$image" "$tag" ; then
+            err "$tag: failed to apply tag to image $image."
+        fi
+    done
+    return "$ERROR_COUNT"
+}
+
+remove_tags() { local image="$1" rm_tags="$2"
+    local tag
+    local ERROR_COUNT=0
+
+    local -a tags
+    read -a tags -r <<< "$rm_tags"
+    for tag in "${tags[@]}" ; do
+        log "$tag: removing tag from image '$image'"
+        if ! docker image rm "$tag" ; then
+            err "$tag: failed to remove tag from image $image."
+        fi
+    done
+    return "$ERROR_COUNT"
+}
+
+# IMAGE should be in name:tag format.
+# TAGS should be a space-delimited list of tags to apply.
+# All existing tags will be removed.
+# New tags are added before old tags are removed
+main() { local IMAGE="$1" TAGS="$2"
+    if [ -z "$IMAGE" ]; then
+        err "No image provided; nothing to do."
+    fi
+    if [ -z "$TAGS" ]; then
+        err "No tags to add; nothing to do."
+    fi
+    if [ "$ERROR_COUNT" -gt 0 ]; then
+        return 1
+    fi
+
+    local IMAGE_ID
+    IMAGE_ID="$(get_image_id "$IMAGE")"
+    if [ -z "$IMAGE_ID" ]; then
+        err "$IMAGE: could not find ID for image."
+        return 1
+    fi
+
+    # collect current tags for removal
+    local TAGS_RM
+    TAGS_RM="$(get_existing_tags "$IMAGE_ID")"
+    log "existing tags (will remove): $TAGS_RM"
+
+    # Add before remove, removing the last tag causes docker to destroy the image.
+    log "Adding requested tags..."
+    add_tags "$IMAGE_ID" "$TAGS"
+    log "Removing existing tags..."
+    remove_tags "$IMAGE_ID" "$TAGS_RM"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
