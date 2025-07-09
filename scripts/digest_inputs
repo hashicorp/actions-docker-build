@@ -35,6 +35,9 @@ PUSH_AUTO_DEV_TAGS="${PUSH_AUTO_DEV_TAGS:=false}"
 OS_VERSION="${OS_VERSION:-}"
 EXTRA_BUILD_ARGS="${EXTRA_BUILD_ARGS:-}"
 SSH_PRIVATE_KEY="${SSH_PRIVATE_KEY:-}"
+# PLATFORMS is required for the exporter action but unused by the build action,
+# so it's optional in this script.
+PLATFORMS="${PLATFORMS:-}"
 
 # Funcs to add variables to GITHUB_ENV.
 add_var() {
@@ -202,4 +205,9 @@ fi
 
 if [ -n "$SSH_PRIVATE_KEY" ]; then
   add_var SSH_PRIVATE_KEY
+fi
+
+# Exporter platforms list
+if [ -n "$PLATFORMS" ]; then
+    add_var PLATFORMS
 fi

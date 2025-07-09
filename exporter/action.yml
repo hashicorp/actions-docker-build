@@ -1,0 +1,254 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
+name: docker-build
+author: Release Engineering <rel-eng@hashicorp.com>
+description: Exports existing docker images, generates tags files.
+
+inputs:
+
+  # Required explicit inputs.
+  version:
+    description: Version of the product, e.g. "X.Y.Z[-pre][+edition]".
+    required: true
+
+  arch:
+    description: >
+      The exporter ignores this parameter.  It is accepted for convenience when
+      copying parameters from a build invocation to an exporter invocation.
+    required: true
+  # platforms replaces arch for this GHA.
+  platforms:
+    description: >
+      A comma-separated list of platforms whose images should be exported.  When
+      building for a single architecture, this might be something like `linux/amd64`.
+      For a multi-arch build, perhaps `linux/amd64,linux/arm64`.
+    required: true
+
+  revision:
+    description: >
+      Full sha of the commit that is being built.
+      This may differ from the default <github.sha> which is the ref the action
+      was invoked at.
+    default: "${{ github.sha }}"
+
+  tags:
+    description: >
+      Whitespace-separated fully-qualified image names to use for production releases.
+      If you set tags non-empty, then the redhat_tag input must be empty.
+      Each tag must be in the format: <registry>/[<namespace>/]<repository>:<tag>
+    default: ""
+
+  redhat_tag:
+    description: >
+      Single tag to use for pushing to Red Hat Certified Container Project.
+      If you set redhat_tag non-empty, then the tags input must be empty.
+      Each tag must be in the format: <registry>/[<namespace>/]<repository>:<tag>
+    default: ""
+
+  # General purpose inputs.
+  target:
+    description: >
+      Dockerfile target stage to build.
+      You should set this explicitly if your Dockerfile contains more than one target.
+      You should use the target name (i.e. FROM ... AS <target name>) not the index.
+      Defaults to 0, meaning the first target defined (fine if only one target).
+    default: "0"
+
+  arm_version:
+    description: Version of arm architecture to use (ignored unless arch == arm).
+    default: "6"
+
+  smoke_test:
+    description: >
+      The exporter ignores this parameter.  It is accepted for convenience when
+      copying parameters from a build invocation to an exporter invocation.
+    required: false
+    default: ""
+
+  # Optional inputs whose values are guessed if left blank.
+  zip_artifact_name:
+    description: >
+      The exporter ignores this parameter.  It is accepted for convenience when
+      copying parameters from a build invocation to an exporter invocation.
+    default: ""
+
+  pkg_name:
+    description: >
+      The exporter ignores this parameter.  It is accepted for convenience when
+      copying parameters from a build invocation to an exporter invocation.
+    default: ""
+
+  bin_name:
+    description: >
+      The exporter ignores this parameter.  It is accepted for convenience when
+      copying parameters from a build invocation to an exporter invocation.
+    default: ""
+
+  # Set defaults in scripts/digest_inputs.sh
+  dev_tags:
+    description: Tags to use for publishing development images (optional).
+    default: ""
+
+  push_auto_dev_tags:
+    description: Tag to determine whether to push default dev tags (optional).
+    default: "false"
+
+  extra_build_args:
+    description: >
+      The exporter ignores this parameter.  It is accepted for convenience when
+      copying parameters from a build invocation to an exporter invocation.
+    default: ""
+
+  # Escape hatch inputs (use sparingly if at all).
+  workdir:
+    description: Working directory in which to run 'docker build'.
+    default: .
+
+  dockerfile:
+    description: >
+      The exporter ignores this parameter.  It is accepted for convenience when
+      copying parameters from a build invocation to an exporter invocation.
+    default: Dockerfile
+
+  do_zip_extract_step:
+    description: >
+      The exporter ignores this parameter.  It is accepted for convenience when
+      copying parameters from a build invocation to an exporter invocation.
+    default: "true"
+
+  # TODO: is this needed?
+  ssh_private_key:
+    description: ssh private key
+    default: ""
+
+  compression_level:
+    description: actions upload artifact compression level
+    default: 6
+
+# action runner (golang:latest image)
+runs:
+  using: composite
+  #env:
+  #  DOCKER_BUILDKIT: 1
+  #  BUILDKIT_PROGRESS: plain
+  steps:
+    - name: Set required repo name env var
+      shell: bash
+      run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
+
+    - name: Get windows version
+      if: runner.os == 'Windows'
+      id: windows-version
+      shell: powershell
+      # language=powershell
+      run: |
+        # Get the OS Version including the revision and trim any white spaces.
+        # We added the revision due to compatibility reasons. Microsoft may need
+        # to break compatibility even with matching major.minor.build. To support this case,
+        # Windows has some additional registry keys on the host and inside the container image to
+        # specify the minimum update version that is supported on each side. Windows will look at this
+        # at container start time to determine whether it should attempt to launch the container
+        # References: https://learn.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility?tabs=windows-server-2022%2Cwindows-11#matching-container-host-version-with-container-image-versions
+        # https://github.com/opencontainers/image-spec/pull/632#issuecomment-295018429
+        $version = (Get-ItemProperty -Path C:\Windows\System32\hal.dll).VersionInfo.ProductVersion.Trim()
+        Write-Output "os-version=$version" >> $ENV:GITHUB_OUTPUT
+
+    - name: Get os version
+      id: os-version
+      shell: bash
+      run: |
+        echo "Version from OS version calculation ${{steps.windows-version.outputs.os-version}}"
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          echo "os-version=${{ steps.windows-version.outputs.os-version }}" >> "$GITHUB_OUTPUT"
+        else
+          echo "os-version=" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Digest Inputs - Calculate Variables for Later Steps
+      shell: bash
+      env:
+
+        # Required.
+        REVISION: "${{ inputs.revision }}"
+        VERSION: "${{ inputs.version }}"
+        ARCH: "${{ inputs.arch }}"
+        PLATFORMS: "${{ inputs.platforms }}"
+        TAGS: "${{ inputs.tags }}"
+        REDHAT_TAG: "${{ inputs.redhat_tag }}"
+        TARGET: "${{ inputs.target }}"
+
+        # Optional.
+        DEV_TAGS: "${{ inputs.dev_tags }}"
+        PUSH_AUTO_DEV_TAGS: "${{ inputs.push_auto_dev_tags }}"
+        ARM_VERSION: "${{ inputs.arm_version }}"
+        PKG_NAME: "${{ inputs.pkg_name }}"
+        WORKDIR: "${{ inputs.workdir }}"
+        ZIP_NAME: "${{ inputs.zip_artifact_name }}"
+        BIN_NAME: "${{ inputs.bin_name }}"
+
+        DOCKERFILE: "${{ inputs.dockerfile }}"
+
+        OS_VERSION: "${{ steps.os-version.outputs.os-version }}"
+        EXTRA_BUILD_ARGS: "${{ inputs.extra_build_args }}"
+
+        SSH_PRIVATE_KEY: "${{ inputs.ssh_private_key }}"
+
+      run: $GITHUB_ACTION_PATH/scripts/digest_inputs
+
+    #- name: Setup QEMU in binfmt_misc filesystem
+    #  shell: bash
+    #  if: runner.os == 'Linux'
+    #  run: $GITHUB_ACTION_PATH/scripts/register_qemu_binfmt
+
+    - name: Generate Random String to use for tag list json
+      shell: bash
+      run: |
+        echo "RANDOM_STRING=$(echo $((2000 + $RANDOM % 40000)))" >> $GITHUB_ENV
+
+    - name: Retag and Generate Metadata
+      shell: bash
+      run: |
+        $GITHUB_ACTION_PATH/scripts/replace_tags
+
+    - name: Generate Docker metadata
+      shell: bash
+      env:
+        RANDOM_STRING: "${{ env.RANDOM_STRING }}"
+      run: $GITHUB_ACTION_PATH/scripts/create_metadata
+
+    - name: Upload Docker Image metadata
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      env:
+        # Add _redhat if this is a redhat call.
+        REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
+        RANDOM_STRING: "${{ env.RANDOM_STRING }}"
+      with:
+        name: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.${{ inputs.arch }}.${{ env.RANDOM_STRING }}.json
+        path: docker_tag_list_${{env.TARGET}}${{env.REDHAT_SUFFIX}}.${{ inputs.arch }}.${{ env.RANDOM_STRING }}.json
+        if-no-files-found: error
+
+    - name: Upload Prod Tarball
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      if: ${{ env.TAGS != '' }}
+      with:
+        name: ${{ env.TARBALL_NAME }}
+        path: ${{ env.TARBALL_NAME }}
+        if-no-files-found: error
+        compression-level: ${{ inputs.compression_level }}
+
+    - name: Upload Dev Tarball
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      if: ${{ env.DEV_TAGS != '' }}
+      with:
+        name: ${{ env.DEV_TARBALL_NAME }}
+        path: ${{ env.DEV_TARBALL_NAME }}
+        if-no-files-found: error
+
+    - name: Upload Red Hat Tarball
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      if: ${{ env.REDHAT_TAG != '' }}
+      with:
+        name: ${{ env.REDHAT_TARBALL_NAME }}
+        path: ${{ env.REDHAT_TARBALL_NAME }}
+        if-no-files-found: error
