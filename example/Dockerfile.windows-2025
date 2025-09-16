@@ -1,7 +1,7 @@
 # Copyright (c) HashiCorp, Inc.
 # SPDX-License-Identifier: MPL-2.0
 # syntax=docker/dockerfile:1
-FROM mcr.microsoft.com/windows/nanoserver:ltsc2019 AS default
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2025 AS default
 LABEL maintainer="Team RelEng <team-rel-eng@hashicorp.com>"
 ARG PRODUCT_VERSION
 ARG PRODUCT_REVISION
