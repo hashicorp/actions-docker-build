@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Create a JSON file containing the tags used in the build.
+# This metadata is then uploaded to the artifact store.
+
 set -Eeuo pipefail
 
 # OUT_DIR is where the file gets written.

@@ -82,6 +82,12 @@ set_test_extra_build_args() {
     "
 }
 
+# set multiarchitecture platform for testing
+set_test_build_mode_manifest() {
+	export BUILD_MODE="manifest"
+	export PLATFORM="linux/amd64,linux/arm64"
+}
+
 @test "only prod tags set - all prod and staging tags built" {
 
 	set_test_prod_tags

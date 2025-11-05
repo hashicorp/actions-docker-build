@@ -10,15 +10,16 @@ die() { echo "$1" 1>&2; exit 1; }
 [ -n "${REVISION:-}" ] || die "Must set REVISION"
 [ -n "${DOCKERFILE:-}" ] || die "Must set DOCKERFILE"
 [ -n "${TARGET:-}" ] || die "Must set TARGET"
-[ -n "${PLATFORM:-}" ] || die "Must set PLATFORM" # Existing single platform for tarball mode
 [ -n "${AUTO_TAG:-}" ] || die "Must set AUTO_TAG"
 [ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG"
 
-# --- NEW REQUIRED ENV VARS FOR MODE SELECTION ---
-[ -n "${BUILD_MODE:-}" ] || die "Must set BUILD_MODE (e.g., 'tarball' or 'manifest')"
-# MULTI_ARCH_PLATFORMS is only required if BUILD_MODE is 'manifest'
-if [[ "${BUILD_MODE}" == "manifest" ]]; then
-    [ -n "${MULTI_ARCH_PLATFORMS:-}" ] || die "Must set MULTI_ARCH_PLATFORMS for 'manifest' BUILD_MODE"
+# --- CONDITIONAL REQUIRED MODE SELECTION ---
+if [[ -n "${PLATFORMS:-}" ]]; then
+    BUILD_MODE="manifest"
+elif [[ -n "${PLATFORM:-}" ]]; then
+    BUILD_MODE="tarball"
+else
+    die "Must set either PLATFORM (for 'tarball' build mode) or PLATFORMS (for 'manifest' multi-arch mode)"
 fi
 # --- END NEW REQUIRED ENV VARS ---
 
@@ -123,7 +124,7 @@ if [[ "$BUILD_MODE" == "manifest" ]]; then
     # Build and push the multi-architecture image and manifest
     docker buildx build --push \
       --target "$TARGET" \
-      --platform "$MULTI_ARCH_PLATFORMS" \
+      --platform "$PLATFORMS" \
       "${SSH_FLAG[@]}" \
       "${TAG_FLAGS[@]}" \
       "${BA_FLAGS[@]}" \
@@ -135,12 +136,11 @@ if [[ "$BUILD_MODE" == "manifest" ]]; then
     # --- Handling version_label_validation for manifest mode ---
     # This function expects a locally loaded image for `docker inspect`.
     # When using `buildx build --push`, the image is NOT loaded locally.
-    # For dev images, it's often acceptable to skip this for speed.
-    # If this validation is CRITICAL for dev builds, you would need to:
-    # 1. Build *one* default platform (e.g., linux/amd64) using `--load` first.
-    # 2. Run version_label_validation on that loaded image.
-    # 3. THEN run the `docker buildx build --push` for all platforms.
-    # This adds complexity and time, so often skipped for dev builds.
+    # Alternatively we can use skopeo to inspect images remotely
+    # skopeo inspect docker://docker.io/hashicorp/$product:$version --raw | jq '.manifests[].digest'
+    # loop over the checksums and verify the version label for each architecture
+    # skopeo inspect "docker://docker.io/hashicorp/$product@${digest}" | jq ".Labels"
+    # this was validated against dockerhub but requires validation against other registries as well.
     echo "Note: Local version label validation is skipped in 'manifest' build mode as image is directly pushed."
 
     # Exit the script here to skip the tarball-specific saving steps

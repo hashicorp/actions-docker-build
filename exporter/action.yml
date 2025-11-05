@@ -7,23 +7,23 @@ description: Exports existing docker images, generates tags files.
 
 inputs:
 
-  # Required explicit inputs.
+  # Required explicit input
   version:
     description: Version of the product, e.g. "X.Y.Z[-pre][+edition]".
     required: true
 
+  # Either arch or platforms must be set. If both are set, platforms takes precedence.
   arch:
-    description: >
-      The exporter ignores this parameter.  It is accepted for convenience when
-      copying parameters from a build invocation to an exporter invocation.
-    required: true
-  # platforms replaces arch for this GHA.
+    description: Target image architecture e.g. "amd64", "arm64", "arm".
+    default: ""
+
   platforms:
     description: >
-      A comma-separated list of platforms whose images should be exported.  When
-      building for a single architecture, this might be something like `linux/amd64`.
-      For a multi-arch build, perhaps `linux/amd64,linux/arm64`.
-    required: true
+      A list of multi-arch platforms to build for.
+      Must be set to a comma-separated list of platforms to build e.g. "linux/amd64,linux/arm64".
+    default: ""
+
+  # Optional or conditionally required inputs
 
   revision:
     description: >
@@ -61,28 +61,34 @@ inputs:
 
   smoke_test:
     description: >
-      The exporter ignores this parameter.  It is accepted for convenience when
-      copying parameters from a build invocation to an exporter invocation.
+      Bash shell script to run as a smoke test against the built image.
+      Inside the script, you will have access to a variable called 'IMAGE_NAME'
+      which you can use in your test to run the image. The script currently only
+      run against the `linux/amd64` build and will have access to a local docker
+      daemon. Tests should not be specific to `amd64` arch nor rely on the daemon
+      being local as these may change later to enable testing to all other images.
+      The script must exit non-zero in order to mark the test as failed.
     required: false
     default: ""
 
-  # Optional inputs whose values are guessed if left blank.
+  # Optional inputs whose values are guessed if left blank
   zip_artifact_name:
     description: >
-      The exporter ignores this parameter.  It is accepted for convenience when
-      copying parameters from a build invocation to an exporter invocation.
+      Name of zip file artifact to download. If left empty defaults to
+      ${PKG_NAME}_${OS}_${ARCH}.zip.
     default: ""
 
   pkg_name:
     description: >
-      The exporter ignores this parameter.  It is accepted for convenience when
-      copying parameters from a build invocation to an exporter invocation.
+      Only used to determine default zip name.
+      Defaults to <repo-name(minus -enterprise)>_<version>[+ent]
+      if left blank.
     default: ""
 
   bin_name:
     description: >
-      The exporter ignores this parameter.  It is accepted for convenience when
-      copying parameters from a build invocation to an exporter invocation.
+      Name of the product binary inside the zip file. If empty (which is the default)
+      then the name is guessed using repo name with any -enteprise suffix removed.
     default: ""
 
   # Set defaults in scripts/digest_inputs.sh
@@ -96,8 +102,8 @@ inputs:
 
   extra_build_args:
     description: >
-      The exporter ignores this parameter.  It is accepted for convenience when
-      copying parameters from a build invocation to an exporter invocation.
+      Whitespace-separated list of extra build arguments that get passed to docker 
+      build (optional).
     default: ""
 
   # Escape hatch inputs (use sparingly if at all).
@@ -106,32 +112,24 @@ inputs:
     default: .
 
   dockerfile:
-    description: >
-      The exporter ignores this parameter.  It is accepted for convenience when
-      copying parameters from a build invocation to an exporter invocation.
+    description: Dockerfile path relative to workdir.
     default: Dockerfile
 
   do_zip_extract_step:
-    description: >
-      The exporter ignores this parameter.  It is accepted for convenience when
-      copying parameters from a build invocation to an exporter invocation.
+    description: Should zip archives be extracted? (optional)
     default: "true"
 
-  # TODO: is this needed?
   ssh_private_key:
     description: ssh private key
     default: ""
 
   compression_level:
     description: actions upload artifact compression level
-    default: 6
+    default: "6"
 
 # action runner (golang:latest image)
 runs:
   using: composite
-  #env:
-  #  DOCKER_BUILDKIT: 1
-  #  BUILDKIT_PROGRESS: plain
   steps:
     - name: Set required repo name env var
       shell: bash
@@ -141,7 +139,6 @@ runs:
       if: runner.os == 'Windows'
       id: windows-version
       shell: powershell
-      # language=powershell
       run: |
         # Get the OS Version including the revision and trim any white spaces.
         # We added the revision due to compatibility reasons. Microsoft may need
@@ -196,22 +193,50 @@ runs:
 
       run: $GITHUB_ACTION_PATH/scripts/digest_inputs
 
-    #- name: Setup QEMU in binfmt_misc filesystem
-    #  shell: bash
-    #  if: runner.os == 'Linux'
-    #  run: $GITHUB_ACTION_PATH/scripts/register_qemu_binfmt
+    - name: Setup QEMU in binfmt_misc filesystem
+      shell: bash
+      if: runner.os == 'Linux'
+      run: $GITHUB_ACTION_PATH/scripts/register_qemu_binfmt
+
+    - name: Download Product Zip Artifact
+      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      if: ${{ inputs.do_zip_extract_step == 'true' }}
+      with:
+        path: ${{ env.ZIP_LOCATION }}
+        name: ${{ env.ZIP_NAME }}
+
+    - name: Extract Product Zip Artifact
+      if: ${{ inputs.do_zip_extract_step == 'true' }}
+      shell: bash
+      run: $GITHUB_ACTION_PATH/scripts/extract_product_zip
+
+    - name: Setup SSH agent
+      if: ${{ inputs.ssh_private_key != '' }}
+      uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd # v0.9.1
+      with:
+        ssh-private-key: ${{ inputs.ssh_private_key }}
+
+    - name: Docker Build
+      shell: bash
+      run: $GITHUB_ACTION_PATH/scripts/docker_build
+
+    - name: Run Test
+      # On linux only test the am64 image
+      # On windows, just test it. We don't have cross-platform builds anyway.
+      if: ${{ inputs.arch != '' && (env.PLATFORM == 'linux/amd64' || runner.os == 'Windows') && inputs.smoke_test != '' }}
+      shell: bash
+      run: ${{ inputs.smoke_test }}
+      env:
+        IMAGE_NAME: ${{env.AUTO_TAG}}
 
     - name: Generate Random String to use for tag list json
+      if: ${{ inputs.arch != '' }}
       shell: bash
       run: |
         echo "RANDOM_STRING=$(echo $((2000 + $RANDOM % 40000)))" >> $GITHUB_ENV
 
-    - name: Retag and Generate Metadata
-      shell: bash
-      run: |
-        $GITHUB_ACTION_PATH/scripts/replace_tags
-
     - name: Generate Docker metadata
+      if: ${{ inputs.arch != '' }}
       shell: bash
       env:
         RANDOM_STRING: "${{ env.RANDOM_STRING }}"
@@ -219,6 +244,7 @@ runs:
 
     - name: Upload Docker Image metadata
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      if: ${{ inputs.arch != '' && inputs.redhat_tag == '' }}
       env:
         # Add _redhat if this is a redhat call.
         REDHAT_SUFFIX: ${{ inputs.redhat_tag && '_redhat' || '' }}
@@ -230,7 +256,7 @@ runs:
 
     - name: Upload Prod Tarball
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      if: ${{ env.TAGS != '' }}
+      if: ${{ inputs.arch != '' && env.TAGS != '' }}
       with:
         name: ${{ env.TARBALL_NAME }}
         path: ${{ env.TARBALL_NAME }}
@@ -239,7 +265,7 @@ runs:
 
     - name: Upload Dev Tarball
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      if: ${{ env.DEV_TAGS != '' }}
+      if: ${{ inputs.arch != '' && env.DEV_TAGS != '' }}
       with:
         name: ${{ env.DEV_TARBALL_NAME }}
         path: ${{ env.DEV_TARBALL_NAME }}
@@ -247,7 +273,7 @@ runs:
 
     - name: Upload Red Hat Tarball
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      if: ${{ env.REDHAT_TAG != '' }}
+      if: ${{ inputs.arch != '' && env.REDHAT_TAG != '' }}
       with:
         name: ${{ env.REDHAT_TARBALL_NAME }}
         path: ${{ env.REDHAT_TARBALL_NAME }}
