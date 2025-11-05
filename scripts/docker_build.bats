@@ -28,6 +28,7 @@ set_all_required_env_vars() {
 	export PLATFORM="linux/amd64"
 	export AUTO_TAG="some/auto/tag:1.2.3-deadbeef"
 	export TAGS=""
+	export BUILD_MODE="tarball"
 }
 
 set_all_optional_env_vars() {
