@@ -93,9 +93,15 @@ inputs:
 
   extra_build_args:
     description: >
-      Whitespace-separated list of extra build arguments that get passed to docker 
+      Whitespace-separated list of extra build arguments that get passed to docker
       build (optional).
     default: ""
+
+  repo_name:
+    description: >
+      The name of the repository (optional).
+    default:
+      ""
 
   # Escape hatch inputs (use sparingly if at all).
   workdir:
@@ -127,7 +133,12 @@ runs:
   steps:
     - name: Set required repo name env var
       shell: bash
-      run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -f2 -d "/")" >> $GITHUB_ENV
+      run: |
+        repo_name='${{ inputs.repo_name }}'
+        if [[ "$repo_name" == "" ]]; then
+          repo_name=$(echo ${{ github.repository }} | cut -f2 -d "/")
+        fi
+        echo "REPO_NAME=${repo_name}" | tee -a $GITHUB_ENV
 
     - name: Get windows version
       if: runner.os == 'Windows'
