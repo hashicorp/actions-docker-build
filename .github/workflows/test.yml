@@ -17,7 +17,7 @@ jobs:
         run: |
           sudo git clone --depth 1 --branch "v$BATS_VERSION" "$BATS_REPO" "$BATS_PATH"
           echo "$BATS_PATH/bin" >> "$GITHUB_PATH"
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Run BATS tests
         run: make test
 
@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Zip Test Bin
         run: |
           zip ./testdata/test_bin.zip ./testdata/test_bin
@@ -51,7 +51,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       # Test setup.
       - name: Move Dockerfile to Repo Root
         run: |
@@ -83,7 +83,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
@@ -111,7 +111,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Invoke Action
         uses: ./ # This is the action we're testing.
         with:
@@ -139,7 +139,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Invoke Action
         uses: ./
         with:
@@ -164,7 +164,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       - name: Invoke Action
         id: docker-build
         uses: ./
@@ -202,7 +202,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       # Test setup.
       - name: Move Dockerfile to Repo Root
         run: |
@@ -228,7 +228,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       # Test setup
       - name: Move Dockerfile to Repo Root
         run: |
@@ -249,7 +249,7 @@ jobs:
       - action-test-prep
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
       # Handle the artifact download ourselves
       - name: Download Product Zip Artifact
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
