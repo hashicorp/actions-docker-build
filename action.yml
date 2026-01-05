@@ -193,7 +193,7 @@ runs:
       run: $GITHUB_ACTION_PATH/scripts/register_qemu_binfmt
 
     - name: Download Product Zip Artifact
-      uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
       if: ${{ inputs.do_zip_extract_step == 'true'  }}
       with:
         path: ${{ env.ZIP_LOCATION }}
