@@ -187,8 +187,8 @@ jobs:
           TEST_RESULT: ${{ steps.docker-build.outcome }}
         run: |
           if [ "${TEST_RESULT}" == 'success' ]; then
-            exit 1
             echo "Successfully failed smoke test."
+            exit 1
           fi
 
 
