@@ -1,5 +1,11 @@
 # Changelog - Docker Build Action
 
+## v2.3.0
+
+- Added: New `repo_name` input parameter to allow configuring the repository name
+  used for tarball artifact naming. This enables building artifacts with consistent
+  naming when releasing from different repositories (e.g., enterprise vs OSS repos).
+
 ## v1.3.1
 
 - Resolve issue where the internal auto tag was invalid with enterprise
