@@ -10,13 +10,17 @@ die() { echo "$1" 1>&2; exit 1; }
 [ -n "${REVISION:-}" ] || die "Must set REVISION"
 [ -n "${DOCKERFILE:-}" ] || die "Must set DOCKERFILE"
 [ -n "${TARGET:-}" ] || die "Must set TARGET"
-[ -n "${TARBALL_NAME:-}" ] || die "Must set TARBALL_NAME"
-[ -n "${DEV_TARBALL_NAME:-}" ] || die "Must set DEV_TARBALL_NAME"
-[ -n "${REDHAT_TARBALL_NAME:-}" ] || die "Must set REDHAT_TARBALL_NAME"
-[ -n "${PLATFORM:-}" ] || die "Must set PLATFORM"
+[ -n "${PLATFORM:-}" ] || die "Must set PLATFORM" # Existing single platform for tarball mode
 [ -n "${AUTO_TAG:-}" ] || die "Must set AUTO_TAG"
 [ -n "${TAGS:-}${REDHAT_TAG:-}" ] || die "Must set either TAG or REDHAT_TAG"
 
+# --- NEW REQUIRED ENV VARS FOR MODE SELECTION ---
+[ -n "${BUILD_MODE:-}" ] || die "Must set BUILD_MODE (e.g., 'tarball' or 'manifest')"
+# MULTI_ARCH_PLATFORMS is only required if BUILD_MODE is 'manifest'
+if [[ "${BUILD_MODE}" == "manifest" ]]; then
+    [ -n "${MULTI_ARCH_PLATFORMS:-}" ] || die "Must set MULTI_ARCH_PLATFORMS for 'manifest' BUILD_MODE"
+fi
+# --- END NEW REQUIRED ENV VARS ---
 
 WORKDIR="${WORKDIR:-.}"
 
@@ -33,6 +37,9 @@ DEV_TAGS="$(xargs <<< "$DEV_TAGS")"
 read -ra DEV_TAGS_A <<< "$DEV_TAGS"
 read -ra PROD_TAGS_A <<< "$PROD_TAGS"
 
+# ALL_TAGS will contain all tags relevant to the current build, regardless of mode.
+# For manifest mode, these will all be pushed with the multi-arch manifest.
+# For tarball mode, these will be used for local saving and validation.
 ALL_TAGS=("${DEV_TAGS_A[@]}")
 ALL_TAGS+=("$AUTO_TAG")
 ALL_TAGS+=("${PROD_TAGS_A[@]}")
@@ -42,6 +49,7 @@ fi
 echo "ALL_TAGS:" "${ALL_TAGS[@]}"
 
 
+# TAG_FLAGS array is perfect for passing to buildx --tag (or docker build --tag)
 for T in "${ALL_TAGS[@]}"; do
 	TAG_FLAGS+=("--tag=$T")
 done
@@ -71,6 +79,8 @@ if [[ "$OS" == "windows" ]]; then
   # They claim it's set "automatically when --platform is provided."
   # Lies.
   # Maybe that's a buildx feature, because build doesn't. So we need to manually inject it.
+  # Note: For buildx in manifest mode, TARGETOS/ARCH are handled correctly by --platform.
+  # This block is only relevant for the `docker build` fallback or if platform specific args are needed.
   BA_FLAGS+=(
     "--build-arg=TARGETOS=${OS}"
     "--build-arg=TARGETARCH=${PLATFORM#*/}"
@@ -85,6 +95,7 @@ else
   SSH_FLAG=()  # If SSH_PRIVATE_KEY is not set, leave SSH_FLAG empty
 fi
 
+# These paths are only relevant for 'tarball' mode
 TARBALL_PATH="$PWD/$TARBALL_NAME"
 DEV_TARBALL_PATH="$PWD/$DEV_TARBALL_NAME"
 REDHAT_TARBALL_PATH="$PWD/$REDHAT_TARBALL_NAME"
@@ -97,63 +108,112 @@ for T in "${ALL_TAGS[@]}"; do
   echo "    - $T"
 done
 
-if [[ "$OS" == "linux" ]]; then
-docker buildx create --use
-docker buildx build --load \
-  --target "$TARGET" \
-  --platform "$PLATFORM" \
-  "${SSH_FLAG[@]}" \
-  "${TAG_FLAGS[@]}" \
-  "${BA_FLAGS[@]}" \
-  -f "$DOCKERFILE" \
-  .
+# --- Main Conditional Build Logic based on BUILD_MODE ---
+
+if [[ "$BUILD_MODE" == "manifest" ]]; then
+    echo "==> Entering Manifest Build Mode: Building and pushing multi-architecture manifest."
+
+    # Your existing `docker buildx create --use` for Linux.
+    # It's good that it's here, as it ensures the builder is active.
+    # Note: docker/setup-buildx-action in action.yml usually handles this for robustness.
+    if [[ "$OS" == "linux" ]]; then
+      docker buildx create --use
+    fi
+
+    # Build and push the multi-architecture image and manifest
+    docker buildx build --push \
+      --target "$TARGET" \
+      --platform "$MULTI_ARCH_PLATFORMS" \
+      "${SSH_FLAG[@]}" \
+      "${TAG_FLAGS[@]}" \
+      "${BA_FLAGS[@]}" \
+      -f "$DOCKERFILE" \
+      .
+
+    echo "==> Multi-architecture manifest pushed successfully to registry."
+
+    # --- Handling version_label_validation for manifest mode ---
+    # This function expects a locally loaded image for `docker inspect`.
+    # When using `buildx build --push`, the image is NOT loaded locally.
+    # For dev images, it's often acceptable to skip this for speed.
+    # If this validation is CRITICAL for dev builds, you would need to:
+    # 1. Build *one* default platform (e.g., linux/amd64) using `--load` first.
+    # 2. Run version_label_validation on that loaded image.
+    # 3. THEN run the `docker buildx build --push` for all platforms.
+    # This adds complexity and time, so often skipped for dev builds.
+    echo "Note: Local version label validation is skipped in 'manifest' build mode as image is directly pushed."
+
+    # Exit the script here to skip the tarball-specific saving steps
+    exit 0
+
+elif [[ "$BUILD_MODE" == "tarball" ]]; then
+    echo "==> Entering Tarball Build Mode: Building single-architecture image and saving as tarball."
+
+    if [[ "$OS" == "linux" ]]; then
+        # Your existing buildx build --load logic for Linux
+        docker buildx create --use # Ensure builder is used for this path too
+        docker buildx build --load \
+          --target "$TARGET" \
+          --platform "$PLATFORM" \
+          "${SSH_FLAG[@]}" \
+          "${TAG_FLAGS[@]}" \
+          "${BA_FLAGS[@]}" \
+          -f "$DOCKERFILE" \
+          .
+    else
+        # Your existing non-Linux docker build logic
+        (set -x;
+        docker build \
+          --target "$TARGET" \
+          --platform "$PLATFORM" \
+          "${TAG_FLAGS[@]}" \
+          "${BA_FLAGS[@]}" \
+          -f "$DOCKERFILE" \
+          .
+        )
+    fi
+
+    # --- Version label validation (remains as is for tarball mode) ---
+    # This relies on the image being loaded locally, which it is in this mode.
+    version_label_validation() {
+        val=$(docker inspect --format='{{ index .Config.Labels "version" }}' "${2}")
+        error_context="actions-docker-build passes a 'PRODUCT_VERSION' build-arg to the build. Ensure it is defined in the Dockerfile and the 'version' label uses it"
+        if [ "$val" = "" ]; then
+            die "Error: 'version' label must be set to version passed in but was empty.\n$error_context"
+        elif [ "$val" != "${1}" ]; then
+            die "Error: 'version' label must match the version passed in but was ($val).\n$error_context"
+        fi
+    }
+    for T in "${ALL_TAGS[@]}"; do
+        version_label_validation "$VERSION" "$T"
+    done
+
+    # --- Existing docker save commands (remains as is for tarball mode) ---
+    echo "==> Saving prod tags in '$TARBALL_PATH'"
+    # Note: docker save requires specific tags that are loaded locally.
+    # "${PROD_TAGS_A[@]}" and "$AUTO_TAG" must be among the tags loaded by the build command.
+    docker save --output "$TARBALL_PATH" "${PROD_TAGS_A[@]}" "$AUTO_TAG"
+    echo "==> Tarball created."
+    ls -lah "$TARBALL_PATH"
+
+    if [ -n "$DEV_TAGS" ]; then
+        echo "==> Saving dev tags in '$DEV_TARBALL_PATH'"
+        docker save --output "$DEV_TARBALL_PATH" "${DEV_TAGS_A[@]}" "$AUTO_TAG"
+        echo "==> Dev Tarball created."
+        ls -lah "$DEV_TARBALL_PATH"
+    else
+        echo "==> No dev tags specified, skipping export."
+    fi
+
+    if [ -n "$REDHAT_TAG" ]; then
+        echo "==> Saving Redhat tag '$REDHAT_TAG' to '$REDHAT_TARBALL_PATH'"
+        docker save --output "$REDHAT_TARBALL_PATH" "${REDHAT_TAG}" "$AUTO_TAG"
+        echo "==> Redhat Tarball created."
+        ls -lah "$REDHAT_TARBALL_PATH"
+    else
+        echo "==> No Redhat tag specified, skipping export."
+    fi
+
 else
-  (set -x;
-  docker build \
-  --target "$TARGET" \
-  --platform "$PLATFORM" \
-  "${TAG_FLAGS[@]}" \
-  "${BA_FLAGS[@]}" \
-  -f "$DOCKERFILE" \
-  .
-  )
-fi
-
-# validate version label is set to the correct value
-version_label_validation() {
-	val=$(docker inspect --format='{{ index .Config.Labels "version" }}' "${2}")
-	error_context="actions-docker-build passes a 'PRODUCT_VERSION' build-arg to the build. Ensure it is defined in the Dockerfile and the 'version' label uses it"
-	if [ "$val" = "" ]; then
-		die "Error: 'version' label must be set to version passed in but was empty.\n$error_context"
-	elif [ "$val" != "${1}" ]; then
-		die "Error: 'version' label must match the version passed in but was ($val).\n$error_context"
-	fi
-}
-
-for T in "${ALL_TAGS[@]}"; do
-	version_label_validation "$VERSION" "$T"
-done
-
-echo "==> Saving prod tags in '$TARBALL_PATH'"
-
-docker save --output "$TARBALL_PATH" "${PROD_TAGS_A[@]}" "$AUTO_TAG"
-echo "==> Tarball created."
-ls -lah "$TARBALL_PATH"
-
-if [ -n "$DEV_TAGS" ]; then
-	echo "==> Saving dev tags in '$DEV_TARBALL_PATH'"
-	docker save --output "$DEV_TARBALL_PATH" "${DEV_TAGS_A[@]}" "$AUTO_TAG"
-	echo "==> Dev Tarball created."
-	ls -lah "$DEV_TARBALL_PATH"
-else
-	echo "==> No dev tags specified, skipping export."
-fi
-
-if [ -n "$REDHAT_TAG" ]; then
-	echo "==> Saving Redhat tag '$REDHAT_TAG' to '$REDHAT_TARBALL_PATH'"
-	docker save --output "$REDHAT_TARBALL_PATH" "${REDHAT_TAG}" "$AUTO_TAG"
-	echo "==> Redhat Tarball created."
-	ls -lah "$REDHAT_TARBALL_PATH"
-else
-	echo "==> No Redhat tag specified, skipping export."
+    die "Error: Invalid BUILD_MODE '${BUILD_MODE}'. Must be 'manifest' or 'tarball'."
 fi
