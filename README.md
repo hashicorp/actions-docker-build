@@ -98,7 +98,7 @@ FROM ubuntu:latest AS target2
 # Lines omitted.
 ```
 
-(Note Docker documentation usually calles these 'stages' rather than 'targets', but
+(Note Docker documentation usually calls these 'stages' rather than 'targets', but
 for our purposes, 'targets' describes how we use them more accurately.)
 
 Sometimes you'll only want one release target (which must `COPY` a local product
